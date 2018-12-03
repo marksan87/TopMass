@@ -2,6 +2,9 @@
 
 all: JEC Selector.o EventTree.o EventPick.o makeSkim makeAnalysisNtuple makeCutflows checkOverlap
 
+RoccoR:
+	g++ -c -I`root-config --incdir` -std=c++11 RocMuonCorrections/RoccoR.cc -o RocMuonCorrections/RoccoR.o
+
 makeSkim: Selector.o EventPick.o EventTree.o  makeSkim.cpp OverlapRemove.cpp
 	g++ -o makeSkim `root-config --libs` -I`root-config --incdir` -std=c++11 EventTree.o EventPick.o Selector.o  OverlapRemove.cpp makeSkim.cpp 
 
@@ -20,8 +23,8 @@ BTagCalibrationStandalone.o: BTagCalibrationStandalone.cpp BTagCalibrationStanda
 JEC: JEC/FactorizedJetCorrector.cpp JEC/JetCorrectorParameters.cpp JEC/SimpleJetCorrector.cpp JEC/JetCorrectionUncertainty.cpp JEC/SimpleJetCorrectionUncertainty.cpp
 	$(MAKE) -C JEC
 
-makeAnalysisNtuple: Selector.o EventPick.o EventTree.o makeAnalysisNtuple.C makeAnalysisNtuple.h OverlapRemove.cpp JetResolutions.h PUReweight.cpp PUReweight.h BTagCalibrationStandalone.o ScaleFactors.h JEC/JECvariation.o TopEventCombinatorics.cpp
-	g++ -o makeAnalysisNtuple `root-config --libs` -I`root-config --incdir` -std=c++11 makeAnalysisNtuple.C EventTree.o EventPick.o Selector.o  OverlapRemove.cpp  PUReweight.cpp BTagCalibrationStandalone.o JEC/FactorizedJetCorrector.o JEC/JetCorrectorParameters.o JEC/SimpleJetCorrector.o JEC/JetCorrectionUncertainty.o JEC/SimpleJetCorrectionUncertainty.o JEC/JECvariation.o METzCalculator.cpp TopEventCombinatorics.cpp 
+makeAnalysisNtuple: Selector.o EventPick.o EventTree.o makeAnalysisNtuple.C makeAnalysisNtuple.h OverlapRemove.cpp JetResolutions.h PUReweight.cpp PUReweight.h BTagCalibrationStandalone.o ScaleFactors.h JEC/JECvariation.o TopEventCombinatorics.cpp RoccoR
+	g++ -o makeAnalysisNtuple `root-config --libs` -I`root-config --incdir` -std=c++11 makeAnalysisNtuple.C EventTree.o EventPick.o Selector.o  OverlapRemove.cpp  PUReweight.cpp BTagCalibrationStandalone.o JEC/FactorizedJetCorrector.o JEC/JetCorrectorParameters.o JEC/SimpleJetCorrector.o JEC/JetCorrectionUncertainty.o JEC/SimpleJetCorrectionUncertainty.o JEC/JECvariation.o METzCalculator.cpp TopEventCombinatorics.cpp RocMuonCorrections/RoccoR.o
 
 Selector.o: EventTree.o Selector.cpp Selector.h
 	g++ -c -I`root-config --incdir` -std=c++11 Selector.cpp

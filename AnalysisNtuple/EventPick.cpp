@@ -1,9 +1,8 @@
 #include"EventPick.h"
 #include <iostream> 
 #include <iomanip>
+#include <cmath>
 
-
-//double secondMinDr(int myInd, const EventTree* tree);
 
 EventPick::EventPick(std::string titleIn){
 	title = titleIn;
@@ -179,7 +178,7 @@ void EventPick::process_event(EventTree* tree, Selector* selector, double weight
 
 	//InvariantMass cut
 
-	cout << (lepton1+lepton2).M() << endl;
+	//cout << (lepton1+lepton2).M() << endl;
 	if (passPresel_emu && (lepton1+lepton2).M() > invMassCut){
 		if (saveCutflows){cutFlow_emu->Fill(5); cutFlowWeight_emu->Fill(4,weight);}
 	}

@@ -28,6 +28,9 @@
 // Header file that includes all of the event luminosity scaling
 #include "ScaleFactors.h"
 
+// Rochester muon corrections
+#include "RocMuonCorrections/RoccoR.h"
+
 
 #include "JEC/UncertaintySourcesList.h"
 
@@ -44,6 +47,8 @@ private :
 	EventTree* tree;   
 	EventPick* evtPick;   
 	Selector* selector;   
+
+    RoccoR* rc; // Rochester muon corrector
 
 	TTree* outputTree;
 
@@ -273,7 +278,11 @@ private :
 
 	double               _pt_ll;
 	double               _m_ll;
-	
+    double               _pt_pos;
+    double               _E_pos;
+    double               _Ep_Em;
+    double               _ptp_ptm;
+
 	bool  _passPresel_EMu;
 
 	bool  _passPresel_Ele;
@@ -291,7 +300,13 @@ private :
 	TLorentzVector METVector;
 	TLorentzVector phoVector1;
 	TLorentzVector phoVector2;
-	std::vector<TLorentzVector> ljetVectors;
+	
+    TLorentzVector lpVector;
+    TLorentzVector lmVector;
+
+
+
+    std::vector<TLorentzVector> ljetVectors;
 	std::vector<TLorentzVector> bjetVectors;
 
 	std::vector<double> ljetResVectors;
@@ -554,6 +569,10 @@ void makeAnalysisNtuple::InitBranches(){
 	} else {
 		outputTree->Branch("pt_ll"                       , &_pt_ll                         ); 
 		outputTree->Branch("m_ll"                        , &_m_ll                         ); 
+		outputTree->Branch("pt_pos"                        , &_pt_pos                       ); 
+		outputTree->Branch("E_pos"                        , &_E_pos                       ); 
+		outputTree->Branch("Ep_Em"                        , &_Ep_Em                       ); 
+		outputTree->Branch("ptp_ptm"                        , &_ptp_ptm                   ); 
 		outputTree->Branch("passPresel_EMu"              , &_passPresel_EMu             ); 
 	}
 
@@ -582,6 +601,13 @@ void makeAnalysisNtuple::InitVariables()
 	_M_bjj           = -9999;
 	_M_jj            = -9999;
 	_MassCuts        = false;
+
+    _pt_ll           = -9999;
+    _m_ll            = -9999;
+    _pt_pos          = -9999;
+    _E_pos           = -9999;
+    _ptp_ptm         = -9999;
+    _Ep_Em           = -9999;
 
 	_HT		 = -9999;
 	_DilepMass	 = -9999;

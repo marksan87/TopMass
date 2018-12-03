@@ -8,6 +8,7 @@
 #include<TMath.h>
 #include<TLorentzVector.h>
 #include"EventTree.h"
+#include"RocMuonCorrections/RoccoR.h"
 
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedPhotonID2012
 // photon ID is not going to be changed every time this code runs
@@ -52,9 +53,13 @@ public:
 	~Selector();
 	
 	void process_objects(EventTree* inp_tree);
+    void applyRoccor();
 
 	bool isTTGamma;
-	
+    bool useRoccor;   // Rochester muon corrections
+    bool fixedSeed;   // Use fixed or random seed for roc muon
+
+
 	// selected object indices
 	std::vector<int> Photons;
 	std::vector<bool> PhoPassChHadIso;
@@ -146,7 +151,8 @@ public:
 
 private:
 	EventTree* tree;
-	void filter_photons();
+	RoccoR* rc;
+    void filter_photons();
 	void filter_electrons();
 	void filter_muons();
 	void filter_jets();

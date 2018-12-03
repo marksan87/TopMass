@@ -1,5 +1,13 @@
+#include <utility>
+#include <map>
+#include <vector>
 #include"Selector.h"
 #include"TRandom3.h"
+
+using std::map;
+using std::pair;
+
+const string rocFile = "AnalysisNtuple/RocMuonCorrections/rcdata.2016.v3";
 
 double dR(double eta1, double phi1, double eta2, double phi2){
 	double dphi = phi2 - phi1;
@@ -37,8 +45,10 @@ Selector::Selector(){
 
 
 	isTTGamma = false;
-
-	// whether to invert lepton requirements for 
+    useRoccor = false;
+    rc = new RoccoR(rocFile);
+	fixedSeed = false;
+    // whether to invert lepton requirements for 
 	QCDselect = false;
 
 	// electrons
@@ -71,6 +81,108 @@ Selector::Selector(){
 	pho_noEleVeto_cut = false;
 	pho_applyPhoID = true;
 	
+}
+
+void Selector::applyRoccor()
+{
+    double correction = 0.0;
+    double minDR = 9999;
+    double muDR = 9999;
+    int muGenIndex = -1;
+    int muPID = 0;
+    double muRecPt = 0;
+    double muRecEta = 0;
+    double muRecPhi = 0;
+
+    vector<int> genMuIndices;   // Indices of gen muons
+    //map<int,int> recToGen;  //  Mapping of reco mu index to matching gen particle index
+    map<int,int> genToRec;  //  Mapping of gen particle index to rec mu index 
+    map<int,int> recToGen;  //  Mapping of rec mu index to gen particle index 
+
+    
+
+    if (tree->isData_)
+    {
+        for (int muInd = 0; muInd < tree->nMu_; muInd++)
+        {
+            tree->muPt_->at(muInd) *= rc->kScaleDT(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd));
+        }
+    }
+    else
+    {
+        if (fixedSeed) { gRandom->SetSeed(tree->event_); }
+        // Find all gen muons
+        for (int mc = 0; mc < tree->nMC_; mc++)
+        {
+            if (abs(tree->mcPID->at(mc)) == 13) { genMuIndices.push_back(mc); } 
+        }
+
+        // Match rec muon index to gen index
+        for (int muInd = 0; muInd < tree->nMu_; muInd++)
+        {
+            minDR = 9999;
+            muGenIndex = -1;
+            muPID = (tree->muCharge_->at(muInd) < 0) ? 13 : -13;
+
+            muRecPt = tree->muPt_->at(muInd);
+            muRecEta = tree->muEta_->at(muInd);
+            muRecPhi = tree->muPhi_->at(muInd);
+
+            for (auto mc : genMuIndices)
+            {
+                muDR = dR(tree->mcEta->at(mc), tree->mcPhi->at(mc), muRecEta, muRecPhi);
+
+                if (muDR < minDR && !genToRec.count(mc) && muPID == tree->mcPID->at(mc) && (abs(muRecPt - tree->mcPt->at(mc)) / tree->mcPt->at(mc) < 0.2 ))
+                {
+                    // Found a better match
+                    minDR = muDR;
+                    muGenIndex = mc;
+                }
+            }
+
+            if (muGenIndex > -1)
+            {
+                // Found a match
+                genToRec.insert(pair<int,int>(muGenIndex,muInd));
+            }
+        }
+
+        // Create rec -> gen mapping by swapping key,value pairs
+        for (const auto& x : genToRec)
+        {
+            recToGen.insert(pair<int,int>(x.second,x.first));
+        }
+
+        // Loop over all muons and apply corrections
+        for (int muInd = 0; muInd < tree->nMu_; muInd++)
+        {
+            if (recToGen.count(muInd))
+            {
+                muGenIndex = recToGen[muInd];
+                tree->muPt_->at(muInd) *= rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), gRandom->Rndm());
+//                correction = rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), gRandom->Rndm());
+//                cout<<"Muon "<<muInd<<" matched to gen particle "<<muGenIndex<<endl;
+//                cout<<"rec pT = "<<tree->muPt_->at(muInd)<<"\tgen pT = "<<tree->mcPt->at(muGenIndex)<<endl;
+//                cout<<"rec eta = "<<tree->muEta_->at(muInd)<<"\tgen eta = "<<tree->mcEta->at(muGenIndex)<<endl;
+//                cout<<"rec phi = "<<tree->muPhi_->at(muInd)<<"\tgen phi = "<<tree->mcPhi->at(muGenIndex)<<endl<<endl;;
+
+            }
+            else
+            {
+                // Couldn't match reco muon to gen muon
+                // Default to smearing-based correction
+//                cout<<"Unable to match Muon "<<muInd<<" to gen particle!"<<endl;
+//                correction = rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), gRandom->Rndm(), gRandom->Rndm());
+                tree->muPt_->at(muInd) *= rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), gRandom->Rndm(), gRandom->Rndm());
+
+            }
+
+//            cout<<"Old pt = "<<tree->muPt_->at(muInd)<<endl;
+//            cout<<"Correction = "<<correction<<endl;
+//            tree->muPt_->at(muInd) *= correction;
+//            cout<<"New pt = "<<tree->muPt_->at(muInd)<<endl<<endl<<endl;
+        }
+    }
 }
 
 void Selector::process_objects(EventTree* inp_tree){
@@ -376,10 +488,15 @@ void Selector::filter_electrons(){
 
 
 void Selector::filter_muons(){
-	for(int muInd = 0; muInd < tree->nMu_; ++muInd){
+    if (useRoccor) { applyRoccor(); }   // Rochester muon corrections	
+    
+    
+    for(int muInd = 0; muInd < tree->nMu_; ++muInd){
 
 		double eta = tree->muEta_->at(muInd);
 		double pt = tree->muPt_->at(muInd);
+
+
 
 		// Applying the beta corrections
 		double PFrelIso_corr = ( tree->muPFChIso_->at(muInd) + 
