@@ -1,4 +1,5 @@
-#define makeAnalysisNtuple_cxx
+//#ifdef makeAnalysisNtuple_cxx
+//#define makeAnalysisNtuple_cxx
 #include "makeAnalysisNtuple.h"
 #include <TH2.h>
 #include <TStyle.h>
@@ -39,12 +40,11 @@ bool overlapRemovalWZ(EventTree* tree);
 bool overlapRemoval_Tchannel(EventTree* tree);
 double getJetResolution(double, double, double);
 
-bool mtAnalysis;
 bool dileptonsample;
 std::clock_t startClock;
 double duration;
 
-#ifdef makeAnalysisNtuple_cxx
+
 makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 {
 	startClock = clock();
@@ -59,6 +59,49 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	isSystematicRun = false;
 	isTTGamma = false;
     mtAnalysis = true;
+
+    if (mtAnalysis)
+    {
+        TFile* f = new TFile(eleID_SF_path, "read");
+        eleID_SF = (TH1F*)f->Get("EGamma_SF2D");
+        eleID_SF->SetDirectory(0);
+        f->Close();
+
+        f = new TFile(eleReco_SF_path, "read");
+        eleReco_SF = (TH1F*)f->Get("EGamma_SF2D");
+        eleReco_SF->SetDirectory(0);
+        f->Close();
+
+        f = new TFile(muID_BF_SF_path, "read");
+        muID_BF_SF = (TH1F*)f->Get("MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio");
+        muID_BF_SF->SetDirectory(0);
+        f->Close();
+
+        f = new TFile(muID_GH_SF_path, "read");
+        muID_GH_SF = (TH1F*)f->Get("MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/abseta_pt_ratio");
+        muID_GH_SF->SetDirectory(0);
+        f->Close();
+     
+        f = new TFile(muIso_BF_SF_path, "read");
+        muIso_BF_SF = (TH1F*)f->Get("TightISO_TightID_pt_eta/abseta_pt_ratio");
+        muIso_BF_SF->SetDirectory(0);
+        f->Close();
+
+        f = new TFile(muIso_GH_SF_path, "read");
+        muIso_GH_SF = (TH1F*)f->Get("TightISO_TightID_pt_eta/abseta_pt_ratio");
+        muIso_GH_SF->SetDirectory(0);
+        f->Close();
+
+        f = new TFile(muTrack_SF_path, "read");
+        muTrack_SF = (TH1F*)f->Get("ratio_eff_eta3_dr030e030_corr");
+        muTrack_SF->SetDirectory(0);
+        f->Close();
+
+        f = new TFile(trigger_SF_path, "read");
+        trigger_SF = (TH1F*)f->Get("SF");
+        trigger_SF->SetDirectory(0);
+        f->Close();
+    }
 
 
 	size_t pos = sampleType.find("__");
@@ -86,14 +129,18 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	//selector->looseJetID = false;
 	selector->looseJetID = true;
 
-	selector->useDeepCSVbTag = true;
+	//selector->useDeepCSVbTag = true;
+	selector->useDeepCSVbTag = false;
 
 	// selector->veto_pho_jet_dR = -1.; //remove jets which have a photon close to them 
 	selector->veto_jet_pho_dR = -1.; //remove photons which have a jet close to them (after having removed jets too close to photon from above cut)
 
 	selector->isTTGamma = isTTGamma;
-    selector->useRoccor = true;	
-    selector->fixedSeed = true;
+    //selector->useRoccor = true;	
+    selector->useRoccor = false;	
+    selector->fixedSeed = true; 
+    
+    
     if (selector->useRoccor) { cout<<"Applying Rochester Muon Corrections using "<<((selector->fixedSeed) ? "fixed" : "random")<<" seed"<<endl; }
 
     if (!selector->fixedSeed) { gRandom->SetSeed(); }
@@ -348,28 +395,47 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 				_btagWeight    = getBtagSF("central", reader, _btagSF);
 				_btagWeight_Up = getBtagSF("up", reader, _btagSF_Up);
 				_btagWeight_Do = getBtagSF("down", reader, _btagSF_Do);				
-				
-				if (evtPick->passPresel_mu) {
-					int muInd_ = selector->Muons.at(0);
-					_muEffWeight    = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
-					_muEffWeight_Do = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
-					_muEffWeight_Up = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
-					_eleEffWeight    = 1.;
-					_eleEffWeight_Up = 1.;
-					_eleEffWeight_Do = 1.;
-				}
-				if (evtPick->passPresel_ele) {
-					int eleInd_ = selector->Electrons.at(0);
-					_muEffWeight    = 1.;
-					_muEffWeight_Do = 1.;
-					_muEffWeight_Up = 1.;
-					_eleEffWeight    = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
-					_eleEffWeight_Do = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
-					_eleEffWeight_Up = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
-                         //               std::cout<<"done with Ele scaling"<<std::endl;
-                                     
-				}
+			    
+                if (mtAnalysis) 
+                {
+                    int muInd_ = selector->Muons.at(0);
+                    _muEffWeight    = muSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
+                    _muEffWeight_Do = muSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
+                    _muEffWeight_Up = muSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
+                        
+                    int eleInd_ = selector->Electrons.at(0);
+                    _eleEffWeight    = eleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
+                    _eleEffWeight_Do = eleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
+                    _eleEffWeight_Up = eleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
 
+                    _trigEffWeight    = trigSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),1);
+                    _trigEffWeight_Do = trigSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),0);
+                    _trigEffWeight_Up = trigSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),2);
+                }
+
+
+                else if (isTTGamma)
+                {
+                    if (evtPick->passPresel_mu) {
+                        int muInd_ = selector->Muons.at(0);
+                        _muEffWeight    = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
+                        _muEffWeight_Do = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
+                        _muEffWeight_Up = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
+                        _eleEffWeight    = 1.;
+                        _eleEffWeight_Up = 1.;
+                        _eleEffWeight_Do = 1.;
+                    }
+                    if (evtPick->passPresel_ele) {
+                        int eleInd_ = selector->Electrons.at(0);
+                        _muEffWeight    = 1.;
+                        _muEffWeight_Do = 1.;
+                        _muEffWeight_Up = 1.;
+                        _eleEffWeight    = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
+                        _eleEffWeight_Do = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
+                        _eleEffWeight_Up = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
+                             //               std::cout<<"done with Ele scaling"<<std::endl;
+                    }
+                }
 			}
 
 			if (tree->isData_){
@@ -556,25 +622,27 @@ void makeAnalysisNtuple::FillEvent()
 			
 		}
 	}
-	
-	//dipho Mass
-	if (_nPho>1){
-		//	std::cout<<_nPho<<std::endl;
-		int phoInd1 = selector->Photons.at(0);
-		int phoInd2 = selector->Photons.at(1);
-		phoVector1.SetPtEtaPhiM(tree->phoEt_->at(phoInd1),
-								tree->phoEta_->at(phoInd1),
-								tree->phoPhi_->at(phoInd1),
-								0.0);
-		phoVector2.SetPtEtaPhiM(tree->phoEt_->at(phoInd2),
-								tree->phoEta_->at(phoInd2),
-								tree->phoPhi_->at(phoInd2),
-								0.0);
-		
-		
-		_DiphoMass = (phoVector1+phoVector2).M();
-	}
-	
+
+    if (isTTGamma) 
+    {
+        //dipho Mass
+        if (_nPho>1){
+            //	std::cout<<_nPho<<std::endl;
+            int phoInd1 = selector->Photons.at(0);
+            int phoInd2 = selector->Photons.at(1);
+            phoVector1.SetPtEtaPhiM(tree->phoEt_->at(phoInd1),
+                                    tree->phoEta_->at(phoInd1),
+                                    tree->phoPhi_->at(phoInd1),
+                                    0.0);
+            phoVector2.SetPtEtaPhiM(tree->phoEt_->at(phoInd2),
+                                    tree->phoEta_->at(phoInd2),
+                                    tree->phoPhi_->at(phoInd2),
+                                    0.0);
+            
+            
+            _DiphoMass = (phoVector1+phoVector2).M();
+        }
+    }	
 	
 
 	_passPresel_EMu  = evtPick->passPresel_emu;
@@ -588,117 +656,120 @@ void makeAnalysisNtuple::FillEvent()
 	int countTightIDPho = 0;
 
 	int parentPID = -1;
-	for (int i_pho = 0; i_pho <_nPho; i_pho++){
-		int phoInd = selector->Photons.at(i_pho);
-		phoVector.SetPtEtaPhiM(tree->phoEt_->at(phoInd),
-							   tree->phoEta_->at(phoInd),
-							   tree->phoPhi_->at(phoInd),
-							   0.0);
-	//	std::cout << "separate" << phoVector.M()<<std::endl;
-		_phoEt.push_back(tree->phoEt_->at(phoInd));
-		_phoEta.push_back(tree->phoEta_->at(phoInd));
-		
 
-		_phoSCEta.push_back(tree->phoSCEta_->at(phoInd));
-		_phoPhi.push_back(tree->phoPhi_->at(phoInd));
-		_phoIsBarrel.push_back( abs(tree->phoSCEta_->at(phoInd))<1.47 );
-		_phoHoverE.push_back(tree->phoHoverE_->at(phoInd));
-		_phoSIEIE.push_back(tree->phoSigmaIEtaIEtaFull5x5_->at(phoInd));
-		_phoPFChIso.push_back( selector->PhoChHadIso_corr.at(phoInd));
-		_phoPFNeuIso.push_back(selector->PhoNeuHadIso_corr.at(phoInd));
-		_phoPFPhoIso.push_back(selector->PhoPhoIso_corr.at(phoInd));
+    if (isTTGamma)
+    {
+        for (int i_pho = 0; i_pho <_nPho; i_pho++){
+            int phoInd = selector->Photons.at(i_pho);
+            phoVector.SetPtEtaPhiM(tree->phoEt_->at(phoInd),
+                                   tree->phoEta_->at(phoInd),
+                                   tree->phoPhi_->at(phoInd),
+                                   0.0);
+        //	std::cout << "separate" << phoVector.M()<<std::endl;
+            _phoEt.push_back(tree->phoEt_->at(phoInd));
+            _phoEta.push_back(tree->phoEta_->at(phoInd));
+            
 
-		if (tree->isData_){
-			_phoEffWeight.push_back(1.);
-			_phoEffWeight_Do.push_back(1.);
-			_phoEffWeight_Up.push_back(1.);
-		} else {
-			_phoEffWeight.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),1));
-			_phoEffWeight_Do.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),0));
-			_phoEffWeight_Up.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),2));
-		}
+            _phoSCEta.push_back(tree->phoSCEta_->at(phoInd));
+            _phoPhi.push_back(tree->phoPhi_->at(phoInd));
+            _phoIsBarrel.push_back( abs(tree->phoSCEta_->at(phoInd))<1.47 );
+            _phoHoverE.push_back(tree->phoHoverE_->at(phoInd));
+            _phoSIEIE.push_back(tree->phoSigmaIEtaIEtaFull5x5_->at(phoInd));
+            _phoPFChIso.push_back( selector->PhoChHadIso_corr.at(phoInd));
+            _phoPFNeuIso.push_back(selector->PhoNeuHadIso_corr.at(phoInd));
+            _phoPFPhoIso.push_back(selector->PhoPhoIso_corr.at(phoInd));
 
-		if (tree->isData_){
+            if (tree->isData_){
+                _phoEffWeight.push_back(1.);
+                _phoEffWeight_Do.push_back(1.);
+                _phoEffWeight_Up.push_back(1.);
+            } else {
+                _phoEffWeight.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),1));
+                _phoEffWeight_Do.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),0));
+                _phoEffWeight_Up.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),2));
+            }
 
-			std::vector<float> randConeIso;
-			std::vector<float> randConeIsoUnCorr;
-			std::vector<float> randConeEta;
-			std::vector<float> randConePhi;
-			std::vector<float> randConeJetDR;
-			for (unsigned int i_randCone = 0; i_randCone < tree->phoPFRandConeChIso_->at(phoInd).size(); i_randCone++){
-				randConeIso.push_back( selector->PhoRandConeChHadIso_corr.at(phoInd).at(i_randCone));
-				randConeIsoUnCorr.push_back( tree->phoPFRandConeChIso_->at(phoInd).at(i_randCone) );
-				randConeEta.push_back( tree->phoEta_->at(phoInd));
-				randConePhi.push_back( tree->phoPFRandConePhi_->at(phoInd).at(i_randCone));
-				randConeJetDR.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPFRandConePhi_->at(phoInd).at(i_randCone),selector->Jets,tree->jetEta_,tree->jetPhi_));
-			}
-			_phoPFRandConeChIso.push_back( randConeIso );
-			_phoPFRandConeChIsoUnCorr.push_back( randConeIsoUnCorr );
-			_phoPFRandConeEta.push_back( randConeEta );
-			_phoPFRandConePhi.push_back( randConePhi );
-			_phoPFRandConeJetDR.push_back( randConeJetDR );
-		}
-		_phoPFChIsoUnCorr.push_back( tree->phoPFChIso_->at(phoInd));
-		_phoPFNeuIsoUnCorr.push_back(tree->phoPFNeuIso_->at(phoInd));
-		_phoPFPhoIsoUnCorr.push_back(tree->phoPFPhoIso_->at(phoInd));
-		_phoTightID.push_back(tree->phoIDbit_->at(phoInd)>>2&1);
-		_phoMediumID.push_back(tree->phoIDbit_->at(phoInd)>>1&1);
+            if (tree->isData_){
 
-		if (_nEle==1 && _nMu==0){
-			_phoMassEGamma.push_back( (phoVector+lepVector).M() );
-		}
-		_phoMassLepGamma.push_back( (phoVector+lepVector).M() );
+                std::vector<float> randConeIso;
+                std::vector<float> randConeIsoUnCorr;
+                std::vector<float> randConeEta;
+                std::vector<float> randConePhi;
+                std::vector<float> randConeJetDR;
+                for (unsigned int i_randCone = 0; i_randCone < tree->phoPFRandConeChIso_->at(phoInd).size(); i_randCone++){
+                    randConeIso.push_back( selector->PhoRandConeChHadIso_corr.at(phoInd).at(i_randCone));
+                    randConeIsoUnCorr.push_back( tree->phoPFRandConeChIso_->at(phoInd).at(i_randCone) );
+                    randConeEta.push_back( tree->phoEta_->at(phoInd));
+                    randConePhi.push_back( tree->phoPFRandConePhi_->at(phoInd).at(i_randCone));
+                    randConeJetDR.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPFRandConePhi_->at(phoInd).at(i_randCone),selector->Jets,tree->jetEta_,tree->jetPhi_));
+                }
+                _phoPFRandConeChIso.push_back( randConeIso );
+                _phoPFRandConeChIsoUnCorr.push_back( randConeIsoUnCorr );
+                _phoPFRandConeEta.push_back( randConeEta );
+                _phoPFRandConePhi.push_back( randConePhi );
+                _phoPFRandConeJetDR.push_back( randConeJetDR );
+            }
+            _phoPFChIsoUnCorr.push_back( tree->phoPFChIso_->at(phoInd));
+            _phoPFNeuIsoUnCorr.push_back(tree->phoPFNeuIso_->at(phoInd));
+            _phoPFPhoIsoUnCorr.push_back(tree->phoPFPhoIso_->at(phoInd));
+            _phoTightID.push_back(tree->phoIDbit_->at(phoInd)>>2&1);
+            _phoMediumID.push_back(tree->phoIDbit_->at(phoInd)>>1&1);
 
-
-		bool isGenuine = false;
-		bool isMisIDEle = false;
-		bool isHadronicPhoton = false;
-		bool isHadronicFake = false;
-		int phoGenMatchInd = -1.;
-		
-		if (!tree->isData_){
-			phoGenMatchInd = findPhotonGenMatch(phoInd, tree);
-
-			_phoGenMatchInd.push_back(phoGenMatchInd);
-
-			findPhotonCategory(phoGenMatchInd, tree, &isGenuine, &isMisIDEle, &isHadronicPhoton, &isHadronicFake);
-			_photonIsGenuine.push_back(isGenuine);
-			_photonIsMisIDEle.push_back(isMisIDEle);
-			_photonIsHadronicPhoton.push_back(isHadronicPhoton);
-			_photonIsHadronicFake.push_back(isHadronicFake);
-		}
+            if (_nEle==1 && _nMu==0){
+                _phoMassEGamma.push_back( (phoVector+lepVector).M() );
+            }
+            _phoMassLepGamma.push_back( (phoVector+lepVector).M() );
 
 
+            bool isGenuine = false;
+            bool isMisIDEle = false;
+            bool isHadronicPhoton = false;
+            bool isHadronicFake = false;
+            int phoGenMatchInd = -1.;
+            
+            if (!tree->isData_){
+                phoGenMatchInd = findPhotonGenMatch(phoInd, tree);
 
-		parentPID = -888;
-		int gparentPID = -888;
-		int parentage = -1;
+                _phoGenMatchInd.push_back(phoGenMatchInd);
 
-		if (!tree->isData_ && phoGenMatchInd!=-1){
-			parentPID = tree->mcMomPID->at(phoGenMatchInd);
-			gparentPID = tree->mcGMomPID->at(phoGenMatchInd);
-			// photon parentage for event categorization
-			// -1 is unmatched photon; 0 is matched, but not top/W/lepton, 1 is top parent or ISR parent, 2 is W parent, 3 is lepton parent,
-			if (abs(parentPID)==22 || abs(parentPID)<6 && gparentPID==-999) parentage = 1;
-			else if (abs(parentPID)==6) parentage = 2;
-			else if (abs(parentPID)==24 || abs(parentPID)==11 || abs(parentPID)==13 || abs(parentPID)==15) parentage = 3;
-			else if (parentPID!=-999) parentage = 0;
-		}
+                findPhotonCategory(phoGenMatchInd, tree, &isGenuine, &isMisIDEle, &isHadronicPhoton, &isHadronicFake);
+                _photonIsGenuine.push_back(isGenuine);
+                _photonIsMisIDEle.push_back(isMisIDEle);
+                _photonIsHadronicPhoton.push_back(isHadronicPhoton);
+                _photonIsHadronicFake.push_back(isHadronicFake);
+            }
 
-		_photonParentage.push_back(parentage);
-		_photonParentPID.push_back(parentPID);
-		
-		_dRPhotonJet.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPhi_->at(phoInd),selector->Jets,tree->jetEta_,tree->jetPhi_));
-		_dRPhotonLepton.push_back(phoVector.DeltaR(lepVector));
-		_MPhotonLepton.push_back((phoVector+lepVector).M());
-		_AnglePhotonLepton.push_back(phoVector.Angle(lepVector.Vect()));	
 
-		_phoJetDR.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPhi_->at(phoInd),selector->Jets,tree->jetEta_,tree->jetPhi_));
-	
 
-	}
+            parentPID = -888;
+            int gparentPID = -888;
+            int parentage = -1;
 
-    if (!mtAnalysis) {
+            if (!tree->isData_ && phoGenMatchInd!=-1){
+                parentPID = tree->mcMomPID->at(phoGenMatchInd);
+                gparentPID = tree->mcGMomPID->at(phoGenMatchInd);
+                // photon parentage for event categorization
+                // -1 is unmatched photon; 0 is matched, but not top/W/lepton, 1 is top parent or ISR parent, 2 is W parent, 3 is lepton parent,
+                if (abs(parentPID)==22 || abs(parentPID)<6 && gparentPID==-999) parentage = 1;
+                else if (abs(parentPID)==6) parentage = 2;
+                else if (abs(parentPID)==24 || abs(parentPID)==11 || abs(parentPID)==13 || abs(parentPID)==15) parentage = 3;
+                else if (parentPID!=-999) parentage = 0;
+            }
+
+            _photonParentage.push_back(parentage);
+            _photonParentPID.push_back(parentPID);
+            
+            _dRPhotonJet.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPhi_->at(phoInd),selector->Jets,tree->jetEta_,tree->jetPhi_));
+            _dRPhotonLepton.push_back(phoVector.DeltaR(lepVector));
+            _MPhotonLepton.push_back((phoVector+lepVector).M());
+            _AnglePhotonLepton.push_back(phoVector.Angle(lepVector.Vect()));	
+
+            _phoJetDR.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPhi_->at(phoInd),selector->Jets,tree->jetEta_,tree->jetPhi_));
+        
+
+        }
+    }
+    if (isTTGamma) {
         for (int i_pho = 0; i_pho <_nLoosePho; i_pho++){
             int phoInd = selector->LoosePhotons.at(i_pho);
             phoVector.SetPtEtaPhiM(tree->phoEt_->at(phoInd),
@@ -1385,9 +1456,71 @@ double makeAnalysisNtuple::minDr(double myEta, double myPhi, std::vector<int> In
 }
 
 
+double makeAnalysisNtuple::eleSF(double elePt, double eleSCEta, int sysLvl)
+{
+    // Ele ID scale factor
+    double ID = eleID_SF->GetBinContent(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+    if (sysLvl == 2)
+        ID += eleID_SF->GetBinError(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+    else if (sysLvl == 0)
+        ID -= eleID_SF->GetBinError(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
 
-#endif
+    // Ele Reco scale factor
+    double reco = eleReco_SF->GetBinContent(eleReco_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+    if (sysLvl == 2)
+        reco += eleReco_SF->GetBinError(eleReco_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+    else if (sysLvl == 0)
+        reco -= eleReco_SF->GetBinError(eleReco_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
 
+    return ID * reco;
+}
+
+double makeAnalysisNtuple::muSF(double muPt, double muEta, int sysLvl)
+{
+    double muAEta = abs(muEta);
+
+    // Muon ID scale factors
+    double ID_BF = muID_BF_SF->GetBinContent(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (sysLvl == 2)
+        ID_BF += muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    else if (sysLvl == 0)
+        ID_BF -= muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    
+    double ID_GH = muID_GH_SF->GetBinContent(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (sysLvl == 2)
+        ID_GH += muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    else if (sysLvl == 0)
+        ID_GH -= muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+
+    // Muon Isolation scale factors
+    double Iso_BF = muIso_BF_SF->GetBinContent(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (sysLvl == 2)
+        Iso_BF += muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    else if (sysLvl == 0)
+        Iso_BF -= muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    
+    double Iso_GH = muIso_GH_SF->GetBinContent(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (sysLvl == 2)
+        Iso_GH += muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    else if (sysLvl == 0)
+        Iso_GH -= muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+
+    return (ID_BF * Iso_BF * lumiBF + ID_GH * Iso_GH * lumiGH) / luminosity;
+}
+
+double makeAnalysisNtuple::trigSF(double elePt, double muPt, int sysLvl)
+{
+    double sf = trigger_SF->GetBinContent(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
+    if (sysLvl == 2)
+        sf += trigger_SF->GetBinContent(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
+    else if (sysLvl == 0)
+        sf -= trigger_SF->GetBinContent(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
+
+    return sf;
+}
+
+
+//#endif
 int main(int ac, char** av){
   if(ac != 4){
     std::cout << "usage: ./makeAnalysisNtuple sampleName outputFileDir inputFile[s]" << std::endl;

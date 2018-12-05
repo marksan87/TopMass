@@ -14,6 +14,7 @@
 #include "EventTree.h"
 #include "EventPick.h"
 #include "Selector.h"
+#include <TString.h>
 
 // Standalone Btag scale factor tool from 
 // https://twiki.cern.ch/twiki/bin/view/CMS/BTagCalibration
@@ -34,6 +35,16 @@
 
 #include "JEC/UncertaintySourcesList.h"
 
+TString eleID_SF_path("lepSF/Ele_TightID_egammaEffi.txt_EGM2D.root");
+TString eleReco_SF_path("lepSF/Ele_Reco_egammaEffi.txt_EGM2D.root");
+TString muID_BF_SF_path("lepSF/Muon_TightID_EfficienciesAndSF_BCDEF.root");
+TString muID_GH_SF_path("lepSF/Muon_TightID_EfficienciesAndSF_GH.root");
+TString muIso_BF_SF_path("lepSF/Muon_Isolation_EfficienciesAndSF_BCDEF.root");
+TString muIso_GH_SF_path("lepSF/Muon_Isolation_EfficienciesAndSF_GH.root");
+TString muTrack_SF_path("lepSF/Muon_Tracking_EfficienciesAndSF_BCDEFGH.root");
+TString trigger_SF_path("lepSF/triggerSFs/AN16_392_SFs.root");
+
+
 class makeAnalysisNtuple {
 public :
 
@@ -41,6 +52,11 @@ public :
    /* Int_t           fCurrent; //!current Tree number in a TChain */
 	makeAnalysisNtuple(char* outputFileName,char** inputFileName);
 	makeAnalysisNtuple(int ac, char** av);
+
+    double eleSF(double elePt, double eleSCEta, int sysLvl);
+    double muSF(double muPt, double muEta, int sysLvl);
+    double trigSF(double elePt, double muPt, int sysLvl);
+
 
 private :
 
@@ -56,9 +72,17 @@ private :
 	string systematicType;
 
 	bool isTTGamma;
-
 	bool isSystematicRun;
 
+    bool mtAnalysis;
+    TH1F* eleID_SF;
+    TH1F* eleReco_SF;
+    TH1F* muID_BF_SF;
+    TH1F* muID_GH_SF;
+    TH1F* muIso_BF_SF;
+    TH1F* muIso_GH_SF;
+    TH1F* muTrack_SF;
+    TH1F* trigger_SF;
 
 	bool getGenScaleWeights;
 	bool applypdfweight;
@@ -102,6 +126,10 @@ private :
 	Float_t         _eleEffWeight;
 	Float_t         _eleEffWeight_Up;
 	Float_t         _eleEffWeight_Do;
+
+    Float_t         _trigEffWeight;
+    Float_t         _trigEffWeight_Up;
+    Float_t         _trigEffWeight_Do;
 
 	Float_t         _evtWeight;
 	Float_t         _lumiWeight;
@@ -378,6 +406,11 @@ void makeAnalysisNtuple::InitBranches(){
 		outputTree->Branch("eleEffWeight_Up"            , &_eleEffWeight_Up             );
 		outputTree->Branch("eleEffWeight_Do"            , &_eleEffWeight_Do             );
 	}
+	outputTree->Branch("trigEffWeight"               , &_trigEffWeight                );
+	if (!isSystematicRun){
+		outputTree->Branch("trigEffWeight_Up"            , &_trigEffWeight_Up             );
+		outputTree->Branch("trigEffWeight_Do"            , &_trigEffWeight_Do             );
+	}
 	outputTree->Branch("phoEffWeight"               , &_phoEffWeight                );
 	if (!isSystematicRun){
 		outputTree->Branch("phoEffWeight_Up"            , &_phoEffWeight_Up             );
@@ -645,7 +678,11 @@ void makeAnalysisNtuple::InitVariables()
 	_muEffWeight_Do = 1.;
 	_muEffWeight_Up = 1.;
 
-	_phoEffWeight.clear();
+	_trigEffWeight    = 1.;
+	_trigEffWeight_Do = 1.;
+	_trigEffWeight_Up = 1.;
+	
+    _phoEffWeight.clear();
 	_phoEffWeight_Do.clear();
 	_phoEffWeight_Up.clear();
 

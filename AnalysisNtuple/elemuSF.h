@@ -1,3 +1,8 @@
+#ifndef ELEMUSF_H
+#define ELEMUSF_H
+
+#include "ScaleFactors.h"
+
 //In bins of 0.2 in absEta
 double muTrackingSF[12][3] = { {0.996924,0.996996,0.997069},
 								{0.997629,0.997712,0.997794},
@@ -230,4 +235,4 @@ double getPhoSF(double pt, double eta, int systLevel){
 
 
 }
-
+#endif

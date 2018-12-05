@@ -1,10 +1,15 @@
+#ifndef SCALEFACTORS_H
+#define SCALEFACTORS_H
+
 /////////////////////////////////
 // Total integrated luminosity //
 /////////////////////////////////
 
 
-double luminosity = 35860;
- 
+double luminosity = 35862.4;
+double lumiBF = 19716.2;
+double lumiGH = 16146.2;
+
 /////////////////////////////////////////////////
 // Total number of events in the MC simulation //
 /////////////////////////////////////////////////
@@ -18,7 +23,7 @@ double totalTTGJets               = 3199101.; //9884993 Total before weights (65
 
 double totalTGJets                = 310437.; //1556973 before negative weights
 
-double totalTTbarPowheg           = 77227178.;
+double totalTTbarPowheg           = 77078997;   // Updated for mt analysis
 double totalTTbarMCatNLO          = 77227178.;
 
 double totalTTbarMadgraph_SingleLeptFromT     = 11956689.;
@@ -460,4 +465,4 @@ const std::string allowedSampleTypes[99] = {"Data",
 											"Test",
                                                                                         };
 
-
+#endif
