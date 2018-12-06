@@ -2,3 +2,7 @@
 *.root
 *.tgz
 *.o
+AnalysisNtuple/makeAnalysisNtuple
+AnalysisNtuple/makeSkim
+AnalysisNtuple/makeCutflows
+AnalysisNtuple/checkOverlap
