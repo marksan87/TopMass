@@ -110,6 +110,7 @@ private :
 	Float_t	         _pdfweight_Do;
 	std::vector<float> _pdfSystWeight;
 
+    Float_t            _topptWeight;
 
 	std::vector<float> _btagWeight;
 	std::vector<float> _btagWeight_Up;
@@ -430,9 +431,9 @@ void makeAnalysisNtuple::InitBranches(){
 		outputTree->Branch("pdfuncer"                  , &_pdfuncer                 );
 		outputTree->Branch("pdfweight_Up"              , &_pdfweight_Up             );
 		outputTree->Branch("pdfweight_Do"              , &_pdfweight_Do             );
-		outputTree->Branch("pdfSystWeight"             , &_pdfSystWeight               );
+		outputTree->Branch("pdfSystWeight"             , &_pdfSystWeight            );
+        outputTree->Branch("topptWeight"               , &_topptWeight              );
 	}
-
 	outputTree->Branch("evtWeight"                  , &_evtWeight                   );      
 	outputTree->Branch("nVtx"                       , &_nVtx                        ); 
 	outputTree->Branch("nGoodVtx"                   , &_nGoodVtx                    ); 
@@ -660,7 +661,7 @@ void makeAnalysisNtuple::InitVariables()
 	_passAll_Mu      = false;
 
 
-
+    _topptWeight  = 1.;
 	_pdfWeight    = 1.;
 	_pdfweight_Up = 1.;
 	_pdfweight_Do = 1.;

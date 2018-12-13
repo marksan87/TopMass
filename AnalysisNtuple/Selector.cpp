@@ -425,10 +425,7 @@ void Selector::filter_electrons(){
 		if (!tree->isData_ && elesmearLevel==0) {EleSmear = generator->Gaus(1,tree->eleResol_rho_dn_->at(eleInd));}
 		if (!tree->isData_ && elesmearLevel==2) {EleSmear = generator->Gaus(1,tree->eleResol_rho_up_->at(eleInd));}
 
-		if (pt<10.){
-			smearEle= false;
-		}
-		if (smearEle){
+		if (smearEle && pt>10){
 			pt = pt*EleSmear;
 			en = EleSmear*en;
 		}
@@ -442,6 +439,7 @@ void Selector::filter_electrons(){
 		if (!tree->isData_ && elescaleLevel==0){EleScale = 1.-(sqrt(pow((1-tree->eleScale_syst_dn_->at(eleInd)),2)+pow(1-(tree->eleScale_stat_dn_->at(eleInd)),2)+pow((1-tree->eleScale_gain_dn_->at(eleInd)),2)));}
 
 		if (scaleEle){
+
 			pt = pt*EleScale;
 			en = EleScale*en;
 		}       

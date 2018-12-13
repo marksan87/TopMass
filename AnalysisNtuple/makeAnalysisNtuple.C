@@ -21,9 +21,13 @@ using std::cout;
 using std::endl;
 using std::flush;
 
-std::string PUfilename = "Data_2016BCDGH_Pileup.root";
-std::string PUfilename_up = "Data_2016BCDGH_Pileup_scaledUp.root";
-std::string PUfilename_down = "Data_2016BCDGH_Pileup_scaledDown.root";
+std::string TTGamma_PUfilename = "Data_2016BCDGH_Pileup.root";
+std::string TTGamma_PUfilename_up = "Data_2016BCDGH_Pileup_scaledUp.root";
+std::string TTGamma_PUfilename_down = "Data_2016BCDGH_Pileup_scaledDown.root";
+
+std::string mt_PUfilename = "mt_pileupNominal.root";
+std::string mt_PUfilename_up = "mt_pileupUp.root"; 
+std::string mt_PUfilename_down = "mt_pileupDown.root"; 
 
 int jecvar012_g = 1; // 0:down, 1:norm, 2:up
 int jervar012_g = 1; // 0:down, 1:norm, 2:up
@@ -43,6 +47,12 @@ double getJetResolution(double, double, double);
 bool dileptonsample;
 std::clock_t startClock;
 double duration;
+
+ostream& operator<<(ostream& os, const TLorentzVector& v);
+ostream& operator<<(ostream& os, const TLorentzVector& v)
+{
+    os<<"(pt,eta,phi,E) = ("<<v.Pt()<<","<<v.Eta()<<","<<v.Phi()<<","<<v.E()<<")"<<endl;
+}
 
 
 makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
@@ -129,16 +139,14 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	//selector->looseJetID = false;
 	selector->looseJetID = true;
 
-	//selector->useDeepCSVbTag = true;
-	selector->useDeepCSVbTag = false;
+	selector->useDeepCSVbTag = true;
 
 	// selector->veto_pho_jet_dR = -1.; //remove jets which have a photon close to them 
 	selector->veto_jet_pho_dR = -1.; //remove photons which have a jet close to them (after having removed jets too close to photon from above cut)
 
 	selector->isTTGamma = isTTGamma;
-    //selector->useRoccor = true;	
-    selector->useRoccor = false;	
-    selector->fixedSeed = true; 
+    selector->useRoccor = true;	
+    selector->fixedSeed = false; 
     
     
     if (selector->useRoccor) { cout<<"Applying Rochester Muon Corrections using "<<((selector->fixedSeed) ? "fixed" : "random")<<" seed"<<endl; }
@@ -262,10 +270,11 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	outputTree = new TTree("AnalysisTree","AnalysisTree");
 
 	InitBranches();
+    
 
-	PUReweight* PUweighter = new PUReweight(ac-3, av+3, PUfilename);
-	PUReweight* PUweighterUp = new PUReweight(ac-3, av+3, PUfilename_up);
-	PUReweight* PUweighterDown = new PUReweight(ac-3, av+3, PUfilename_down);
+	PUReweight* PUweighter = new PUReweight(ac-3, av+3, (mtAnalysis ? mt_PUfilename : TTGamma_PUfilename));
+	PUReweight* PUweighterUp = new PUReweight(ac-3, av+3, (mtAnalysis ? mt_PUfilename_up : TTGamma_PUfilename_up));
+	PUReweight* PUweighterDown = new PUReweight(ac-3, av+3, (mtAnalysis ? mt_PUfilename_down : TTGamma_PUfilename_down));
 	bool isMC;
 
 	tree->GetEntry(0);
@@ -508,6 +517,7 @@ void makeAnalysisNtuple::FillEvent()
 	_nBJet           = selector->bJets.size();
 	_nMC             = tree->nMC_;
 	_pdfWeight       = tree->pdfWeight_;	
+    _topptWeight     = topPtWeight();
 
 	double ht = 0.0;
 	ht += tree->pfMET_;
@@ -902,6 +912,12 @@ void makeAnalysisNtuple::FillEvent()
     }	
 
     if (mtAnalysis) {
+//        if (tree->event_ == 101927)// 101760)
+//        {
+//            cout<<endl<<"lpVector"<<endl<<lpVector<<endl;
+//            cout<<"lmVector"<<endl<<lmVector<<endl;
+//            cout<<"ll = "<<endl<<(lpVector + lmVector)<<endl;
+//        }
         _pt_ll = (lpVector + lmVector).Pt();
         _m_ll = (lpVector + lmVector).M();
         _pt_pos = lpVector.Pt();
@@ -1009,20 +1025,20 @@ void makeAnalysisNtuple::FillEvent()
 		}
 
 	}
-	else{
-		int eleInd = selector->Electrons.at(0);
-		int muInd = selector->Muons.at(0);
-		lepVector.SetPtEtaPhiE(tree->elePt_->at(eleInd),
-							   tree->eleSCEta_->at(eleInd),
-							   tree->elePhi_->at(eleInd),
-							   tree->eleEn_->at(eleInd));
-		lepVector2.SetPtEtaPhiE(tree->muPt_->at(muInd),
-								tree->muEta_->at(muInd),
-								tree->muPhi_->at(muInd),
-								tree->muEn_->at(muInd));
-		_pt_ll = (lepVector + lepVector2).Pt();
-		_m_ll = (lepVector + lepVector2).M();
-	}
+//	else{
+//		int eleInd = selector->Electrons.at(0);
+//		int muInd = selector->Muons.at(0);
+//		lepVector.SetPtEtaPhiE(tree->elePt_->at(eleInd),
+//							   tree->eleSCEta_->at(eleInd),
+//							   tree->elePhi_->at(eleInd),
+//							   tree->eleEn_->at(eleInd));
+//		lepVector2.SetPtEtaPhiE(tree->muPt_->at(muInd),
+//								tree->muEta_->at(muInd),
+//								tree->muPhi_->at(muInd),
+//								tree->muEn_->at(muInd));
+//		_pt_ll = (lepVector + lepVector2).Pt();
+//		_m_ll = (lepVector + lepVector2).M();
+//	}
 
 	ljetVectors.clear();
 	bjetVectors.clear();
