@@ -54,19 +54,6 @@ channelDir="emu"
 tupleExtraName1=""
 tupleExtraName2=""
 
-if [ "$jobType" == "QCD" ] ;	then
-	channel="qcdele"
-	channelDir="qcdelectrons"
-	tupleExtraName1="QCDcr_"
-	tupleExtraName2="__QCDcr"
-fi
-if [ "$jobType" == "Dilep" ] ;	then
-	channel="diele"
-	channelDir="dielectrons"
-	tupleExtraName1="Dilep_"
-	tupleExtraName2="__Dilep"
-fi
-
 #outputdir="root://cmseos.fnal.gov//store/user/lpctop/TopMass/13TeV_"
 outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_"
 

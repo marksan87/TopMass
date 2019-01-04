@@ -32,11 +32,10 @@ std::string mt_PUfilename_down = "mt_pileupDown.root";
 int jecvar012_g = 1; // 0:down, 1:norm, 2:up
 int jervar012_g = 1; // 0:down, 1:norm, 2:up
 int phosmear012_g = 1; // 0:down, 1:norm, 2:up 
-int musmear012_g = 1; // 0:down, 1:norm, 2: up
+int muscale012_g = 1; // 0:down, 1:norm, 2: up
 int elesmear012_g = 1; // 0:down, 1:norm, 2: up
 int phoscale012_g = 1;
 int elescale012_g = 1;
-int roccor012_g = 1;  // 1:nominal, others not yet implemented
 #include "BTagCalibrationStandalone.h"
 
 bool overlapRemovalTT(EventTree* tree);
@@ -103,8 +102,7 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
         f->Close();
 
         f = new TFile(muTrack_SF_path, "read");
-        muTrack_SF = (TH1F*)f->Get("ratio_eff_eta3_dr030e030_corr");
-        muTrack_SF->SetDirectory(0);
+        muTrack_SF = (TGraphAsymmErrors*)f->Get("ratio_eff_eta3_dr030e030_corr")->Clone();
         f->Close();
 
         f = new TFile(trigger_SF_path, "read");
@@ -243,14 +241,16 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	if(systematicType=="elescale_down") {elescale012_g=0;selector->elescaleLevel=0; isSystematicRun = true;}
 	if(systematicType=="elescale_up") {elescale012_g=2;  selector->elescaleLevel=2; isSystematicRun = true;}
 
-	if( systematicType=="musmear_up")   {musmear012_g = 2; isSystematicRun = true;}
-	if( systematicType=="musmear_down") {musmear012_g = 0; isSystematicRun = true;}
+    
+
+	if( systematicType=="muscale_up")   {muscale012_g = 2; selector->muscaleLevel=2; isSystematicRun = true;}
+	if( systematicType=="muscale_down") {muscale012_g = 0; selector->muscaleLevel=0; isSystematicRun = true;}
 
 	if( systematicType=="Dilep")     {dileptonsample =true; evtPick->Nmu_eq=2; evtPick->Nele_eq=2;}
 	if( systematicType=="QCDcr")       {selector->QCDselect = true; evtPick->ZeroBExclusive=true;}
 	std::cout << "Dilepton Sample :" << dileptonsample << std::endl;
 	std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << " eleScale "<< elescale012_g << " phoScale" << phoscale012_g << "   ";
-	std::cout << "  PhoSmear: " << phosmear012_g << "  muSmear: " << musmear012_g << "  eleSmear: " << elesmear012_g << endl;
+	std::cout << "  PhoSmear: " << phosmear012_g << "  muSmear: " << muscale012_g << "  eleSmear: " << elesmear012_g << endl;
 
 	if (isSystematicRun){
 		std::cout << "  Systematic Run : Dropping genMC variables from tree" << endl;
@@ -258,10 +258,10 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	std::string outputDirectory(av[2]);
 	std::string outputFileName = outputDirectory + "/" + sampleType+"_AnalysisNtuple.root";
 	// char outputFileName[100];
-	cout << av[2] << " " << sampleType << " " << systematicType << endl;
+	//cout << av[2] << " " << sampleType << " " << systematicType << endl;
 	//	outputFileName = sprintf("%s_AnalysisNtuple.root",sampleType);
 	if (systematicType!=""){
-		outputFileName = outputDirectory + "/"+systematicType + "_" +sampleType+"_AnalysisNtuple.root";
+		outputFileName = outputDirectory + "/"+ sampleType + "__" +systematicType+"_AnalysisNtuple.root";
 		//		sprintf(outputFileName,"%s/%s_%s_AnalysisNtuple.root",av[2],systematicType,sampleType);
 	}
 	cout << av[2] << " " << sampleType << " " << systematicType << endl;
@@ -294,9 +294,24 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	_muEffWeight    = 1.;
 	_muEffWeight_Do = 1.;
 	_muEffWeight_Up = 1.;
+	_muIDEffWeight    = 1.;
+	_muIDEffWeight_Do = 1.;
+	_muIDEffWeight_Up = 1.;
+	_muIsoEffWeight    = 1.;
+	_muIsoEffWeight_Do = 1.;
+	_muIsoEffWeight_Up = 1.;
+	_muTrackEffWeight    = 1.;
+	_muTrackEffWeight_Do = 1.;
+	_muTrackEffWeight_Up = 1.;
 	_eleEffWeight    = 1.;
 	_eleEffWeight_Up = 1.;
 	_eleEffWeight_Do = 1.;
+	_eleIDEffWeight    = 1.;
+	_eleIDEffWeight_Up = 1.;
+	_eleIDEffWeight_Do = 1.;
+	_eleRecoEffWeight    = 1.;
+	_eleRecoEffWeight_Up = 1.;
+	_eleRecoEffWeight_Do = 1.;
 
 	Long64_t nEntr = tree->GetEntries();
 
@@ -408,18 +423,38 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
                 if (mtAnalysis) 
                 {
                     int muInd_ = selector->Muons.at(0);
-                    _muEffWeight    = muSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
-                    _muEffWeight_Do = muSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
-                    _muEffWeight_Up = muSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
-                        
-                    int eleInd_ = selector->Electrons.at(0);
-                    _eleEffWeight    = eleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
-                    _eleEffWeight_Do = eleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
-                    _eleEffWeight_Up = eleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
+                    _muEffWeight    = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
+                    _muEffWeight_Do = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
+                    _muEffWeight_Up = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
+                    
+                    _muIDEffWeight    = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
+                    _muIDEffWeight_Do = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
+                    _muIDEffWeight_Up = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
+                    
+                    _muIsoEffWeight    = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
+                    _muIsoEffWeight_Do = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
+                    _muIsoEffWeight_Up = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
+                    
+                    _muTrackEffWeight    = muTrackEffSF(tree->muEta_->at(muInd_),1);
+                    _muTrackEffWeight_Do = muTrackEffSF(tree->muEta_->at(muInd_),0);
+                    _muTrackEffWeight_Up = muTrackEffSF(tree->muEta_->at(muInd_),2);
 
-                    _trigEffWeight    = trigSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),1);
-                    _trigEffWeight_Do = trigSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),0);
-                    _trigEffWeight_Up = trigSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),2);
+                    int eleInd_ = selector->Electrons.at(0);
+                    _eleEffWeight    = eleEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
+                    _eleEffWeight_Do = eleEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
+                    _eleEffWeight_Up = eleEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
+
+                    _eleIDEffWeight    = eleIDEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
+                    _eleIDEffWeight_Do = eleIDEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
+                    _eleIDEffWeight_Up = eleIDEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
+
+                    _eleRecoEffWeight    = eleRecoEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
+                    _eleRecoEffWeight_Do = eleRecoEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
+                    _eleRecoEffWeight_Up = eleRecoEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
+
+                    _trigEffWeight    = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),1);
+                    _trigEffWeight_Do = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),0);
+                    _trigEffWeight_Up = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),2);
                 }
 
 
@@ -517,8 +552,7 @@ void makeAnalysisNtuple::FillEvent()
 	_nBJet           = selector->bJets.size();
 	_nMC             = tree->nMC_;
 	_pdfWeight       = tree->pdfWeight_;	
-    _topptWeight     = topPtWeight();
-
+    
 	double ht = 0.0;
 	ht += tree->pfMET_;
 	for( int i_jet = 0; i_jet < _nJet; i_jet++)
@@ -925,6 +959,7 @@ void makeAnalysisNtuple::FillEvent()
         _ptp_ptm = lpVector.Pt() + lmVector.Pt();
         _Ep_Em = lpVector.E() + lmVector.E();
 
+        if (!tree->isData_) { _topptWeight = topPtWeight(); }
     }
 
 
@@ -1115,9 +1150,7 @@ void makeAnalysisNtuple::FillEvent()
 
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
 double makeAnalysisNtuple::SFtop(double pt){
-	// if(top_sample_g==1) return exp(0.159 - 0.00141*pt);
-	// if(top_sample_g==2) return exp(0.148 - 0.00129*pt);
-	return 1.0;
+	return exp(0.0615 - 0.0005*pt); 
 }
 
 double makeAnalysisNtuple::topPtWeight(){
@@ -1130,9 +1163,8 @@ double makeAnalysisNtuple::topPtWeight(){
 	}
 	if(toppt > 0.001 && antitoppt > 0.001)
 		weight = sqrt( SFtop(toppt) * SFtop(antitoppt) );
-	
-	//This has been changed, the new prescription is to not use the top pt reweighting, and the syst is using it
-	return weight;
+    
+    return weight;
 
 }
 
@@ -1471,8 +1503,7 @@ double makeAnalysisNtuple::minDr(double myEta, double myPhi, std::vector<int> In
 	else return 999.0;
 }
 
-
-double makeAnalysisNtuple::eleSF(double elePt, double eleSCEta, int sysLvl)
+double makeAnalysisNtuple::eleEffSF(double elePt, double eleSCEta, int sysLvl)
 {
     // Ele ID scale factor
     double ID = eleID_SF->GetBinContent(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
@@ -1480,6 +1511,7 @@ double makeAnalysisNtuple::eleSF(double elePt, double eleSCEta, int sysLvl)
         ID += eleID_SF->GetBinError(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
     else if (sysLvl == 0)
         ID -= eleID_SF->GetBinError(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+
 
     // Ele Reco scale factor
     double reco = eleReco_SF->GetBinContent(eleReco_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
@@ -1491,7 +1523,31 @@ double makeAnalysisNtuple::eleSF(double elePt, double eleSCEta, int sysLvl)
     return ID * reco;
 }
 
-double makeAnalysisNtuple::muSF(double muPt, double muEta, int sysLvl)
+double makeAnalysisNtuple::eleIDEffSF(double elePt, double eleSCEta, int sysLvl)
+{
+    // Ele ID scale factor
+    double ID = eleID_SF->GetBinContent(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+    if (sysLvl == 2)
+        ID += eleID_SF->GetBinError(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+    else if (sysLvl == 0)
+        ID -= eleID_SF->GetBinError(eleID_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+
+    return ID;
+}
+
+double makeAnalysisNtuple::eleRecoEffSF(double elePt, double eleSCEta, int sysLvl)
+{
+    // Ele Reco scale factor
+    double reco = eleReco_SF->GetBinContent(eleReco_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+    if (sysLvl == 2)
+        reco += eleReco_SF->GetBinError(eleReco_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+    else if (sysLvl == 0)
+        reco -= eleReco_SF->GetBinError(eleReco_SF->FindBin(eleSCEta, max(25.0, min(150.0, elePt))));
+
+    return reco;
+}
+
+double makeAnalysisNtuple::muEffSF(double muPt, double muEta, int sysLvl)
 {
     double muAEta = abs(muEta);
 
@@ -1524,13 +1580,94 @@ double makeAnalysisNtuple::muSF(double muPt, double muEta, int sysLvl)
     return (ID_BF * Iso_BF * lumiBF + ID_GH * Iso_GH * lumiGH) / luminosity;
 }
 
-double makeAnalysisNtuple::trigSF(double elePt, double muPt, int sysLvl)
+double makeAnalysisNtuple::muIDEffSF(double muPt, double muEta, int sysLvl)
+{
+    double muAEta = abs(muEta);
+
+    // Muon ID scale factors
+    double ID_BF = muID_BF_SF->GetBinContent(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (sysLvl == 2)
+        ID_BF += muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    else if (sysLvl == 0)
+        ID_BF -= muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    
+    double ID_GH = muID_GH_SF->GetBinContent(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (sysLvl == 2)
+        ID_GH += muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    else if (sysLvl == 0)
+        ID_GH -= muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+
+    return (ID_BF * lumiBF + ID_GH * lumiGH) / luminosity; 
+}
+
+double makeAnalysisNtuple::muIsoEffSF(double muPt, double muEta, int sysLvl)
+{
+    double muAEta = abs(muEta);
+
+    // Muon Isolation scale factors
+    double Iso_BF = muIso_BF_SF->GetBinContent(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (sysLvl == 2)
+        Iso_BF += muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    else if (sysLvl == 0)
+        Iso_BF -= muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    
+    double Iso_GH = muIso_GH_SF->GetBinContent(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (sysLvl == 2)
+        Iso_GH += muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    else if (sysLvl == 0)
+        Iso_GH -= muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+
+    return (Iso_BF * lumiBF + Iso_GH * lumiGH) / luminosity;
+}
+
+double makeAnalysisNtuple::muTrackEffSF(double muEta, int sysLvl)
+{
+    // Muon Tracker scale factors
+    double track = muTrack_SF->Eval(muEta); 
+    
+    if (sysLvl != 1) 
+    {
+        // Find closet point
+        int n = -1;
+        for (int i =0; i < muTrack_SF->GetN(); i++)
+        {
+            if (muTrack_SF->GetX()[i] - muEta > 0)
+            {
+                n = i;
+                break;
+            }
+        }
+
+        auto xpoints = muTrack_SF->GetX();
+        if (n > 0)
+        {
+            if (abs(xpoints[n-1] - muEta) < abs(xpoints[n] - muEta))
+                n -= 1;
+        }
+        if (n < 14)
+        {
+            if (abs(xpoints[n+1] - muEta) < abs(xpoints[n] - muEta))
+                n += 1;
+        }
+   
+        double err = muTrack_SF->GetErrorY(n);
+
+        if (sysLvl == 2)
+            track += err;
+        else if (sysLvl == 0)
+            track -= err; 
+    }
+
+    return track;
+}
+
+double makeAnalysisNtuple::trigEffSF(double elePt, double muPt, int sysLvl)
 {
     double sf = trigger_SF->GetBinContent(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
     if (sysLvl == 2)
-        sf += trigger_SF->GetBinContent(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
+        sf += trigger_SF->GetBinError(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
     else if (sysLvl == 0)
-        sf -= trigger_SF->GetBinContent(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
+        sf -= trigger_SF->GetBinError(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
 
     return sf;
 }

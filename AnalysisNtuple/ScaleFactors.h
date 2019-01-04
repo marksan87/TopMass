@@ -100,25 +100,6 @@ double totalST_tW_antitop = 3256309.;
 double totalDY_M_10to50   = 35291236.; 
 double totalDY_M_50       = 49143455.;
 
-//// systematics samples
-double totalTTbar_mt1665 = 19379727.;
-double totalTTbar_mt1695 = 58540996.;
-double totalTTbar_mt1715 = 79484355.;
-double totalTTbar_mt1735 = 79276800.; 
-double totalTTbar_mt1755 = 59382995.;
-double totalTTbar_mt1785 = 16376678.;
-
-double totalTTbar_fsrDown = 155987323.;
-double totalTTbar_fsrUp   = 152613640.;
-double totalTTbar_isrDown = 120675570.;
-double totalTTbar_isrUp   = 156465594.;
-
-double totalST_tW_top_mt1695     = 3198907.;
-double totalST_tW_top_mt1755     = 2958469.;
-double totalST_tW_antitop_mt1695 = 3028484.;
-double totalST_tW_antitop_mt1755 = 3253383.;
-
-
 double totalTTGamma_dilept_fsrDown      = 3983729.;
 double totalTTGamma_dilept_fsrUp        = 3926890.;
 double totalTTGamma_dilept_isrDown      = 3886639.;
@@ -135,6 +116,58 @@ double totalTTGamma_semilept_Tbar_isrDown = 4952386.;
 double totalTTGamma_semilept_Tbar_isrUp   = 4838684.;
 
 
+
+
+//// Top Mass systematics samples
+double totalTTbar_mt1665 = 19379727.;
+double totalTTbar_mt1695 = 58540996.;
+double totalTTbar_mt1715 = 79484355.;
+double totalTTbar_mt1735 = 79276800.; 
+double totalTTbar_mt1755 = 59382995.;
+double totalTTbar_mt1785 = 16376678.;
+
+// alphaS
+double totalTTbar_fsrDown = 155987323.;
+double totalTTbar_fsrUp   = 152613640.;
+double totalTTbar_isrDown = 120675570.;
+double totalTTbar_isrUp   = 156465594.;
+
+// ME-PS matching  hdamp
+double totalTTbar_hdampUp   = 58856922.; 
+double totalTTbar_hdampDown = 58162350.; 
+
+// Underlying event
+double totalTTbar_UEUp   = 58952087.; 
+double totalTTbar_UEDown = 58336680.; 
+
+// Color reconnection
+double totalTTbar_CRerdON = 59880545.;
+double totalTTbar_CRGluon = 56167431.;
+double totalTTbar_CRQCD   = 59618551.; 
+
+// Alternate generators
+double totalTTbar_amcanlo  = 43561608.;
+double totalTTbar_madgraph = 10139950.;
+double totalTTbar_herwigpp = 59172906.;
+
+// tt/tW interference DS
+double totalST_tW_top_DS     = 3192538.;
+double totalST_tW_antitop_DS = 3257226.; 
+
+
+double totalST_tW_top_mt1695     = 3198907.;
+double totalST_tW_top_mt1755     = 2958469.;
+double totalST_tW_antitop_mt1695 = 3028484.;
+double totalST_tW_antitop_mt1755 = 3253383.;
+
+double totalST_tW_top_fsrUp       = 0.; 
+double totalST_tW_top_fsrDown     = 0.; 
+double totalST_tW_antitop_fsrUp   = 0.; 
+double totalST_tW_antitop_fsrDown = 0.; 
+double totalST_tW_top_isrUp       = 0.; 
+double totalST_tW_top_isrDown     = 0.; 
+double totalST_tW_antitop_isrUp   = 0.; 
+double totalST_tW_antitop_isrDown = 0.; 
 
 
 //////////////////////////
@@ -328,6 +361,21 @@ double TTbar_fsrUp_SF = TTbar_xs  * luminosity / totalTTbar_fsrUp;
 double TTbar_isrDown_SF = TTbar_xs  * luminosity / totalTTbar_isrDown;
 double TTbar_isrUp_SF = TTbar_xs  * luminosity / totalTTbar_isrUp;
 
+double TTbar_UEUp_SF = TTbar_xs  * luminosity / totalTTbar_UEUp;
+double TTbar_UEDown_SF = TTbar_xs  * luminosity / totalTTbar_UEDown;
+
+double TTbar_hdampUp_SF = TTbar_xs  * luminosity / totalTTbar_hdampUp;
+double TTbar_hdampDown_SF = TTbar_xs  * luminosity / totalTTbar_hdampDown;
+
+double TTbar_CRerdON_SF = TTbar_xs  * luminosity / totalTTbar_CRerdON;
+double TTbar_CRGluon_SF = TTbar_xs  * luminosity / totalTTbar_CRGluon;
+double TTbar_CRQCD_SF = TTbar_xs  * luminosity / totalTTbar_CRQCD;
+
+double TTbar_amcanlo_SF = TTbar_xs  * luminosity / totalTTbar_amcanlo;
+double TTbar_madgraph_SF = TTbar_xs  * luminosity / totalTTbar_madgraph;
+double TTbar_herwigpp_SF = TTbar_xs  * luminosity / totalTTbar_herwigpp;
+
+
 double WJetsToLNu_SF = WJetsToLNu_xs * luminosity / totalWJetsToLNu;
 double WWTo2L2Nu_SF = WWTo2L2Nu_xs * luminosity / totalWWTo2L2Nu;
 double WZTo3LNu_SF = WZTo3LNu_xs * luminosity / totalWZTo3LNu;
@@ -337,14 +385,28 @@ double TTZToLLNuNu_SF = TTZToLLNuNu_xs * luminosity / totalTTZToLLNuNu;
 double ST_s_SF = ST_s_xs * luminosity / totalST_s;
 double ST_t_top_SF = ST_t_top_xs * luminosity / totalST_t_top;
 double ST_t_antitop_SF = ST_t_antitop_xs * luminosity / totalST_t_antitop;
-double ST_tW_top_SF = ST_tW_top_xs * luminosity / totalST_tW_top;
-double ST_tW_antitop_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop;
 double DY_M_10to50_SF = DYjetsM10to50_xs * luminosity / totalDY_M_10to50;
 double DY_M_50_SF = DYjetsM50_xs * luminosity / totalDY_M_50;
+
+double ST_tW_top_SF = ST_tW_top_xs * luminosity / totalST_tW_top;
+double ST_tW_antitop_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop;
+
+double ST_tW_top_DS_SF = ST_tW_top_xs * luminosity / totalST_tW_top_DS;
+double ST_tW_antitop_DS_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_DS;
+
 double ST_tW_top_mt1695_SF = ST_tW_top_xs / totalST_tW_top_mt1695;
 double ST_tW_top_mt1755_SF = ST_tW_top_xs / totalST_tW_top_mt1755;
 double ST_tW_antitop_mt1695_SF = ST_tW_antitop_xs / totalST_tW_antitop_mt1695;
 double ST_tW_antitop_mt1755_SF = ST_tW_antitop_xs / totalST_tW_antitop_mt1755;
+
+double ST_tW_top_fsrUp_SF = ST_tW_top_xs * luminosity / totalST_tW_top_fsrUp;
+double ST_tW_top_fsrDown_SF = ST_tW_top_xs * luminosity / totalST_tW_top_fsrDown;
+double ST_tW_antitop_fsrUp_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_fsrUp;
+double ST_tW_antitop_fsrDown_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_fsrDown;
+double ST_tW_top_isrUp_SF = ST_tW_top_xs * luminosity / totalST_tW_top_isrUp;
+double ST_tW_top_isrDown_SF = ST_tW_top_xs * luminosity / totalST_tW_top_isrDown;
+double ST_tW_antitop_isrUp_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_isrUp;
+double ST_tW_antitop_isrDown_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_isrDown;
 
 
 double getEvtWeight(string sampleType){
@@ -375,6 +437,24 @@ double getEvtWeight(string sampleType){
 	else if( sampleType=="TTbar_isrUp_1") {evtWeight = TTbar_isrUp_SF;}
 	else if( sampleType=="TTbar_isrUp_2") {evtWeight = TTbar_isrUp_SF;}
 	else if( sampleType=="TTbar_isrUp_3") {evtWeight = TTbar_isrUp_SF;}
+	else if( sampleType=="TTbar_hdampUp_1") {evtWeight = TTbar_hdampUp_SF;}
+	else if( sampleType=="TTbar_hdampUp_2") {evtWeight = TTbar_hdampUp_SF;}
+	else if( sampleType=="TTbar_hdampDown_1") {evtWeight = TTbar_hdampDown_SF;}
+	else if( sampleType=="TTbar_hdampDown_2") {evtWeight = TTbar_hdampDown_SF;}
+	else if( sampleType=="TTbar_UEUp_1") {evtWeight = TTbar_UEUp_SF;}
+	else if( sampleType=="TTbar_UEUp_2") {evtWeight = TTbar_UEUp_SF;}
+	else if( sampleType=="TTbar_UEDown_1") {evtWeight = TTbar_UEDown_SF;}
+	else if( sampleType=="TTbar_UEDown_2") {evtWeight = TTbar_UEDown_SF;}
+	else if( sampleType=="TTbar_CRerdON_1") {evtWeight = TTbar_CRerdON_SF;}
+	else if( sampleType=="TTbar_CRerdON_2") {evtWeight = TTbar_CRerdON_SF;}
+	else if( sampleType=="TTbar_CRGluon") {evtWeight = TTbar_CRGluon_SF;}
+	else if( sampleType=="TTbar_CRQCD_1") {evtWeight = TTbar_CRQCD_SF;}
+	else if( sampleType=="TTbar_CRQCD_2") {evtWeight = TTbar_CRQCD_SF;}
+	else if( sampleType=="TTbar_amcanlo") {evtWeight = TTbar_amcanlo_SF;}
+	else if( sampleType=="TTbar_madgraph") {evtWeight = TTbar_madgraph_SF;}
+	else if( sampleType=="TTbar_herwigpp_1") {evtWeight = TTbar_herwigpp_SF;}
+	else if( sampleType=="TTbar_herwigpp_2") {evtWeight = TTbar_herwigpp_SF;}
+	else if( sampleType=="TTbar_herwigpp_3") {evtWeight = TTbar_herwigpp_SF;}
     else if( sampleType=="WJetsToLNu"){evtWeight = WJetsToLNu_SF;} 
     else if( sampleType=="WWTo2L2Nu"){evtWeight = WWTo2L2Nu_SF;} 
     else if( sampleType=="WZTo3LNu"){evtWeight = WZTo3LNu_SF;} 
@@ -384,14 +464,24 @@ double getEvtWeight(string sampleType){
     else if( sampleType=="ST_s"){evtWeight = ST_s_SF;} 
     else if( sampleType=="ST_t_top"){evtWeight = ST_t_top_SF;} 
     else if( sampleType=="ST_t_antitop"){evtWeight = ST_t_antitop_SF;} 
-    else if( sampleType=="ST_tW_top"){evtWeight = ST_tW_top_SF;} 
-    else if( sampleType=="ST_tW_antitop"){evtWeight = ST_tW_antitop_SF;} 
     else if( sampleType=="DY_M_10to50"){evtWeight = DY_M_10to50_SF;} 
     else if( sampleType=="DY_M_50"){evtWeight = DY_M_50_SF;} 
+    else if( sampleType=="ST_tW_top"){evtWeight = ST_tW_top_SF;} 
+    else if( sampleType=="ST_tW_antitop"){evtWeight = ST_tW_antitop_SF;} 
     else if( sampleType=="ST_tW_top_mt1695"){evtWeight = ST_tW_top_mt1695_SF;} 
     else if( sampleType=="ST_tW_top_mt1755"){evtWeight = ST_tW_top_mt1755_SF;} 
     else if( sampleType=="ST_tW_antitop_mt1695"){evtWeight = ST_tW_antitop_mt1695_SF;} 
     else if( sampleType=="ST_tW_antitop_mt1755"){evtWeight = ST_tW_antitop_mt1755_SF;} 
+    else if( sampleType=="ST_tW_top_fsrUp"){evtWeight = ST_tW_top_fsrUp_SF;} 
+    else if( sampleType=="ST_tW_top_fsrDown"){evtWeight = ST_tW_top_fsrDown_SF;} 
+    else if( sampleType=="ST_tW_antitop_fsrUp"){evtWeight = ST_tW_antitop_fsrUp_SF;} 
+    else if( sampleType=="ST_tW_antitop_fsrDown"){evtWeight = ST_tW_antitop_fsrDown_SF;} 
+    else if( sampleType=="ST_tW_top_isrUp"){evtWeight = ST_tW_top_isrUp_SF;} 
+    else if( sampleType=="ST_tW_top_isrDown"){evtWeight = ST_tW_top_isrDown_SF;} 
+    else if( sampleType=="ST_tW_antitop_isrUp"){evtWeight = ST_tW_antitop_isrUp_SF;} 
+    else if( sampleType=="ST_tW_antitop_isrDown"){evtWeight = ST_tW_antitop_isrDown_SF;} 
+    else if( sampleType=="ST_tW_top_DS"){evtWeight = ST_tW_top_DS_SF;} 
+    else if( sampleType=="ST_tW_antitop_DS"){evtWeight = ST_tW_antitop_DS_SF;} 
     else if( sampleType=="TGJets"){evtWeight = TGJets_SF;} 
 	else if( sampleType=="TTGJets"){evtWeight = TTGJets_SF;} 
 	else if( sampleType=="TTGamma_Hadronic") {evtWeight = TTGamma_hadronic_SF;}
@@ -527,6 +617,24 @@ const std::string allowedSampleTypes[199] = {"Data",
                                             "TTbar_isrUp_1",
                                             "TTbar_isrUp_2",
                                             "TTbar_isrUp_3",
+                                            "TTbar_hdampUp_1",
+                                            "TTbar_hdampUp_2"
+                                            "TTbar_hdampDown_1",
+                                            "TTbar_hdampDown_2"
+                                            "TTbar_UEUp_1",
+                                            "TTbar_UEUp_2"
+                                            "TTbar_UEDown_1",
+                                            "TTbar_UEDown_2"
+                                            "TTbar_CRerdON_1",
+                                            "TTbar_CRerdON_2",
+                                            "TTbar_CRGluon",
+                                            "TTbar_CRQCD_1",
+                                            "TTbar_CRQCD_2",
+                                            "TTbar_amcanlo",
+                                            "TTbar_madgraph",
+                                            "TTbar_herwigpp_1",
+                                            "TTbar_herwigpp_2",
+                                            "TTbar_herwigpp_3",
                                             "WJetsToLNu",
                                             "WWTo2L2Nu",
                                             "WZTo3LNu",
@@ -536,14 +644,24 @@ const std::string allowedSampleTypes[199] = {"Data",
                                             "ST_s",
                                             "ST_t_top",
                                             "ST_t_antitop",
-                                            "ST_tW_top",
-                                            "ST_tW_antitop",
                                             "DY_M_10to50",
                                             "DY_M_50",
+                                            "ST_tW_top",
+                                            "ST_tW_antitop",
+                                            "ST_tW_top_DS",
+                                            "ST_tW_antitop_DS",
                                             "ST_tW_top_mt1695",
                                             "ST_tW_top_mt1755",
                                             "ST_tW_antitop_mt1695",
                                             "ST_tW_antitop_mt1755",
+                                            "ST_tW_top_fsrUp",
+                                            "ST_tW_top_fsrDown",
+                                            "ST_tW_top_isrUp",
+                                            "ST_tW_top_isrDown",
+                                            "ST_tW_antitop_fsrUp",
+                                            "ST_tW_antitop_fsrDown",
+                                            "ST_tW_antitop_isrUp",
+                                            "ST_tW_antitop_isrDown",
                                             "Data_SingleMu_b",
 											"Data_SingleMu_c",
 											"Data_SingleMu_d",

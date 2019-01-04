@@ -1,0 +1,45 @@
+universe = vanilla
+Executable = runSystAnalysisNtuples_emu.sh
+
+should_transfer_files = YES
+WhenTOTransferOutput  = ON_EXIT
+notification = never
+
+Output = condor/eleSkim_$(cluster)_$(process).stdout
+Error  = condor/eleSkim_$(cluster)_$(process).stderr
+Log    = condor/eleSkim_$(cluster)_$(process).condor
+Requirements          = (OpSys == "LINUX" && (Arch != "DUMMY"))
+
+#use_x509userproxy = true
+x509userproxy = $ENV(X509_USER_PROXY)
+
+# important, number of instances (jobs) of script
+Arguments = "0 elescale"
+Queue 1
+
+Arguments = "0 elesmear"
+Queue 1
+
+Arguments = "0 muscale"
+Queue 1
+
+Arguments = "0 JEC1"
+Queue 1
+
+Arguments = "0 JER"
+Queue 1
+
+#Arguments = "$(process) JEC1"
+#Queue 18
+#Arguments = "$(process)-18 JER"
+#Queue 18
+#Arguments = "$(process)-36 elescale"
+#Queue 18
+#Arguments = "$(process)-54 elesmear"
+#Queue 18
+#Arguments = "$(process)-72 muscale"
+#Queue 18
+
+
+
+

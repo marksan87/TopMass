@@ -129,7 +129,7 @@ void EventPick::process_event(EventTree* tree, Selector* selector, double weight
 	double mu0pt = 0, mu1pt = 0, ele0pt = 0, ele1pt = 0;
 	double mu0Q = 0, mu1Q = 0, ele0Q = 0, ele1Q = 0;
 
-	// Cut on events with ==1 muon, no loose muons, no loose or tight electrons
+	// Cut on events with at least 1 mu and 1 ele 
 	if( passPresel_emu && selector->Muons.size() >= 1 && selector->Electrons.size() >= 1){
 		mu0pt = tree->muPt_->at(selector->Muons.at(0));
 		mu0Q = tree->muCharge_->at(selector->Muons.at(0));

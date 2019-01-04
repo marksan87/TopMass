@@ -1,0 +1,38 @@
+#!/bin/bash
+./rename.sh TTbarPowheg_JECTotal_down_AnalysisNtuple.root TTbar_JECTotal_down_AnalysisNtuple.root
+./rename.sh TTbarPowheg_JECTotal_up_AnalysisNtuple.root TTbar_JECTotal_up_AnalysisNtuple.root
+./rename.sh TTbarPowheg_JER_down_AnalysisNtuple.root TTbar_JER_down_AnalysisNtuple.root
+./rename.sh TTbarPowheg_JER_up_AnalysisNtuple.root TTbar_JER_up_AnalysisNtuple.root
+./rename.sh TTbarPowheg_elescale_down_AnalysisNtuple.root TTbar_elescale_down_AnalysisNtuple.root
+./rename.sh TTbarPowheg_elescale_up_AnalysisNtuple.root TTbar_elescale_up_AnalysisNtuple.root
+./rename.sh TTbarPowheg_elesmear_down_AnalysisNtuple.root TTbar_elesmear_down_AnalysisNtuple.root
+./rename.sh TTbarPowheg_elesmear_up_AnalysisNtuple.root TTbar_elesmear_up_AnalysisNtuple.root
+./rename.sh TTbarPowheg_muscale_down_AnalysisNtuple.root TTbar_muscale_down_AnalysisNtuple.root
+./rename.sh TTbarPowheg_muscale_up_AnalysisNtuple.root TTbar_muscale_up_AnalysisNtuple.root
+
+#./rename.sh JER_down_ST_tW_antitop_AnalysisNtuple.root ST_tW_antitop_JER_down_AnalysisNtuple.root
+#./rename.sh JER_down_ST_tW_top_AnalysisNtuple.root ST_tW_top_JER_down_AnalysisNtuple.root
+#./rename.sh JER_up_ST_tW_antitop_AnalysisNtuple.root ST_tW_antitop_JER_up_AnalysisNtuple.root
+#./rename.sh JER_up_ST_tW_top_AnalysisNtuple.root ST_tW_top_JER_up_AnalysisNtuple.root
+#
+#./rename.sh elescale_down_ST_tW_antitop_AnalysisNtuple.root ST_tW_antitop_elescale_down_AnalysisNtuple.root
+#./rename.sh elescale_down_ST_tW_top_AnalysisNtuple.root ST_tW_top_elescale_down_AnalysisNtuple.root
+#./rename.sh elescale_down_TTbarPowheg_AnalysisNtuple.root TTbarPowheg_elescale_down_AnalysisNtuple.root
+#./rename.sh elescale_up_ST_tW_antitop_AnalysisNtuple.root ST_tW_antitop_elescale_up_AnalysisNtuple.root
+#./rename.sh elescale_up_ST_tW_top_AnalysisNtuple.root ST_tW_top_elescale_up_AnalysisNtuple.root
+#./rename.sh elescale_up_TTbarPowheg_AnalysisNtuple.root TTbarPowheg_elescale_up_AnalysisNtuple.root
+#
+#./rename.sh elesmear_down_ST_tW_antitop_AnalysisNtuple.root ST_tW_antitop_elesmear_down_AnalysisNtuple.root
+#./rename.sh elesmear_down_ST_tW_top_AnalysisNtuple.root ST_tW_top_elesmear_down_AnalysisNtuple.root
+#./rename.sh elesmear_down_TTbarPowheg_AnalysisNtuple.root TTbarPowheg_elesmear_down_AnalysisNtuple.root
+#./rename.sh elesmear_up_ST_tW_antitop_AnalysisNtuple.root ST_tW_antitop_elesmear_up_AnalysisNtuple.root
+#./rename.sh elesmear_up_ST_tW_top_AnalysisNtuple.root ST_tW_top_elesmear_up_AnalysisNtuple.root
+#./rename.sh elesmear_up_TTbarPowheg_AnalysisNtuple.root TTbarPowheg_elesmear_up_AnalysisNtuple.root
+#
+#./rename.sh muscale_down_ST_tW_antitop_AnalysisNtuple.root ST_tW_antitop_muscale_down_AnalysisNtuple.root
+#./rename.sh muscale_down_ST_tW_top_AnalysisNtuple.root ST_tW_top_muscale_down_AnalysisNtuple.root
+#./rename.sh muscale_down_TTbarPowheg_AnalysisNtuple.root TTbarPowheg_muscale_down_AnalysisNtuple.root
+#./rename.sh muscale_up_ST_tW_antitop_AnalysisNtuple.root ST_tW_antitop_muscale_up_AnalysisNtuple.root
+#./rename.sh muscale_up_ST_tW_top_AnalysisNtuple.root ST_tW_top_muscale_up_AnalysisNtuple.root
+#./rename.sh muscale_up_TTbarPowheg_AnalysisNtuple.root TTbarPowheg_muscale_up_AnalysisNtuple.root
+

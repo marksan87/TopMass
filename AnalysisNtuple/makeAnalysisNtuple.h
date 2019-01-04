@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <TGraphAsymmErrors.h>
 #include "EventTree.h"
 #include "EventPick.h"
 #include "Selector.h"
@@ -53,9 +54,14 @@ public :
 	makeAnalysisNtuple(char* outputFileName,char** inputFileName);
 	makeAnalysisNtuple(int ac, char** av);
 
-    double eleSF(double elePt, double eleSCEta, int sysLvl);
-    double muSF(double muPt, double muEta, int sysLvl);
-    double trigSF(double elePt, double muPt, int sysLvl);
+    double eleEffSF(double elePt, double eleSCEta, int sysLvl);
+    double eleIDEffSF(double elePt, double eleSCEta, int sysLvl);
+    double eleRecoEffSF(double elePt, double eleSCEta, int sysLvl);
+    double muEffSF(double muPt, double muEta, int sysLvl);
+    double muIDEffSF(double muPt, double muEta, int sysLvl);
+    double muIsoEffSF(double muPt, double muEta, int sysLvl);
+    double muTrackEffSF(double muEta, int sysLvl);
+    double trigEffSF(double elePt, double muPt, int sysLvl);
 
 
 private :
@@ -81,7 +87,7 @@ private :
     TH1F* muID_GH_SF;
     TH1F* muIso_BF_SF;
     TH1F* muIso_GH_SF;
-    TH1F* muTrack_SF;
+    TGraphAsymmErrors* muTrack_SF;
     TH1F* trigger_SF;
 
 	bool getGenScaleWeights;
@@ -120,14 +126,35 @@ private :
 	std::vector<float> _btagSF_Up;
 	std::vector<float> _btagSF_Do;
 
-	Float_t         _muEffWeight;
-	Float_t         _muEffWeight_Up;
-	Float_t         _muEffWeight_Do;
 
 	Float_t         _eleEffWeight;
 	Float_t         _eleEffWeight_Up;
 	Float_t         _eleEffWeight_Do;
+    
+    Float_t         _eleIDEffWeight;
+    Float_t         _eleIDEffWeight_Up;
+    Float_t         _eleIDEffWeight_Do;
 
+    Float_t         _eleRecoEffWeight;
+    Float_t         _eleRecoEffWeight_Up;
+    Float_t         _eleRecoEffWeight_Do;
+
+	Float_t         _muEffWeight;
+	Float_t         _muEffWeight_Up;
+	Float_t         _muEffWeight_Do;
+	
+    Float_t         _muIDEffWeight;
+	Float_t         _muIDEffWeight_Up;
+	Float_t         _muIDEffWeight_Do;
+    
+    Float_t         _muIsoEffWeight;
+	Float_t         _muIsoEffWeight_Up;
+	Float_t         _muIsoEffWeight_Do;
+    
+    Float_t         _muTrackEffWeight;
+	Float_t         _muTrackEffWeight_Up;
+	Float_t         _muTrackEffWeight_Do;
+    
     Float_t         _trigEffWeight;
     Float_t         _trigEffWeight_Up;
     Float_t         _trigEffWeight_Do;
@@ -397,17 +424,45 @@ void makeAnalysisNtuple::InitBranches(){
 		outputTree->Branch("btagWeight_Do"              , &_btagWeight_Do               );
 	}
 	outputTree->Branch("btagSF"                     , &_btagSF                      );
-	outputTree->Branch("muEffWeight"                , &_muEffWeight                 );
-	if (!isSystematicRun){
-		outputTree->Branch("muEffWeight_Up"             , &_muEffWeight_Up              );
-		outputTree->Branch("muEffWeight_Do"             , &_muEffWeight_Do              );
-	}
+	
 	outputTree->Branch("eleEffWeight"               , &_eleEffWeight                );
 	if (!isSystematicRun){
 		outputTree->Branch("eleEffWeight_Up"            , &_eleEffWeight_Up             );
 		outputTree->Branch("eleEffWeight_Do"            , &_eleEffWeight_Do             );
 	}
-	outputTree->Branch("trigEffWeight"               , &_trigEffWeight                );
+	outputTree->Branch("eleIDEffWeight"               , &_eleIDEffWeight                );
+	if (!isSystematicRun){
+		outputTree->Branch("eleIDEffWeight_Up"            , &_eleIDEffWeight_Up             );
+		outputTree->Branch("eleIDEffWeight_Do"            , &_eleIDEffWeight_Do             );
+	}
+	outputTree->Branch("eleRecoEffWeight"               , &_eleRecoEffWeight                );
+	if (!isSystematicRun){
+		outputTree->Branch("eleRecoEffWeight_Up"            , &_eleRecoEffWeight_Up             );
+		outputTree->Branch("eleRecoEffWeight_Do"            , &_eleRecoEffWeight_Do             );
+	}
+    outputTree->Branch("muEffWeight"                , &_muEffWeight                 );
+	if (!isSystematicRun){
+		outputTree->Branch("muEffWeight_Up"             , &_muEffWeight_Up              );
+		outputTree->Branch("muEffWeight_Do"             , &_muEffWeight_Do              );
+	}
+    outputTree->Branch("muIDEffWeight"                , &_muIDEffWeight                 );
+	if (!isSystematicRun){
+		outputTree->Branch("muIDEffWeight_Up"             , &_muIDEffWeight_Up              );
+		outputTree->Branch("muIDEffWeight_Do"             , &_muIDEffWeight_Do              );
+	}
+    outputTree->Branch("muIsoEffWeight"                , &_muIsoEffWeight                 );
+	if (!isSystematicRun){
+		outputTree->Branch("muIsoEffWeight_Up"             , &_muIsoEffWeight_Up              );
+		outputTree->Branch("muIsoEffWeight_Do"             , &_muIsoEffWeight_Do              );
+	}
+    outputTree->Branch("muTrackEffWeight"                , &_muTrackEffWeight                 );
+	if (!isSystematicRun){
+		outputTree->Branch("muTrackEffWeight_Up"             , &_muTrackEffWeight_Up              );
+		outputTree->Branch("muTrackEffWeight_Do"             , &_muTrackEffWeight_Do              );
+	}
+	
+    
+    outputTree->Branch("trigEffWeight"               , &_trigEffWeight                );
 	if (!isSystematicRun){
 		outputTree->Branch("trigEffWeight_Up"            , &_trigEffWeight_Up             );
 		outputTree->Branch("trigEffWeight_Do"            , &_trigEffWeight_Do             );
@@ -675,9 +730,29 @@ void makeAnalysisNtuple::InitVariables()
 	_eleEffWeight_Do = 1.;
 	_eleEffWeight_Up = 1.;
 
-	_muEffWeight    = 1.;
+	_eleIDEffWeight    = 1.;
+	_eleIDEffWeight_Do = 1.;
+	_eleIDEffWeight_Up = 1.;
+	
+    _eleRecoEffWeight    = 1.;
+	_eleRecoEffWeight_Do = 1.;
+	_eleRecoEffWeight_Up = 1.;
+	
+    _muEffWeight    = 1.;
 	_muEffWeight_Do = 1.;
 	_muEffWeight_Up = 1.;
+    
+    _muIDEffWeight    = 1.;
+	_muIDEffWeight_Do = 1.;
+	_muIDEffWeight_Up = 1.;
+
+    _muIsoEffWeight    = 1.;
+	_muIsoEffWeight_Do = 1.;
+	_muIsoEffWeight_Up = 1.;
+
+    _muTrackEffWeight    = 1.;
+	_muTrackEffWeight_Do = 1.;
+	_muTrackEffWeight_Up = 1.;
 
 	_trigEffWeight    = 1.;
 	_trigEffWeight_Do = 1.;

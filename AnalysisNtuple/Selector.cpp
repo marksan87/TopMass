@@ -35,6 +35,7 @@ Selector::Selector(){
 	elesmearLevel = 1;
 	phoscaleLevel = 1;
 	elescaleLevel = 1;
+    muscaleLevel  = 1;
 
 	useDeepCSVbTag = false;
 	//https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
@@ -69,7 +70,7 @@ Selector::Selector(){
 	mu_Iso_invert = false;
 	smearJetPt = true;
 	smearPho = true;
-	smearEle = true;
+    smearEle = true;
 	scaleEle = true;
 	scalePho = true;
 
@@ -83,7 +84,7 @@ Selector::Selector(){
 	
 }
 
-void Selector::applyRoccor()
+void Selector::applyRoccor(int sysLvl)
 {
     double correction = 0.0;
     double minDR = 9999;
@@ -153,13 +154,26 @@ void Selector::applyRoccor()
             recToGen.insert(pair<int,int>(x.second,x.first));
         }
 
+        double rand1 = 0.0, rand2 = 0.0, cor = 0.0, cor_var = 0.0;
         // Loop over all muons and apply corrections
         for (int muInd = 0; muInd < tree->nMu_; muInd++)
         {
             if (recToGen.count(muInd))
             {
+                rand1 = gRandom->Rndm();
                 muGenIndex = recToGen[muInd];
-                tree->muPt_->at(muInd) *= rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), gRandom->Rndm());
+                cor = rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), rand1);
+                if (sysLvl != 1)
+                {
+                    cor_var = abs(rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), rand1) - cor);
+                    if (sysLvl == 2)
+                        cor += cor_var;
+                    else if (sysLvl == 0)
+                        cor -= cor_var;
+                }
+                
+                tree->muPt_->at(muInd) *= cor;
+
 //                correction = rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), gRandom->Rndm());
 //                cout<<"Muon "<<muInd<<" matched to gen particle "<<muGenIndex<<endl;
 //                cout<<"rec pT = "<<tree->muPt_->at(muInd)<<"\tgen pT = "<<tree->mcPt->at(muGenIndex)<<endl;
@@ -173,8 +187,19 @@ void Selector::applyRoccor()
                 // Default to smearing-based correction
 //                cout<<"Unable to match Muon "<<muInd<<" to gen particle!"<<endl;
 //                correction = rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), gRandom->Rndm(), gRandom->Rndm());
-                tree->muPt_->at(muInd) *= rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), gRandom->Rndm(), gRandom->Rndm());
-
+                rand1 = gRandom->Rndm();
+                rand2 = gRandom->Rndm();
+                cor = rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), rand1, rand2);
+                if (sysLvl != 1)
+                {
+                    cor_var = abs(rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), rand1, rand2) - cor);
+                    if (sysLvl == 2)
+                        cor += cor_var;
+                    else if (sysLvl == 0)
+                        cor -= cor_var;
+                }
+                
+                tree->muPt_->at(muInd) *= cor;
             }
 
 //            cout<<"Old pt = "<<tree->muPt_->at(muInd)<<endl;
@@ -486,7 +511,7 @@ void Selector::filter_electrons(){
 
 
 void Selector::filter_muons(){
-    if (useRoccor) { applyRoccor(); }   // Rochester muon corrections	
+    if (useRoccor) { applyRoccor(muscaleLevel); }   // Rochester muon corrections	
     
     
     for(int muInd = 0; muInd < tree->nMu_; ++muInd){

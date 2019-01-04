@@ -53,7 +53,7 @@ public:
 	~Selector();
 	
 	void process_objects(EventTree* inp_tree);
-    void applyRoccor();
+    void applyRoccor(int sysLvl = 1);
 
 	bool isTTGamma;
     bool useRoccor;   // Rochester muon corrections
@@ -103,8 +103,10 @@ public:
 	int elesmearLevel;
 	int phoscaleLevel;
 	int elescaleLevel;
-	bool   smearJetPt;
-	bool scaleEle;
+	int muscaleLevel;
+    bool   smearJetPt;
+	bool scaleMu;
+    bool scaleEle;
 	bool smearEle;
 	bool scalePho;
 	bool smearPho;

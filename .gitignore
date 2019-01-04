@@ -6,3 +6,7 @@ AnalysisNtuple/makeAnalysisNtuple
 AnalysisNtuple/makeSkim
 AnalysisNtuple/makeCutflows
 AnalysisNtuple/checkOverlap
+*.png
+*.pdf
+*.pklz
+*.pyc
