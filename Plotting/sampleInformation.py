@@ -57,6 +57,84 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                              isMC
                              ],
            
+           "TTbar_hdampUp" : [["TTbar_hdampUp_1_AnalysisNtuple.root",
+                               "TTbar_hdampUp_2_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+           
+           "TTbar_hdampDown" : [["TTbar_hdampDown_1_AnalysisNtuple.root",
+                                 "TTbar_hdampDown_2_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+           
+           "TTbar_UEUp" : [["TTbar_UEUp_1_AnalysisNtuple.root",
+                            "TTbar_UEUp_2_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+           
+           "TTbar_UEDown" : [["TTbar_UEDown_1_AnalysisNtuple.root",
+                              "TTbar_UEDown_2_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+           
+           "TTbar_CRerdON" : [["TTbar_CRerdON_1_AnalysisNtuple.root",
+                               "TTbar_CRerdON_2_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+           
+           "TTbar_CRGluon" : [["TTbar_CRGluon_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+           
+           "TTbar_CRQCD" : [["TTbar_CRQCD_1_AnalysisNtuple.root",
+                             "TTbar_CRQCD_2_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+          
+           "TTbar_amcanlo" : [["TTbar_amcanlo_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+            
+           "TTbar_madgraph" : [["TTbar_madgraph_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+           
+           "TTbar_herwigpp" : [["TTbar_herwigpp_1_AnalysisNtuple.root",
+                                "TTbar_herwigpp_2_AnalysisNtuple.root",
+                                "TTbar_herwigpp_3_AnalysisNtuple.root",
+                             ],
+                             kRed+1,
+                             "t#bar{t}",
+                             isMC
+                             ],
+
            "TTbar_fsrDown" : [["TTbar_fsrDown_1_AnalysisNtuple.root",
                                "TTbar_fsrDown_2_AnalysisNtuple.root",
                                "TTbar_fsrDown_3_AnalysisNtuple.root",
@@ -162,6 +240,46 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                                   isMC
                                   ],
            
+           "ST_tW_DS" :  [["ST_tW_top_DS_AnalysisNtuple.root",
+                           "ST_tW_antitop_DS_AnalysisNtuple.root",
+                           ],
+                           618,
+                           "ST tW",
+                           isMC
+                           ],
+           
+           "ST_tW_isrUp" :  [["ST_tW_top_isrUp_AnalysisNtuple.root",
+                              "ST_tW_antitop_isrUp_AnalysisNtuple.root",
+                               ],
+                               618,
+                               "ST tW",
+                               isMC
+                               ],
+           
+           "ST_tW_isrDown" :  [["ST_tW_top_isrDown_AnalysisNtuple.root",
+                                "ST_tW_antitop_isrDown_AnalysisNtuple.root",
+                                ],
+                                618,
+                                "ST tW",
+                                isMC
+                                ],
+           
+           
+           "ST_tW_fsrUp" :  [["ST_tW_top_fsrUp_AnalysisNtuple.root",
+                              "ST_tW_antitop_fsrUp_AnalysisNtuple.root",
+                               ],
+                               618,
+                               "ST tW",
+                               isMC
+                               ],
+           
+           "ST_tW_fsrDown" :  [["ST_tW_top_fsrDown_AnalysisNtuple.root",
+                                "ST_tW_antitop_fsrDown_AnalysisNtuple.root",
+                                ],
+                                618,
+                                "ST tW",
+                                isMC
+                                ],
            
            "ST_tW_MuScaleUp" :  [["ST_tW_top_muscale_up_AnalysisNtuple.root",
                                   "ST_tW_antitop_muscale_up_AnalysisNtuple.root",

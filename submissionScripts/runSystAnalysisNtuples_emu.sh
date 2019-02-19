@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export USER=$(whoami)
 job=$1
 jobType=$2
 
@@ -75,7 +75,46 @@ if [ "$jobType" == "muscale" ] ;   then
     tupleExtraName1="muscale"
     systematic=true
 fi
-
+if [ "$jobType" == "isr" ] ; then
+    tupleExtraName1="isr"
+    systematic=true
+fi
+if [ "$jobType" == "fsr" ] ; then
+    tupleExtraName1="fsr"
+    systematic=true
+fi
+if [ "$jobType" == "hdamp" ] ; then
+    tupleExtraName1="hdamp"
+    systematic=true
+fi
+if [ "$jobType" == "UE" ] ; then
+    tupleExtraName1="UE"
+    systematic=true
+fi
+if [ "$jobType" == "CRerdON" ] ; then
+    tupleExtraName1="CRerdON"
+    systematic=true
+fi
+if [ "$jobType" == "CRGluon" ] ; then
+    tupleExtraName1="CRGluon"
+    systematic=true
+fi
+if [ "$jobType" == "CRQCD" ] ; then
+    tupleExtraName1="CRQCD"
+    systematic=true
+fi
+if [ "$jobType" == "amcanlo" ] ; then
+    tupleExtraName1="amcanlo"
+    systematic=true
+fi
+if [ "$jobType" == "madgraph" ] ; then
+    tupleExtraName1="madgraph"
+    systematic=true
+fi
+if [ "$jobType" == "herwigpp" ] ; then
+    tupleExtraName1="herwigpp"
+    systematic=true
+fi
 
 
 #outputdir="root://cmseos.fnal.gov//store/user/lpctop/TopMass/13TeV_"
@@ -118,13 +157,69 @@ TEST="/store/user/msaunder/test/"
 #"ST_tW_antitop_mt1695" \
 #"ST_tW_antitop_mt1755" \
 #)
+#sampleType=(
+#    "TTbar_isrUp_1" \
+#    "TTbar_isrUp_2" \
+#    "TTbar_isrUp_3" \
+#    "TTbar_isrDown_1" \
+#    "TTbar_isrDown_2" \
+#    "ST_tW_top_isrUp" \
+#    "ST_tW_top_isrDown" \
+#    "ST_tW_antitop_isrUp" \
+#    "ST_tW_antitop_isrDown" \
+#    "TTbar_fsrUp_1" \
+#    "TTbar_fsrUp_2" \
+#    "TTbar_fsrUp_3" \
+#    "TTbar_fsrDown_1" \
+#    "TTbar_fsrDown_2" \
+#    "TTbar_fsrDown_3" \
+#    "ST_tW_top_fsrUp" \
+#    "ST_tW_top_fsrDown" \
+#    "ST_tW_antitop_fsrUp" \
+#    "ST_tW_antitop_fsrDown" \
+#    "ST_tW_top_DS" \
+#    "ST_tW_antitop_DS" \
+#)
 sampleType=(
-"TTbar_mt1665" \
+    "TTbar_hdampUp_1" \
+    "TTbar_hdampUp_2" \
+    "TTbar_hdampDown_1" \
+    "TTbar_hdampDown_2" \
+    "TTbar_UEUp_1" \
+    "TTbar_UEUp_2" \
+    "TTbar_UEDown_1" \
+    "TTbar_UEDown_2" \
+    "TTbar_CRerdON_1" \
+    "TTbar_CRerdON_2" \
+    "TTbar_CRGluon" \
+    "TTbar_CRQCD_1" \
+    "TTbar_CRQCD_2" \
+    "TTbar_amcanlo" \
+    "TTbar_madgraph" \
+    "TTbar_herwigpp_1" \
+    "TTbar_herwigpp_2" \
+    "TTbar_herwigpp_3" \
 )
+signal=""
+var=""
+if [ "${sampleType[job]}:0:5" == "TTbar" ] ; then
+    signal="TTbar"
+elif [ "${sampleType[job]}:0:9" == "ST_tW_top" ] ; then
+    signal="ST_tW_top"
+else
+    signal="ST_tW_antitop"
+fi
 
+if [ "${sampleType[job]:${#signal}+4:2}" == "Up" ] ; then
+    var="up"
+elif [ "${sampleType[job]:${#signal}+4:4}" == "Down" ] ; then
+    var="down"
+fi
+echo "signal: ${signal}"
 #Copy skim ntuple from eos
 
 if [ "${sampleType[job]}" == "TTbar" ] ; then
+    # Copy the TTbarPowheg skim file
     echo "xrdcp -f ${outputdir}skims/${channelDir}/V08_00_26_07/TTbarPowheg_skim.root ${sampleType[job]}_skim.root" 
     xrdcp -f ${outputdir}skims/${channelDir}/V08_00_26_07/TTbarPowheg_skim.root ${sampleType[job]}_skim.root 
 else
@@ -134,9 +229,29 @@ fi
 
 
 echo $jobType
-echo $JEC
 if [ "$systematic" = true ] ; then
-    if [ "$JEC" = false ] ; then
+    if [ "$jobType" == "DS" ] && [ "$signal" != "TTbar" ]; then
+        echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]} . ${inputdir}${sampleType[job]}_skim.root"
+        AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]} . ${inputdir}${sampleType[job]}_skim.root
+        
+        echo "xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
+        xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
+    elif [ "$jobType" == "CRerdON" ] || [ "$jobType" == "CRGluon" ] || [ "$jobType" == "CRQCD" ] || [ "$jobType" == "amcanlo" ] || [ "$jobType" == "madgraph" ] || [ "$jobType" == "herwigpp" ] ; then
+        echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]} . ${inputdir}${sampleType[job]}_skim.root"
+        AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]} . ${inputdir}${sampleType[job]}_skim.root
+        
+        echo "xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
+        xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
+
+    elif [ "$jobType" == "isr" ] || [ "$jobType" == "fsr" ] || [ "$jobType" == "hdamp" ] || [ "$jobType" == "UE" ] ; then
+        echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_${var} . ${inputdir}${sampleType[job]}_skim.root"
+        AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_${var} . ${inputdir}${sampleType[job]}_skim.root
+
+        echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_${var}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
+        xrdcp -f ${sampleType[job]}__${tupleExtraName1}_${var}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
+
+
+    elif [ "$JEC" = false ] ; then
         # Up variation
         echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_up . ${inputdir}${sampleType[job]}_skim.root"
         AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_up . ${inputdir}${sampleType[job]}_skim.root

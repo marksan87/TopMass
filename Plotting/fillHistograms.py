@@ -15,8 +15,11 @@ parser.add_argument("-l", "--level", dest="level", default="", help="Specify up/
 parser.add_argument("--syst", "--systematic", dest="systematic", default="", help="Specify which systematic to run on")
 parser.add_argument("--addPlots","--addOnly", dest="onlyAddPlots", default=False,action="store_true",
                      help="Use only if you want to add a couple of plots to the file, does not remove other plots" )
+parser.add_argument("--outDir", default="histograms", help="output histogram directory")
 parser.add_argument("-o","--output", dest="outputFileName", default="hists",
                      help="Give the name of the root file for histograms to be saved in (default is hists.root)" )
+
+parser.add_argument("--binning", nargs="+", type=float, default=[], help="nbins binMin binMax, to be used ONLY when --plot is specified")
 parser.add_argument("--plot", dest="plotList",action="store", nargs='*',
                      help="Add plots" )
 parser.add_argument("--multiPlots", "--multiplots", dest="multiPlotList",action="append",
@@ -34,6 +37,11 @@ parser.add_argument("--quiet", "-q", dest="quiet",default=False,action="store_tr
 
 
 args = parser.parse_args()
+if len(args.binning) > 0:
+    if args.plotList is None:
+        print "Must specify plots to apply binning to with --plot"
+        sys.exit()
+    args.binning[0] = int(args.binning[0])
 
 syst = args.systematic
 if syst=="":
@@ -50,11 +58,16 @@ sample = args.sample
 level = args.level.lower()  # Make lowercase
 testoneplot=args.testoneplot
 onlyAddPlots = args.onlyAddPlots
+outputDirectory = args.outDir
 outputFileName = args.outputFileName
 makeAllPlots = args.makeAllPlots
 makeMorePlots = args.makeMorePlots
 makegenPlots=args.makegenPlots
 runQuiet = args.quiet
+
+
+if outputDirectory[-1] == "/": outputDirectory = outputDirectory[:-1]
+os.system("mkdir -p %s" % outputDirectory)
 
 if not runQuiet and runsystematic: print "Systematic run"
 
@@ -83,8 +96,8 @@ extraCuts = ""
 btagWeightCategory = ["1","(1-btagWeight[0])","(btagWeight[2])","(btagWeight[1])"]
 
 # Systematics with separate analysis ntuples
-separateSystSamples = ["isr", "fsr", "EleScale", "EleSmear", "MuScale", "JEC", "JER"]
-
+separateSystSamples = ["hdamp", "UE", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "DS", "isr", "fsr", "EleScale", "EleSmear", "MuScale", "JEC", "JER"]
+oneSidedSysts = ["toppt", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "DS"]
 #atleast 0, atleast 1, atleast 2, exactly 1, btagWeight[0] = exactly 0
 
 sampleListName = sample
@@ -92,49 +105,42 @@ sampleListName = sample
 
 #if (sample=="TTbar" or sample=="ST_tW") and syst in separateSystSamples: 
 if ("TTbar" in sample or "ST_tW" in sample) and syst in separateSystSamples: 
-    if (syst=="isr" or syst=="fsr"):
-        sampleListName+="_%s" % syst
-#        samples={"TTbar"     : [["TTbarPowheg_AnalysisNtuple.root",
-#                               #"TTbarPowheg2_AnalysisNtuple.root",
-#                               #"TTbarPowheg3_AnalysisNtuple.root",
-#                               #"TTbarPowheg4_AnalysisNtuple.root",
-#                               ],
-#                              kRed+1,
-#                              "t#bar{t}",
-#                              isMC
-#                              ],
-#                }
-    elif syst=="EleScale": 
-        sampleListName+="_EleScale"
+#    if (syst=="isr" or syst=="fsr"):
+#        sampleListName+="_%s" % syst
+#    elif syst=="EleScale": 
+#        sampleListName+="_EleScale"
+#
+#    elif syst=="EleSmear": 
+#        sampleListName+="_EleSmear"
+#
+#    elif syst=="MuScale": 
+#        sampleListName+="_MuScale"
+#
+#    elif syst=="JEC":
+#        sampleListName+="_JEC"
+#
+#    elif syst=="JER":
+#        sampleListName+="_JER"
 
-    elif syst=="EleSmear": 
-        sampleListName+="_EleSmear"
-
-    elif syst=="MuScale": 
-        sampleListName+="_MuScale"
-
-    elif syst=="JEC":
-        sampleListName+="_JEC"
-
-    elif syst=="JER":
-        sampleListName+="_JER"
-
-    if level == "up":
-        sampleListName+="Up"
-    else:
-        sampleListName+="Down"
+    sampleListName += "_%s" % syst
+    if syst not in oneSidedSysts:
+        if level == "up":
+            sampleListName+="Up"
+        else:
+            sampleListName+="Down"
 
 
 analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/"
-outputhistName = "histograms/%s"%outputFileName
+outputhistName = "%s/%s" % (outputDirectory,outputFileName)
 if runsystematic:
+    outputhistName = "%s/" % outputDirectory
     if syst=="PU":
         if level=="up":
             Pileup = "PUweight_Up"
         else:
             Pileup = "PUweight_Do"
 
-        outputhistName = "histograms/%sPU_%s"%(outputFileName,level)
+        outputhistName += "%sPU_%s"%(outputFileName,level)
 
     elif syst=="Lumi":
         # https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopSystematics#Luminosity
@@ -144,15 +150,15 @@ if runsystematic:
         else:
             Lumi = 0.975
 
-        outputhistName = "histograms/%sLumi_%s"%(outputFileName,level)
+        outputhistName += "%sLumi_%s"%(outputFileName,level)
 
     elif 'Q2' in syst:
         if level=="up":
             Q2="q2weight_Up"
         else:
             Q2="q2weight_Do"
-        
-        outputhistName = "histograms/%sQ2_%s"%(outputFileName,level)
+       
+        outputhistName += "%sQ2_%s"%(outputFileName,level)
 
     elif 'Pdf' in syst:
         if syst=="Pdf":
@@ -160,25 +166,31 @@ if runsystematic:
                 Pdf="pdfweight_Up"
             else:
                 Pdf="pdfweight_Do"
-            outputhistName = "histograms/%sPdf_%s"%(outputFileName,level)
+            outputhistName += "%sPdf_%s"%(outputFileName,level)
 
         else:
             if type(eval(syst[3:]))==type(int()):
                 pdfNumber = eval(syst[3:])
                 Pdf="pdfSystWeight[%i]/pdfWeight"%(pdfNumber-1)
-                outputhistName = "histograms/%sPdf/Pdf%i"%(outputFileName,pdfNumber)				
+                outputhistName += "%sPdf/Pdf%i"%(outputFileName,pdfNumber)				
 
     elif 'toppt' in syst:
         topptWeight = "topptWeight"
-        outputhistName = "histograms/%stoppt" % outputFileName
+        outputhistName += "%stoppt" % outputFileName
     
-    elif 'JEC' in syst:
-        outputhistName = "histograms/%sJEC_%s"%(outputFileName,level)
+#    elif 'JEC' in syst:
+#        outputhistName = "histograms/%sJEC_%s"%(outputFileName,level)
+#    
+#    elif 'JER' in syst:
+#        outputhistName = "histograms/%sJER_%s"%(outputFileName,level)
+#    
+#    elif 'isr' in syst:
+#        outputhistName = "histograms/%sisr_%s"%(outputFileName,level)
+#    
+#    elif 'fsr' in syst:
+#        outputhistName = "histograms/%sfsr_%s"%(outputFileName,level)
     
-    elif 'JER' in syst:
-        outputhistName = "histograms/%sJER_%s"%(outputFileName,level)
-    
-    
+
 #    elif 'MuEff' in syst:
 #        if level=="up":
 #            MuEff = "muEffWeight_Up"
@@ -207,7 +219,7 @@ if runsystematic:
         else:
             EleIDEff = "eleIDEffWeight_Do"
 
-        outputhistName = "histograms/%sEleIDEff_%s"%(outputFileName,level)
+        outputhistName += "%sEleIDEff_%s"%(outputFileName,level)
     
     elif 'EleRecoEff' in syst:
         if level=="up":
@@ -215,23 +227,16 @@ if runsystematic:
         else:
             EleRecoEff = "eleRecoEffWeight_Do"
 
-        outputhistName = "histograms/%sEleRecoEff_%s"%(outputFileName,level)
+        outputhistName += "%sEleRecoEff_%s"%(outputFileName,level)
     
-    elif 'EleScale' in syst:
-        outputhistName = "histograms/%sEleScale_%s"%(outputFileName,level)
-    
-    elif 'EleSmear' in syst:
-        outputhistName = "histograms/%sEleSmear_%s"%(outputFileName,level)
+#    elif 'EleScale' in syst:
+#        outputhistName += "%sEleScale_%s"%(outputFileName,level)
+#    
+#    elif 'EleSmear' in syst:
+#        outputhistName += "%sEleSmear_%s"%(outputFileName,level)
     
     elif 'MuScale' in syst:
-        outputhistName = "histograms/%sMuScale_%s"%(outputFileName,level)
-#    elif 'MuScale' in syst:
-#        if level=="up":
-#            MuScale = "muScaleWeight_Up"
-#        else:
-#            MuScale = "muScaleWeight_Do"
-#
-#        outputhistName = "histograms/%sMuScale_%s"%(outputFileName,level)
+        outputhistName += "%sMuScale_%s"%(outputFileName,level)
 
     elif 'MuIDEff' in syst:
         if level=="up":
@@ -239,7 +244,7 @@ if runsystematic:
         else:
             MuIDEff = "muIDEffWeight_Do"
 
-        outputhistName = "histograms/%sMuIDEff_%s"%(outputFileName,level)
+        outputhistName += "%sMuIDEff_%s"%(outputFileName,level)
 
     elif 'MuIsoEff' in syst:
         if level=="up":
@@ -247,7 +252,7 @@ if runsystematic:
         else:
             MuIsoEff = "muIsoEffWeight_Do"
 
-        outputhistName = "histograms/%sMuIsoEff_%s"%(outputFileName,level)
+        outputhistName += "%sMuIsoEff_%s"%(outputFileName,level)
 
     elif 'MuTrackEff' in syst:
         if level=="up":
@@ -255,7 +260,7 @@ if runsystematic:
         else:
             MuTrackEff = "muTrackEffWeight_Do"
 
-        outputhistName = "histograms/%sMuTrackEff_%s"%(outputFileName,level)
+        outputhistName += "%sMuTrackEff_%s"%(outputFileName,level)
 
     elif 'TrigEff' in syst:
         if level=="up":
@@ -263,7 +268,7 @@ if runsystematic:
         else:
             TrigEff = "trigEffWeight_Do"
 
-        outputhistName = "histograms/%sTrigEff_%s"%(outputFileName,level)
+        outputhistName += "%sTrigEff_%s"%(outputFileName,level)
 
     elif 'BTagSF' in syst:
         if level=="up":
@@ -271,7 +276,7 @@ if runsystematic:
         else:
             btagWeightCategory = ["1","(1-btagWeight_Do[0])","(btagWeight_Do[2])","(btagWeight_Do[1])"]
 
-        outputhistName = "histograms/%sBTagSF_%s"%(outputFileName,level)
+        outputhistName += "%sBTagSF_%s"%(outputFileName,level)
 #elif syst=="isr" or syst=="fsr":
 #	if level=="up":
 #		analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/lpctop/TTGamma/13TeV_AnalysisNtuples/muons/V08_00_26_07/%s_up_"%(syst)
@@ -281,14 +286,17 @@ if runsystematic:
          #               outputhistName = "histograms/mu/%s%s_down"%(outputFileName,syst)
 
     else:
-        if level=="up":
-            #analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/lpctop/TTGamma/13TeV_AnalysisNtuples/systematics_muons/V08_00_26_07/%s_up_"%(syst)
-            analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/%s_up_"%(syst)
-            outputhistName = "histograms/%s%s_up"%(outputFileName,syst)
-        if level=="down":
-            analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/%s_down_"%(syst)
-            outputhistName = "histograms/%s%s_down"%(outputFileName,syst)
-
+        if syst in oneSidedSysts:
+            outputhistName += "%s%s"%(outputFileName,syst)
+        else:
+            outputhistName += "%s%s_%s"%(outputFileName,syst,level)
+#        if level=="up":
+#            #analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/lpctop/TTGamma/13TeV_AnalysisNtuples/systematics_muons/V08_00_26_07/%s_up_"%(syst)
+#            analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/%s_up_"%(syst)
+#            outputhistName = "histograms/%s%s_up"%(outputFileName,syst)
+#        if level=="down":
+#            analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/%s_down_"%(syst)
+#            outputhistName = "histograms/%s%s_down"%(outputFileName,syst)
 
 btagWeight = btagWeightCategory[nBJets]
 
@@ -375,7 +383,15 @@ for hist in histogramsToMake:
     if not runQuiet: print "filling", h_Info[1], sample
     evtWeight = ""
 #	print TH1F("%s_%s"%(h_Info[1],sample),"%s_%s"%(h_Info[1],sample),h_Info[2][0],h_Info[2][1],h_Info[2][2])
-    histograms.append(TH1F("%s_%s"%(h_Info[1],sample),"%s_%s"%(h_Info[1],sample),h_Info[2][0],h_Info[2][1],h_Info[2][2]))
+    if len(args.binning) > 0:
+        _nbins = args.binning[0]
+        _binMin = args.binning[1]
+        _binMax = args.binning[2]
+    else:
+        _nbins = h_Info[2][0]
+        _binMin = h_Info[2][1]
+        _binMax = h_Info[2][2]
+    histograms.append(TH1F("%s_%s"%(h_Info[1],sample),"%s_%s"%(h_Info[1],sample),_nbins, _binMin, _binMax))
     if h_Info[4]=="":
         evtWeight = "%s%s"%(h_Info[3],weights)
     else:

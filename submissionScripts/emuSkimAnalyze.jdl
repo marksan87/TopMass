@@ -14,10 +14,8 @@ Requirements          = (OpSys == "LINUX" && (Arch != "DUMMY"))
 x509userproxy = $ENV(X509_USER_PROXY)
 
 # important, number of instances (jobs) of script
-Arguments = 35
-Queue 1
-#Arguments = $(process)
-#Queue 50 
+Arguments = $(process)
+Queue 18 
 
 
 

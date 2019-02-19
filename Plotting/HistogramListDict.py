@@ -29,6 +29,8 @@ def GetHistogramInfo(extraCuts="", nBJets=1):
 #                      "presel_nVtxup"   : ["nVtx"      , "presel_nVtxup"    ,        [50,0,50], extraCuts, "%sevtWeight*PUweight_Up*muEffWeight*eleEffWeight*trigEffWeight*%s"%(extraCuts,btagWeightCategory[nBJets])],
 #                      "presel_nVtxdo"   : ["nVtx"      , "presel_nVtxdo"    ,        [50,0,50], extraCuts, "%sevtWeight*PUweight_Do*muEffWeight*eleEffWeight*trigEffWeight*%s"%(extraCuts,btagWeightCategory[nBJets])],
 #                      "presel_nVtxNoPU" : ["nVtx"      , "presel_nVtxNoPU"  ,        [50,0,50], extraCuts, "%sevtWeight*muEffWeight*eleEffWeight*trigEffWeight*%s"%(extraCuts,btagWeightCategory[nBJets])],
+                      
+                      "nVtx"            : ["nVtx"      , "nVtx"             ,   [50,-0.5,49.5], extraCuts, ""],
                       "nEle"            : ["nEle"      , "nEle"             ,     [4,-0.5,3.5], extraCuts, ""],
                       "elePt"           : ["elePt"     , "elePt"            ,     [200,20,200], extraCuts, ""],
                       "eleSCEta"        : ["eleSCEta"  , "eleSCEta"         ,    [50,-2.4,2.4], extraCuts, ""],

@@ -14,22 +14,38 @@ Requirements          = (OpSys == "LINUX" && (Arch != "DUMMY"))
 x509userproxy = $ENV(X509_USER_PROXY)
 
 # important, number of instances (jobs) of script
-Arguments = "0 elescale"
+Arguments = "13 amcanlo"
 Queue 1
 
-Arguments = "0 elesmear"
-Queue 1
+#Arguments = "$(process) hdamp"
+#Queue 4
+#Arguments = "$(process) UE"
+#Queue 4
+#Arguments = "$(process) CRerdON"
+#Queue 2
+#Arguments = "$(process) CRGluon"
+#Queue 1
+#Arguments = "$(process) CRQCD"
+#Queue 2
+#Arguments = "$(process) amcanlo"
+#Queue 1 
+#Arguments = "$(process) madgraph"
+#Queue 1 
+#Arguments = "$(process) herwigpp"
+#Queue 3 
 
-Arguments = "0 muscale"
-Queue 1
 
-Arguments = "0 JEC1"
-Queue 1
+#Arguments = "$(process) isr"
+#Queue 9
+#Arguments = "$(process) fsr"
+#Queue 10
+#Arguments = "$(process) DS"
+#Queue 2
 
-Arguments = "0 JER"
-Queue 1
 
-#Arguments = "$(process) JEC1"
+
+
+#Arguments = "$(process)+0 JEC1"
 #Queue 18
 #Arguments = "$(process)-18 JER"
 #Queue 18

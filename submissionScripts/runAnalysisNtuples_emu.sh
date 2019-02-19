@@ -87,56 +87,66 @@ TEST="/store/user/msaunder/test/"
 
 #name for the sample type of the file.  this is used by makeSkim as a file name and analysisNtuple to figure out which lumi scale factor to apply.
 sampleType=("TTbarPowheg" \
-"TTbar_mt1665" \
-"TTbar_mt1695_1" \
-"TTbar_mt1695_2" \
-"TTbar_mt1695_3" \
-"TTbar_mt1715_1" \
-"TTbar_mt1715_2" \
-"TTbar_mt1735_1" \
-"TTbar_mt1735_2" \
-"TTbar_mt1755_1" \
-"TTbar_mt1755_2" \
-"TTbar_mt1755_3" \
-"TTbar_mt1785" \
-"TTbar_fsrDown_1" \
-"TTbar_fsrDown_2" \
-"TTbar_fsrDown_3" \
-"TTbar_fsrUp_1" \
-"TTbar_fsrUp_2" \
-"TTbar_fsrUp_3" \
-"TTbar_isrDown_1" \
-"TTbar_isrDown_2" \
-"TTbar_isrUp_1" \
-"TTbar_isrUp_2" \
-"TTbar_isrUp_3" \
-"WJetsToLNu" \
-"WWTo2L2Nu" \
-"WZTo3LNu" \
-"ZZTo2L2Nu" \
-"TTWJetsToLNu" \
-"TTZToLLNuNu" \
-"ST_s" \
-"ST_t_top" \
-"ST_t_antitop" \
-"ST_tW_top" \
-"ST_tW_antitop" \
-"DY_M_10to50" \
-"DY_M_50" \
-"ST_tW_top_mt1695" \
-"ST_tW_top_mt1755" \
-"ST_tW_antitop_mt1695" \
-"ST_tW_antitop_mt1755" \
-"Data_MuEG2016B" \
-"Data_MuEG2016C" \
-"Data_MuEG2016D" \
-"Data_MuEG2016E" \
-"Data_MuEG2016F_1" \
-"Data_MuEG2016F_2" \
-"Data_MuEG2016G" \
-"Data_MuEG2016H_1" \
-"Data_MuEG2016H_2" \
-)
+            "TTbar_mt1665" \
+            "TTbar_mt1695_1" \
+            "TTbar_mt1695_2" \
+            "TTbar_mt1695_3" \
+            "TTbar_mt1715_1" \
+            "TTbar_mt1715_2" \
+            "TTbar_mt1735_1" \
+            "TTbar_mt1735_2" \
+            "TTbar_mt1755_1" \
+            "TTbar_mt1755_2" \
+            "TTbar_mt1755_3" \
+            "TTbar_mt1785" \
+            "WJetsToLNu" \
+            "WWTo2L2Nu" \
+            "WZTo3LNu" \
+            "ZZTo2L2Nu" \
+            "TTWJetsToLNu" \
+            "TTZToLLNuNu" \
+            "ST_s" \
+            "ST_t_top" \
+            "ST_t_antitop" \
+            "ST_tW_top" \
+            "ST_tW_antitop" \
+            "DY_M_10to50" \
+            "DY_M_50" \
+            "ST_tW_top_mt1695" \
+            "ST_tW_top_mt1755" \
+            "ST_tW_antitop_mt1695" \
+            "ST_tW_antitop_mt1755" \
+            "Data_MuEG2016B" \
+            "Data_MuEG2016C" \
+            "Data_MuEG2016D" \
+            "Data_MuEG2016E" \
+            "Data_MuEG2016F_1" \
+            "Data_MuEG2016F_2" \
+            "Data_MuEG2016G" \
+            "Data_MuEG2016H_1" \
+            "Data_MuEG2016H_2" \
+            "TTbar_fsrDown_1" \
+            "TTbar_fsrDown_2" \
+            "TTbar_fsrDown_3" \
+            "TTbar_fsrUp_1" \
+            "TTbar_fsrUp_2" \
+            "TTbar_fsrUp_3" \
+            "TTbar_isrDown_1" \
+            "TTbar_isrDown_2" \
+            "TTbar_isrUp_1" \
+            "TTbar_isrUp_2" \
+            "TTbar_isrUp_3" \
+            "ST_tW_top_isrUp" \
+            "ST_tW_top_isrDown" \
+            "ST_tW_top_fsrUp" \
+            "ST_tW_top_fsrDown" \
+            "ST_tW_antitop_isrUp" \
+            "ST_tW_antitop_isrDown" \
+            "ST_tW_antitop_fsrUp" \
+            "ST_tW_antitop_fsrDown" \
+            "ST_tW_top_DS" \
+            "ST_tW_antitop_DS" \
+            )
 
 
 #Copy skim ntuple from eos 

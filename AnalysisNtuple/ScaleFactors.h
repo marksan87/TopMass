@@ -145,9 +145,11 @@ double totalTTbar_CRerdON = 59880545.;
 double totalTTbar_CRGluon = 56167431.;
 double totalTTbar_CRQCD   = 59618551.; 
 
-// Alternate generators
-double totalTTbar_amcanlo  = 43561608.;
-double totalTTbar_madgraph = 10139950.;
+// Alternate generators      
+
+//double totalTTbar_amcanlo  = 43560332.;
+double totalTTbar_amcanlo  = 15065312.;  // PosEvents - NegEvents
+double totalTTbar_madgraph = 10139697.;
 double totalTTbar_herwigpp = 59172906.;
 
 // tt/tW interference DS
@@ -160,14 +162,15 @@ double totalST_tW_top_mt1755     = 2958469.;
 double totalST_tW_antitop_mt1695 = 3028484.;
 double totalST_tW_antitop_mt1755 = 3253383.;
 
-double totalST_tW_top_fsrUp       = 0.; 
-double totalST_tW_top_fsrDown     = 0.; 
-double totalST_tW_antitop_fsrUp   = 0.; 
-double totalST_tW_antitop_fsrDown = 0.; 
-double totalST_tW_top_isrUp       = 0.; 
-double totalST_tW_top_isrDown     = 0.; 
-double totalST_tW_antitop_isrUp   = 0.; 
-double totalST_tW_antitop_isrDown = 0.; 
+double totalST_tW_top_fsrUp       = 3212324.; 
+double totalST_tW_top_fsrDown     = 2975323.; 
+double totalST_tW_antitop_fsrUp   = 3001527.; 
+double totalST_tW_antitop_fsrDown = 3234964.;
+
+double totalST_tW_top_isrUp       = 3129727.; 
+double totalST_tW_top_isrDown     = 3201563.; 
+double totalST_tW_antitop_isrUp   = 3076275.; 
+double totalST_tW_antitop_isrDown = 3101321.; 
 
 
 //////////////////////////
@@ -394,10 +397,10 @@ double ST_tW_antitop_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop;
 double ST_tW_top_DS_SF = ST_tW_top_xs * luminosity / totalST_tW_top_DS;
 double ST_tW_antitop_DS_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_DS;
 
-double ST_tW_top_mt1695_SF = ST_tW_top_xs / totalST_tW_top_mt1695;
-double ST_tW_top_mt1755_SF = ST_tW_top_xs / totalST_tW_top_mt1755;
-double ST_tW_antitop_mt1695_SF = ST_tW_antitop_xs / totalST_tW_antitop_mt1695;
-double ST_tW_antitop_mt1755_SF = ST_tW_antitop_xs / totalST_tW_antitop_mt1755;
+double ST_tW_top_mt1695_SF = ST_tW_top_xs * luminosity / totalST_tW_top_mt1695;
+double ST_tW_top_mt1755_SF = ST_tW_top_xs * luminosity / totalST_tW_top_mt1755;
+double ST_tW_antitop_mt1695_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_mt1695;
+double ST_tW_antitop_mt1755_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_mt1755;
 
 double ST_tW_top_fsrUp_SF = ST_tW_top_xs * luminosity / totalST_tW_top_fsrUp;
 double ST_tW_top_fsrDown_SF = ST_tW_top_xs * luminosity / totalST_tW_top_fsrDown;
@@ -618,13 +621,13 @@ const std::string allowedSampleTypes[199] = {"Data",
                                             "TTbar_isrUp_2",
                                             "TTbar_isrUp_3",
                                             "TTbar_hdampUp_1",
-                                            "TTbar_hdampUp_2"
+                                            "TTbar_hdampUp_2",
                                             "TTbar_hdampDown_1",
-                                            "TTbar_hdampDown_2"
+                                            "TTbar_hdampDown_2",
                                             "TTbar_UEUp_1",
-                                            "TTbar_UEUp_2"
+                                            "TTbar_UEUp_2",
                                             "TTbar_UEDown_1",
-                                            "TTbar_UEDown_2"
+                                            "TTbar_UEDown_2",
                                             "TTbar_CRerdON_1",
                                             "TTbar_CRerdON_2",
                                             "TTbar_CRGluon",
