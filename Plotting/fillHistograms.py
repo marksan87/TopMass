@@ -6,6 +6,7 @@ from sampleInformation import *
 import os
 import sys
 from argparse import ArgumentParser
+from array import array
 from pprint import pprint
 
 parser = ArgumentParser()
@@ -20,6 +21,7 @@ parser.add_argument("-o","--output", dest="outputFileName", default="hists",
                      help="Give the name of the root file for histograms to be saved in (default is hists.root)" )
 
 parser.add_argument("--binning", nargs="+", type=float, default=[], help="nbins binMin binMax, to be used ONLY when --plot is specified")
+parser.add_argument("--varBins", type=str, default="", help="list of variable bin sizes (overrides --binning option)")
 parser.add_argument("--plot", dest="plotList",action="store", nargs='*',
                      help="Add plots" )
 parser.add_argument("--multiPlots", "--multiplots", dest="multiPlotList",action="append",
@@ -37,7 +39,14 @@ parser.add_argument("--quiet", "-q", dest="quiet",default=False,action="store_tr
 
 
 args = parser.parse_args()
-if len(args.binning) > 0:
+if args.varBins != "":
+    print "Using variable binning"
+    args.varBins = eval(args.varBins)
+    print args.varBins
+    if len(args.binning) > 0:
+        print "Warning: Uniform bin option --binning will be disregarded!"
+
+elif len(args.binning) > 0:
     if args.plotList is None:
         print "Must specify plots to apply binning to with --plot"
         sys.exit()
@@ -383,15 +392,19 @@ for hist in histogramsToMake:
     if not runQuiet: print "filling", h_Info[1], sample
     evtWeight = ""
 #	print TH1F("%s_%s"%(h_Info[1],sample),"%s_%s"%(h_Info[1],sample),h_Info[2][0],h_Info[2][1],h_Info[2][2])
-    if len(args.binning) > 0:
-        _nbins = args.binning[0]
-        _binMin = args.binning[1]
-        _binMax = args.binning[2]
+    
+    if args.varBins != "":
+        histograms.append(TH1F("%s_%s"%(h_Info[1],sample),"%s_%s"%(h_Info[1],sample),len(args.varBins)-1, array('d',args.varBins)))
     else:
-        _nbins = h_Info[2][0]
-        _binMin = h_Info[2][1]
-        _binMax = h_Info[2][2]
-    histograms.append(TH1F("%s_%s"%(h_Info[1],sample),"%s_%s"%(h_Info[1],sample),_nbins, _binMin, _binMax))
+        if len(args.binning) > 0:
+            _nbins = args.binning[0]
+            _binMin = args.binning[1]
+            _binMax = args.binning[2]
+        else:
+            _nbins = h_Info[2][0]
+            _binMin = h_Info[2][1]
+            _binMax = h_Info[2][2]
+        histograms.append(TH1F("%s_%s"%(h_Info[1],sample),"%s_%s"%(h_Info[1],sample),_nbins, _binMin, _binMax))
     if h_Info[4]=="":
         evtWeight = "%s%s"%(h_Info[3],weights)
     else:

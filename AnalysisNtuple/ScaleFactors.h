@@ -491,6 +491,7 @@ double getEvtWeight(string sampleType){
 	else if( sampleType=="TTGamma_SingleLeptFromTbar") {evtWeight = TTGamma_semilept_Tbar_SF;}
 	else if( sampleType=="TTGamma_SingleLeptFromT") {evtWeight = TTGamma_semilept_T_SF;}
 	else if( sampleType=="TTGamma_Dilepton") {evtWeight = TTGamma_dilept_SF;}
+	else if( sampleType=="TTbar") {evtWeight = TTbarPowheg_SF;}
 	else if( sampleType=="TTbarPowheg") {evtWeight = TTbarPowheg_SF;}
 	else if( sampleType=="TTbarPowheg1") {evtWeight = TTbarPowheg_SF;}
 	else if( sampleType=="TTbarPowheg2") {evtWeight = TTbarPowheg_SF;}
@@ -683,6 +684,7 @@ const std::string allowedSampleTypes[199] = {"Data",
 											"TTGamma_SingleLeptFromTbar",
 											"TTGamma_SingleLeptFromT",
 											"TTGamma_Dilepton",
+											"TTbar",
 											"TTbarPowheg",
 											"TTbarPowheg1",
 											"TTbarPowheg2",

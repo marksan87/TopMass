@@ -12,6 +12,7 @@ import CMS_lumi
 from pprint import pprint
 import pdb
 
+
 obsTitle = {"ptll":"p_{T}(ll)", "ptpos":"p_{T}(l^{+})", "Epos":"E(l^{+})", "ptp_ptm":"p_{T}(l^{+}) + p_{T}(l^{-})", "Ep_Em":"E(l^{+}) + E(l^{-})", "Mll":"M(ll)"}
 
 # Available systematics
@@ -71,7 +72,8 @@ systColors = {
     "DS":kBlue+7,
     }
 #systematics = ["PU", "Q2", "Pdf", "isr", "fsr", "toppt", "EleIDEff", "EleRecoEff", "EleScale", "EleSmear", "MuIDEff", "MuIsoEff", "MuTrackEff", "MuScale", "JEC", "JER"]
-signal = ["TTbar", "ST_tW", "TTbar_amcanlo"]
+#signal = ["TTbar", "ST_tW", "TTbar_amcanlo"]
+signal = ["TTbar"]
 
 observables = obsTitle.keys()
 
@@ -84,25 +86,30 @@ padGap = 0.08
 
 parser = ArgumentParser()
 parser.add_argument("--overflow", dest="useOverflow",default=False,action="store_true",
-		  help="Add oveflow bin to the plots" )
+          help="Add oveflow bin to the plots" )
 parser.add_argument("--plot", dest="plotList",action="append",
-		  help="Add plots" )
+          help="Add plots" )
 parser.add_argument("--morePlots","--MorePlots",dest="makeMorePlots",action="store_true",default=False,
                      help="Make larger list of kinematic distributions" )
 parser.add_argument("--allPlots","--allPlots",dest="makeAllPlots",action="store_false",default=True,
                      help="Make plots of all distributions" )
 parser.add_argument("--file",dest="inputFile",default=None,
-		  help="Specify specific input file")
+          help="Specify specific input file")
 parser.add_argument("--reverse", action="store_true", default=False, help="reverse stack ordering")
 parser.add_argument("--reorderTop", dest="newStackListTop",action="append",
-		  help="New order for stack list (which plots will be put on top of the stack)" )
+          help="New order for stack list (which plots will be put on top of the stack)" )
 parser.add_argument("--reorderBot", dest="newStackListBot",action="append",
-		  help="New order for stack list (which plots will be put on top of the stack)" )
+          help="New order for stack list (which plots will be put on top of the stack)" )
 parser.add_argument("--theoryTTxs", action="store_true", default=False, help="Use theory xs of 831.76 pb instead of 803")
 parser.add_argument("--norm", action="store_true", default=False, help="normalize plots")
-
+parser.add_argument("-o", "--outDir", default="plots", help="output plot directory")
+parser.add_argument("--showUnc", action="store_true", default=False, help="show data & MC uncertainty bands")
+parser.add_argument("--systPlots", action="store_true", default=False, help="make systematic variation plots")
 args = parser.parse_args()
 
+makeSystPlots = args.systPlots
+
+if args.outDir[-1] == "/": args.outDir = args.outDir[:-1]
 plotList = args.plotList
 
 newStackListTop = args.newStackListTop
@@ -116,11 +123,11 @@ makeAllPlots = args.makeAllPlots
 
 scaleTTbarXS = not args.theoryTTxs     # Scale to 803 pb, value from TOP-17-001
 
-showUnc = False    # If true, include data/mc uncertainty in plot
+showUnc = args.showUnc    # If true, include data/mc uncertainty in plot
 
 
 _fileDir = "histograms/hists"
-plotDirectory = "plots"
+plotDirectory = args.outDir
 regionText = ""
 channel = 'emu'
 
@@ -129,15 +136,15 @@ CMS_lumi.extraText = "Work in Progress"
 
 #print channel
 if not inputFile is None:
-	_fileDir = "histograms/%s"%inputFile
-	if not _file.IsOpen():
-		print "Unable to open file"
-		sys.exit()
+    _fileDir = "histograms/%s"%inputFile
+    if not _file.IsOpen():
+        print "Unable to open file"
+        sys.exit()
 
 
 
 if not os.path.exists(plotDirectory):
-	os.mkdir(plotDirectory)
+    os.mkdir(plotDirectory)
 
 
 gROOT.SetBatch(True)
@@ -154,7 +161,7 @@ NoLog=False
 #  log plot]
 
 histograms_dilep = {"presel_DilepMass"   : ["m_(lepton,lepton) (GeV)", "<Events/GeV>", [20., 30., 40., 50., 60., 70., 80., 85., 95., 100., 110., 120., 130., 140., 150., 160., 170., 180., 190., 200., 210., 220., 230., 240., 250., 260., 270.], [-1,-1], regionText, NoLog, " "],
-		}
+        }
 
 
 
@@ -177,23 +184,23 @@ histograms = {  \
           "bjetPt"          : ["BJet p_{T} [GeV]", "Events", 5, [-1,-1], regionText, NoLog, " "],
           "bjetEta"         : ["BJet #eta", "Events", 1, [-1,-1], regionText, NoLog, " "],
           "bjetPhi"         : ["BJet #phi", "Events", 1, [-1,-1], regionText, NoLog, " "],
-          "rec_ptll"        : ["Reco p_{T}(ll) [GeV]", "Events", 5, [-1,-1], regionText, NoLog, " "],
-          "rec_Mll"         : ["Reco M(ll) [GeV]", "Events", 5, [-1,-1], regionText, NoLog, " "],
-          "rec_ptpos"       : ["Reco p_{T}(l^{+}) [GeV]", "Events", 5, [-1,-1], regionText, NoLog, " "],
-          "rec_Epos"        : ["Reco E(l^{+}) [GeV]", "Events", 5, [-1,-1], regionText, NoLog, " "],
-          "rec_ptp_ptm"     : ["Reco p_{T}(l^{+}) + p_{T}(l^{-}) [GeV]", "Events", 5, [-1,-1], regionText, NoLog, " "],
-          "rec_Ep_Em"       : ["Reco E(l^{+}) + E(l^{-}) [GeV]", "Events", 5, [-1,-1], regionText, NoLog, " "],
-	      }
+          "rec_ptll"        : ["Reco p_{T}(ll) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "rec_Mll"         : ["Reco M(ll) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "rec_ptpos"       : ["Reco p_{T}(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "rec_Epos"        : ["Reco E(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "rec_ptp_ptm"     : ["Reco p_{T}(l^{+}) + p_{T}(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "rec_Ep_Em"       : ["Reco E(l^{+}) + E(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          }
 
 
 if not plotList is None:
-	allHistsDefined = True
-	for hist in plotList:
-		if not hist in histograms:
-			print "Histogram %s plotting information not defined" % hist
-			allHistsDefined = False
-	if not allHistsDefined:
-		sys.exit()
+    allHistsDefined = True
+    for hist in plotList:
+        if not hist in histograms:
+            print "Histogram %s plotting information not defined" % hist
+            allHistsDefined = False
+    if not allHistsDefined:
+        sys.exit()
 
 if plotList is None:
     if makeAllPlots:
@@ -234,22 +241,22 @@ print "Experimental syst:", experimentalSysts
 print "      Theory syst:", theorySysts 
 
 if not newStackListTop is None:
-	newStackListTop.reverse()
-	for sample in newStackListTop:
-		if not sample in stackList:
-			print "Unknown sample name %s"%sample
-			continue
-		stackList.remove(sample)
-		stackList.append(sample)
+    newStackListTop.reverse()
+    for sample in newStackListTop:
+        if not sample in stackList:
+            print "Unknown sample name %s"%sample
+            continue
+        stackList.remove(sample)
+        stackList.append(sample)
 
 if not newStackListBot is None:
-	newStackListBot.reverse()
-	for sample in newStackListBot:
-		if not sample in stackList:
-			print "Unknown sample name %s"%sample
-			continue
-		stackList.remove(sample)
-		stackList.insert(0,sample)
+    newStackListBot.reverse()
+    for sample in newStackListBot:
+        if not sample in stackList:
+            print "Unknown sample name %s"%sample
+            continue
+        stackList.remove(sample)
+        stackList.insert(0,sample)
 
 _channelText = ""
 #_channelText = "emu"
@@ -275,9 +282,10 @@ R = 0.1*W
 # SetOwnership(pad1, False)
 # SetOwnership(pad2, False)
 
+errorbandFillStyle = 3245
 
-
-legendHeightPer = 0.04
+legendHeightPer = 0.02
+#legendHeightPer = 0.04
 legList = stackList[:]
 legList.reverse()
 
@@ -305,10 +313,10 @@ legend.SetBorderSize(0)
 legend.SetFillColor(0)
 
 _file = {}
-#	if finalState=="mu":
-#		stackList.remove("QCDMu")
-#	else:
-#		stackList.remove("QCDEle")
+#   if finalState=="mu":
+#       stackList.remove("QCDMu")
+#   else:
+#       stackList.remove("QCDEle")
 
 
 
@@ -325,28 +333,28 @@ _filesys_down={}
 for sample in (stackList+["TTbar_amcanlo"]):
     _filesys_up[sample]={}
     _filesys_down[sample]={}
-    if sample == "TTbar_amcanlo":
-        print "Loading TTbar_amcanlo and Q2 variations"
-        _file[sample] = TFile.Open("%samcanlo/TTbar.root" % _fileDir)
-        _filesys_up[sample]["Q2"] = TFile.Open("histograms/histsQ2_up/%s.root" % (sample))
-        _filesys_down[sample]["Q2"] = TFile.Open("histograms/histsQ2_down/%s.root" % (sample))
-    else:
-        _file[sample] = TFile.Open("%s/%s.root"%(_fileDir,sample),"read")
-        #if sample not in signal: continue
-        
-        for syst in systematics:
+#    if sample == "TTbar_amcanlo":
+#        print "Loading TTbar_amcanlo and Q2 variations"
+#        _file[sample] = TFile.Open("%samcanlo/TTbar.root" % _fileDir)
+#        _filesys_up[sample]["Q2"] = TFile.Open("histograms/histsQ2_up/%s.root" % (sample))
+#        _filesys_down[sample]["Q2"] = TFile.Open("histograms/histsQ2_down/%s.root" % (sample))
+#    else:
+    _file[sample] = TFile.Open("%s/%s.root"%(_fileDir,sample),"read")
+    #if sample not in signal: continue
+    
+    for syst in systematics:
 #        if syst=="isr" or syst=="fsr":
 #            if sample not in ["TTGamma" ,"TTbar"]:continue
-            if syst != "PU" and sample not in signal: continue
-            print "Loading sample %s  syst %s" % (sample,syst)
-            if sample == "TTbar" and syst == "DS": continue
-            if sample == "ST_tW" and syst not in tWSystematics: continue
-            
-            if syst not in oneSidedSysts:
-                _filesys_up[sample][syst]=TFile.Open("histograms/hists%s_up/%s.root"%(syst,sample),"read")
-                _filesys_down[sample][syst]=TFile.Open("histograms/hists%s_down/%s.root"%(syst,sample),"read")
-            else:
-                _filesys_up[sample][syst]=TFile.Open("histograms/hists%s/%s.root"%(syst,sample),"read")
+        if syst != "PU" and sample not in signal: continue
+        print "Loading sample %s  syst %s" % (sample,syst)
+        if sample == "TTbar" and syst == "DS": continue
+        if sample == "ST_tW" and syst not in tWSystematics: continue
+        
+        if syst not in oneSidedSysts:
+            _filesys_up[sample][syst]=TFile.Open("histograms/hists%s_up/%s.root"%(syst,sample),"read")
+            _filesys_down[sample][syst]=TFile.Open("histograms/hists%s_down/%s.root"%(syst,sample),"read")
+        else:
+            _filesys_up[sample][syst]=TFile.Open("histograms/hists%s/%s.root"%(syst,sample),"read")
             
 
 
@@ -386,18 +394,18 @@ hist.SetLineColor(samples[sample][1])
 legendR.AddEntry(hist,samples[sample][2],'f')
 
 for i in range(X):
-	sample = legList[i]
-	hist = _file[sample].Get("%s_%s"%(histName,sample))
-	hist.SetFillColor(samples[sample][1])
-	hist.SetLineColor(samples[sample][1])
-	legendR.AddEntry(hist,samples[sample][2],'f')
+    sample = legList[i]
+    hist = _file[sample].Get("%s_%s"%(histName,sample))
+    hist.SetFillColor(samples[sample][1])
+    hist.SetLineColor(samples[sample][1])
+    legendR.AddEntry(hist,samples[sample][2],'f')
 
-	if X+i+1 < len(legList):
-		sample = legList[i+X+1]
-		hist = _file[sample].Get("%s_%s"%(histName,sample))
-		hist.SetFillColor(samples[sample][1])
-		hist.SetLineColor(samples[sample][1])
-		legendR.AddEntry(hist,samples[sample][2],'f')
+    if X+i+1 < len(legList):
+        sample = legList[i+X+1]
+        hist = _file[sample].Get("%s_%s"%(histName,sample))
+        hist.SetFillColor(samples[sample][1])
+        hist.SetLineColor(samples[sample][1])
+        legendR.AddEntry(hist,samples[sample][2],'f')
 
 
 
@@ -405,7 +413,7 @@ for i in range(X):
 errorband=TH1F("error","error",20,0,20)
 errorband.SetLineColor(0)
 errorband.SetFillColor(kBlack)
-errorband.SetFillStyle(3245)
+errorband.SetFillStyle(errorbandFillStyle)
 errorband.SetMarkerSize(0)
 if showUnc: legendR.AddEntry(errorband,"Uncertainty","f")
 
@@ -416,7 +424,6 @@ TGaxis.SetMaxDigits(3)
 
 def drawHist(histName,plotInfo, plotDirectory, _file):
     #print "start drawing"
-
 
     canvas = TCanvas('c1','c1',W,H)
     canvas.SetFillColor(0)
@@ -485,7 +492,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         #print sample, histName, _file[sample], "%s_%s"%(histName,sample)
         hist = _file[sample].Get("%s_%s"%(histName,sample))
         if type(hist)==type(TObject()):continue
-        hist = hist.Clone(sample)	
+        hist = hist.Clone(sample)   
         hist.SetFillColor(samples[sample][1])
         hist.SetLineColor(samples[sample][1])
         if scaleTTbarXS and sample == "TTbar":
@@ -509,42 +516,41 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
             hist.SetBinContent(lastBin,lastBinContent + overFlowContent)
             hist.SetBinError(lastBin, (lastBinError**2 + overFlowError**2)**0.5 )
 
-	
-	#print sample, histName, hist.Integral(-1,-1)
-	#if type(plotInfo[2]) is type(list()):
-	#	hist.Scale(1.,"width")
+    
+    #print sample, histName, hist.Integral(-1,-1)
+    #if type(plotInfo[2]) is type(list()):
+    #   hist.Scale(1.,"width")
         stack.Add(hist)
 
 
     dataHist = _file["Data"].Get("%s_Data" % histName)
-
     noData = False
     #print dataHist
     if type(dataHist)==type(TObject()): noData = True
-    print histName	
+    print histName  
     
     if not noData:
-	    dataHist.Sumw2()
-	    if type(plotInfo[2]) is type(list()):	
-		    dataHist = dataHist.Rebin(len(plotInfo[2])-1,"",array('d',plotInfo[2]))
-		    if "MassEGamma" not in histName:
-		    	dataHist.Scale(1.,"width")
-	    else:
-		    dataHist.Rebin(plotInfo[2])
+        dataHist.Sumw2()
+        if type(plotInfo[2]) is type(list()):   
+            dataHist = dataHist.Rebin(len(plotInfo[2])-1,"",array('d',plotInfo[2]))
+            if "MassEGamma" not in histName:
+                dataHist.Scale(1.,"width")
+        else:
+            dataHist.Rebin(plotInfo[2])
             #        print "number of bins in data:  ",plotInfo[2], hist.GetNbinsX()
-#	    dataHist.Rebin(plotInfo[2])
-	    #print dataHist.GetMarkerStyle()
-	    #dataHist.Sumw2()
-	    print "Total data events:", dataHist.Integral()
-	    #exit()
-	    if useOverflow:
-		    lastBin = dataHist.GetNbinsX()
-		    lastBinContent = dataHist.GetBinContent(lastBin)
-		    lastBinError   = dataHist.GetBinError(lastBin)
-		    overFlowContent = dataHist.GetBinContent(lastBin+1)
-		    overFlowError   = dataHist.GetBinError(lastBin+1)
-		    dataHist.SetBinContent(lastBin,lastBinContent + overFlowContent)
-		    dataHist.SetBinError(lastBin, (lastBinError**2 + overFlowError**2)**0.5 )
+#       dataHist.Rebin(plotInfo[2])
+        #print dataHist.GetMarkerStyle()
+        #dataHist.Sumw2()
+        print "Total data events:", dataHist.Integral()
+        #exit()
+        if useOverflow:
+            lastBin = dataHist.GetNbinsX()
+            lastBinContent = dataHist.GetBinContent(lastBin)
+            lastBinError   = dataHist.GetBinError(lastBin)
+            overFlowContent = dataHist.GetBinContent(lastBin+1)
+            overFlowError   = dataHist.GetBinError(lastBin+1)
+            dataHist.SetBinContent(lastBin,lastBinContent + overFlowContent)
+            dataHist.SetBinError(lastBin, (lastBinError**2 + overFlowError**2)**0.5 )
 
 
 
@@ -552,7 +558,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     oneLine.SetLineColor(kBlack)
     oneLine.SetLineWidth(1)
     oneLine.SetLineStyle(2)
-	
+    
     _text = TPaveText(0.35,.75,0.45,0.85,"NDC")
     _text.SetTextColor(kBlack)
     _text.SetFillColor(0)
@@ -565,33 +571,34 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     #canvas.SetLogy()
     maxVal = stack.GetMaximum()
     if not noData: 
-	    maxVal = max(dataHist.GetMaximum(),maxVal)
+        maxVal = max(dataHist.GetMaximum(),maxVal)
     
     minVal = 1
     if plotInfo[5]:
-	    #print histName, plotInfo[5], stack.GetStack()[1].GetMinimum()
-	    minVal = max(stack.GetStack()[0].GetMinimum(),1)
-	    stack.SetMaximum(10**(1.5*log10(maxVal) - 0.5*log10(minVal)))
-#	    stack.SetMaximum(10**(1.5*log10(maxVal) - 0.5*log10(stack.GetMinimum())))
-#	    print minVal
-	    stack.SetMinimum(minVal)
-	    # print stack.GetStack()[0]
-	    # print stack.GetStack()[0].GetName()
-	    # print stack.GetStack()[0].GetMinimum()
+        #print histName, plotInfo[5], stack.GetStack()[1].GetMinimum()
+        minVal = max(stack.GetStack()[0].GetMinimum(),1)
+        stack.SetMaximum(10**(1.5*log10(maxVal) - 0.5*log10(minVal)))
+#       stack.SetMaximum(10**(1.5*log10(maxVal) - 0.5*log10(stack.GetMinimum())))
+#       print minVal
+        stack.SetMinimum(minVal)
+        # print stack.GetStack()[0]
+        # print stack.GetStack()[0].GetName()
+        # print stack.GetStack()[0].GetMinimum()
     else:
-	    stack.SetMaximum(1.5*maxVal)
-	    stack.SetMinimum(minVal)
+        stack.SetMaximum(1.5*maxVal)
+        stack.SetMinimum(minVal)
 
     # if not noData:
     #     stack.SetMaximum(1.35*max(dataHist.GetMaximum(),stack.GetMaximum()))
     # else:
-    # 	stack.SetMaximum(1.35*stack.GetMaximum())
+    #   stack.SetMaximum(1.35*stack.GetMaximum())
     #print histName
     errorband=stack.GetStack().Last().Clone("error")
     errorband.Sumw2()
     errorband.SetLineColor(kBlack)
     errorband.SetFillColor(kBlack)
-    errorband.SetFillStyle(3245)
+    #errorband.SetFillStyle(3245)
+    errorband.SetFillStyle(errorbandFillStyle)
     errorband.SetMarkerSize(0)
     h1_up={}
     h1_do={}
@@ -630,10 +637,10 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 if syst not in oneSidedSysts:
                     h1_do[sample][syst].Rebin(plotInfo[2])
     error=0.
-    diff={}		
+    diff={}     
     sum_={}
     for i_bin in range(1,errorband.GetNbinsX()+1):
-        sum_[i_bin]=0.	
+        sum_[i_bin]=0.  
         diff[i_bin]=[]
         for syst in systematics:
             for sample in stackList:
@@ -642,15 +649,20 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 if sample == "ST_tW" and syst not in tWSystematics: continue
 #                if sys=="Q2" or sys=="Pdf" or sys=="isr" or sys=="fsr":
 #                    if sample not in ["TTbar"]:continue
-#			print "adding sys",sample,sys, ((h1_up[sample][sys].GetBinContent(i_bin)-h1_do[sample][sys].GetBinContent(i_bin))/2.)**2
+#           print "adding sys",sample,sys, ((h1_up[sample][sys].GetBinContent(i_bin)-h1_do[sample][sys].GetBinContent(i_bin))/2.)**2
                 #if sys != "toppt":
                 if syst not in oneSidedSysts: 
                     sum_[i_bin]+=((h1_up[sample][syst].GetBinContent(i_bin)-h1_do[sample][syst].GetBinContent(i_bin))/2.)**2
-#diff[i_bin].append(((h1_up[sample][sys].GetBinContent(i_bin)-h1_do[sample][sys].GetBinContent(i_bin))/2.)**2.)
+#                else:
+#                    sum_[i_bin]+=(h1_up[sample][syst].GetBinContent(i_bin) - stack.GetStack().Last().GetBinContent(i_bin))**2
 
 
-#print (sum_[i_bin])**0.5		
-        errorband.SetBinError(i_bin,(sum_[i_bin])**0.5)
+
+#print (sum_[i_bin])**0.5       
+        
+        #################################################
+        #errorband.SetBinError(i_bin,(sum_[i_bin])**0.5)
+        #################################################
     
     stack.Draw('hist')
     _text.Draw("same")
@@ -660,8 +672,9 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     stack.GetXaxis().SetTitleOffset(1.1)
 
     #stack.GetHistogram().GetYaxis().SetTitle(plotInfo[1])
-    stack.GetYaxis().SetTitle("%sEntries / %.1f GeV" % ("Normalized " if args.norm else "", plotInfo[2]) )
-    stack.GetYaxis().SetTitleOffset(1.1)
+    stack.GetYaxis().SetTitle("%s%s%s" % ("Normalized " if args.norm else "", plotInfo[1], " / %.1f GeV" % plotInfo[2] if (histName.find("rec_") >= 0 or histName.find("gen_") >=0) else "" ) )
+    stack.GetYaxis().SetTitleOffset(1.22)
+    #stack.GetYaxis().SetTitleOffset(1.05)
     
     #histograms list has x-axis title
 #    stack.GetHistogram().GetXaxis().SetTitle(plotInfo[0])
@@ -674,12 +687,12 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     
     if not -1 in plotInfo[3]:
         stack.GetHistogram().GetXaxis().SetRangeUser(plotInfo[3][0],plotInfo[3][1])
-	if not noData:
+        if not noData:
             dataHist.GetXaxis().SetRangeUser(plotInfo[3][0],plotInfo[3][1])
 
     if not noData:
-	dataHist.SetLineColor(kBlack)
-	dataHist.Draw("e,X0,same")
+        dataHist.SetLineColor(kBlack)
+        dataHist.Draw("e,X0,same")
      
     #residue=dataHist.Clone()
     #temp=stack.GetStack().Last().Clone("temp")
@@ -687,7 +700,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     #residue.Draw("hist")
     #canvas.Print("%s/%s_residue.pdf"%(plotDirectory,histName))
     #canvas.Clear()
-
+    if showUnc: errorband.DrawCopy('e2,same')
     legend.Draw("same")
 
 
@@ -727,21 +740,25 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
 
         #print "stack.GetXaxis().GetTitle() =", stack.GetXaxis().GetTitle() 
 
-#	stack.SetMinimum(1)
+#   stack.SetMinimum(1)
 #    pad1.Update()
 #        stack.GetXaxis().SetTitle('')
         #stack.GetXaxis().SetTitle(dataHist.GetXaxis().GetTitle())
         #stack.GetYaxis().SetTitle(dataHist.GetYaxis().GetTitle())
 
-        stack.SetTitle(histName)    # Set ratio plot title here
-        
+        #stack.SetTitle(histName)    # Set ratio plot title here
+        stack.SetTitle("")
+
         # No x axis title on upper pad of stack plot
         stack.GetXaxis().SetTitle("")
 
         stack.GetYaxis().SetLabelSize(gStyle.GetLabelSize()/(1.-padRatio+padOverlap))
         stack.GetYaxis().SetTitleSize(gStyle.GetTitleSize()/(1.-padRatio+padOverlap))
         #stack.GetYaxis().SetTitleOffset(gStyle.GetTitleYOffset()*(1.-padRatio+padOverlap))
-        
+        #stack.GetYaxis().SetTitleOffset(0.9)
+        #stack.GetYaxis().SetTitleOffset(1.05)
+        stack.GetYaxis().SetTitleOffset(1.1)
+
         #stack.GetYaxis().SetTitle(plotInfo[1])
         dataHist.Draw('E,X0,SAME')
         #print "dataHist.GetXaxis().GetTitle() =", dataHist.GetXaxis().GetTitle() 
@@ -763,7 +780,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         ratio.GetXaxis().SetTitleSize(gStyle.GetTitleSize()/(padRatio+padOverlap))
         ratio.GetYaxis().SetTitleSize(gStyle.GetTitleSize()/(padRatio+padOverlap))
         ratio.GetYaxis().SetTitleOffset(gStyle.GetTitleYOffset()*(padRatio+padOverlap-padGap))
-#	ratio.GetYaxis().SetRangeUser(0.5,1.5)
+#   ratio.GetYaxis().SetRangeUser(0.5,1.5)
 
         maxRatio = ratio.GetMaximum()
         minRatio = ratio.GetMinimum()
@@ -783,13 +800,13 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         elif maxRatio < 1:
             ratio.GetYaxis().SetRangeUser(0,1.2)
         elif maxRatio-1 < 1-minRatio:
-            ratio.GetYaxis().SetRangeUser((1-(1-minRatio)*1.2),1.1*maxRatio)		
+            ratio.GetYaxis().SetRangeUser((1-(1-minRatio)*1.2),1.1*maxRatio)        
         else:
             ratio.GetYaxis().SetRangeUser(2-1.1*maxRatio,1.1*maxRatio)
         
 
         #maxRatio = 1.5
-            #minRatio = 0.5	
+            #minRatio = 0.5 
         ratio.GetYaxis().SetRangeUser(0.7,1.3)
         ratio.GetYaxis().SetNdivisions(504)
         ratio.GetXaxis().SetTitle(plotInfo[0])
@@ -798,7 +815,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
 
         pad2.cd()
         #for i_bin in range(1,errorband.GetNbinsX()):
-        #	errorband.SetBinContent(i_bin,1.)
+        #   errorband.SetBinContent(i_bin,1.)
         maxRatio = 1.5
         minRatio = 0.5
         ratio.SetMarkerStyle(dataHist.GetMarkerStyle())
@@ -807,7 +824,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         ratio.SetLineWidth(dataHist.GetLineWidth())
         ratio.Draw('e,x0')
         errorband.Divide(temp)
-        if showUnc: errorband.Draw('e2,same')
+        if showUnc: errorband.DrawCopy('e2,same')
         oneLine.Draw("same")
         
         #    pad2.Update()
@@ -835,8 +852,8 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
 #            pad1.SetLogy(plotInfo[5])
 
 
-            stack = THStack(histName+"_PU"+var,histName+"_PU"+var)
-            SetOwnership(stack,True)
+            _stack = THStack(histName+"_PU"+var,histName+"_PU"+var)
+            SetOwnership(_stack,True)
             for sample in stackList:
                 #print sample, histName, _file[sample], "%s_%s"%(histName,sample)
                 #hist = _file[sample].Get("%s_%s"%(histName,sample))
@@ -875,10 +892,14 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
             #print sample, histName, hist.Integral(-1,-1)
             #if type(plotInfo[2]) is type(list()):
             #   hist.Scale(1.,"width")
-                stack.Add(hist)
+                _stack.Add(hist)
+            maxVal = _stack.GetMaximum()
+            if not noData:
+                maxVal = max(dataHist.GetMaximum(),maxVal)
+            _stack.SetMaximum(1.5*maxVal)
             if not noData:
                 ratio = dataHist.Clone("temp")
-                temp = stack.GetStack().Last().Clone("temp")
+                temp = _stack.GetStack().Last().Clone("temp")
 
                 for i_bin in range(1,temp.GetNbinsX()+1):
                     temp.SetBinError(i_bin,0.)
@@ -900,20 +921,21 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 pad1.cd()
                 pad1.SetLogy(plotInfo[5])
 
-                stack.Draw('HIST')
+                _stack.Draw('HIST')
                 y2 = pad1.GetY2()
 
 
-                stack.SetTitle(histName + "  Pileup %s" % var)    # Set ratio plot title here
+                _stack.SetTitle(histName + "  Pileup %s" % var)    # Set ratio plot title here
 
                 # No x axis title on upper pad of stack plot
-                stack.GetXaxis().SetTitle("")
-
-                stack.GetYaxis().SetLabelSize(gStyle.GetLabelSize()/(1.-padRatio+padOverlap))
-                stack.GetYaxis().SetTitleSize(gStyle.GetTitleSize()/(1.-padRatio+padOverlap))
-                #stack.GetYaxis().SetTitleOffset(gStyle.GetTitleYOffset()*(1.-padRatio+padOverlap))
-
-                #stack.GetYaxis().SetTitle(plotInfo[1])
+                _stack.GetXaxis().SetTitle("")
+                _stack.GetYaxis().SetTitle("%s%s" % ("Normalized " if args.norm else "", plotInfo[1]))
+                
+                _stack.GetYaxis().SetLabelSize(gStyle.GetLabelSize()/(1.-padRatio+padOverlap))
+                _stack.GetYaxis().SetTitleSize(gStyle.GetTitleSize()/(1.-padRatio+padOverlap))
+                #_stack.GetYaxis().SetTitleOffset(gStyle.GetTitleYOffset()*(1.-padRatio+padOverlap))
+                _stack.GetYaxis().SetTitleOffset(1.1)
+                #_stack.GetYaxis().SetTitle(plotInfo[1])
                 dataHist.Draw('E,X0,SAME')
                 #print "dataHist.GetXaxis().GetTitle() =", dataHist.GetXaxis().GetTitle() 
 #       legendR.AddEntry(errorband,"Uncertainty","f")
@@ -965,7 +987,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 ratio.GetYaxis().SetNdivisions(504)
                 ratio.GetXaxis().SetTitle(plotInfo[0])
                 ratio.GetYaxis().SetTitle("Data/MC")
-                CMS_lumi.CMS_lumi(pad1, 4, 12)
+                CMS_lumi.CMS_lumi(pad1, 4, 11)
 
                 pad2.cd()
                 #for i_bin in range(1,errorband.GetNbinsX()):
@@ -977,7 +999,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 ratio.SetLineColor(dataHist.GetLineColor())
                 ratio.SetLineWidth(dataHist.GetLineWidth())
                 ratio.Draw('e,x0')
-                errorband.Divide(temp)
+                #errorband.Divide(temp)
                 if showUnc: errorband.Draw('e2,same')
                 oneLine.Draw("same")
 
@@ -992,7 +1014,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
 
     
     #if histName.find("rec_") >= 0 or histName.find("gen_") >=0 or histName.find("nVtx") >= 0:
-    if histName.find("rec_") >= 0 or histName.find("gen_") >=0:
+    if makeSystPlots and histName.find("rec_") >= 0 or histName.find("gen_") >=0:
         # Systematic variation plots
         print "\n","="*50
         print "Now making systematics plots for %s" % histName
@@ -1007,7 +1029,8 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
             # Set X,Y axis labels
             #nominal.GetXaxis().SetTitle(obsTitle[histName[4:]] + " [GeV]")
             nominal.GetYaxis().SetTitle("%sEntries / %.1f GeV" % ("Normalized " if args.norm else "", plotInfo[2]) )
-            nominal.GetYaxis().SetTitleOffset(1.1)
+            #nominal.GetYaxis().SetTitleOffset(1.1)
+            nominal.GetYaxis().SetTitleOffset(1.0)
             nominal.SetLineColor(kBlack)
             nominal.SetMarkerSize(0)
             if args.norm: nominal.Scale(1./nominal.Integral())

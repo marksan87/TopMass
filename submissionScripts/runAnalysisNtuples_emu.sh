@@ -1,5 +1,4 @@
 #!/bin/bash
-
 job=$1
 jobType=$2
 
@@ -17,13 +16,15 @@ else
 	echo ${_CONDOR_SCRATCH_DIR}
 	
 	# copy tarred cmssw area over from eos (should be excluding .SCRAM area)
-	echo "xrdcp root://cmseos.fnal.gov//store/user/"${USER}"/condorFiles/CMSSW_8_0_26_patch1.tgz ."
-	xrdcp root://cmseos.fnal.gov//store/user/${USER}/condorFiles/CMSSW_8_0_26_patch1.tgz .
+	echo "xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/CMSSW_8_0_26_patch1.tgz CMSSW_8_0_26_patch1.tgz"
+	xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/CMSSW_8_0_26_patch1.tgz CMSSW_8_0_26_patch1.tgz
 
     export SCRAM_ARCH=slc6_amd64_gcc530
 	source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-	eval `scramv1 project CMSSW CMSSW_8_0_26_patch1`
+	#eval `scramv1 project CMSSW CMSSW_8_0_26_patch1`
+    echo "scramv1 project CMSSW CMSSW_8_0_26_patch1"
+    scramv1 project CMSSW CMSSW_8_0_26_patch1
 
 	echo "tar -xvf CMSSW_8_0_26_patch1.tgz"
 	tar -xzf CMSSW_8_0_26_patch1.tgz
@@ -33,14 +34,14 @@ else
 	cd TopNtuplizer/
     
 	# copy tarred lep scale factors
-	echo "xrdcp -f root://cmseos.fnal.gov//store/user/"${USER}"/condorFiles/lepSF.tgz ."
-	xrdcp -f root://cmseos.fnal.gov//store/user/${USER}/condorFiles/lepSF.tgz .
+	echo "xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/lepSF.tgz lepSF.tgz"
+	xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/lepSF.tgz lepSF.tgz
     
     echo "tar xzvf lepSF.tgz"
 	tar xzvf lepSF.tgz
 
-	echo "xrdcp -r root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz ."
-	xrdcp -r root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz .
+	echo "xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz Data_Pileup.tgz"
+	xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz Data_Pileup.tgz
 	
     echo "tar xzvf Data_Pileup.tgz"
     tar xzvf Data_Pileup.tgz

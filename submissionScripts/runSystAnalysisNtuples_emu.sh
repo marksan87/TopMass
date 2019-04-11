@@ -1,5 +1,4 @@
 #!/bin/bash
-export USER=$(whoami)
 job=$1
 jobType=$2
 
@@ -17,13 +16,14 @@ else
 	echo ${_CONDOR_SCRATCH_DIR}
 	
 	# copy tarred cmssw area over from eos (should be excluding .SCRAM area)
-	echo "xrdcp root://cmseos.fnal.gov//store/user/"${USER}"/condorFiles/CMSSW_8_0_26_patch1.tgz ."
-	xrdcp root://cmseos.fnal.gov//store/user/${USER}/condorFiles/CMSSW_8_0_26_patch1.tgz .
+	echo "xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/CMSSW_8_0_26_patch1.tgz ."
+	xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/CMSSW_8_0_26_patch1.tgz .
 
     export SCRAM_ARCH=slc6_amd64_gcc530
 	source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-	eval `scramv1 project CMSSW CMSSW_8_0_26_patch1`
+    echo "scramv1 project CMSSW CMSSW_8_0_26_patch1"
+    scramv1 project CMSSW CMSSW_8_0_26_patch1
 
 	echo "tar -xvf CMSSW_8_0_26_patch1.tgz"
 	tar -xzf CMSSW_8_0_26_patch1.tgz
@@ -33,14 +33,14 @@ else
 	cd TopNtuplizer/
     
 	# copy tarred lep scale factors
-	echo "xrdcp -f root://cmseos.fnal.gov//store/user/"${USER}"/condorFiles/lepSF.tgz ."
-	xrdcp -f root://cmseos.fnal.gov//store/user/${USER}/condorFiles/lepSF.tgz .
+	echo "xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/lepSF.tgz lepSF.tgz"
+	xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/lepSF.tgz lepSF.tgz
     
     echo "tar xzvf lepSF.tgz"
 	tar xzvf lepSF.tgz
 
-	echo "xrdcp -r root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz ."
-	xrdcp -r root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz .
+	echo "xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz Data_Pileup.tgz"
+	xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz Data_Pileup.tgz
 	
     echo "tar xzvf Data_Pileup.tgz"
     tar xzvf Data_Pileup.tgz
@@ -199,23 +199,44 @@ sampleType=(
     "TTbar_herwigpp_1" \
     "TTbar_herwigpp_2" \
     "TTbar_herwigpp_3" \
+    "TTbar" \
+    "TTbar_mt1665" \
+    "TTbar_mt1695_1" \
+    "TTbar_mt1695_2" \
+    "TTbar_mt1695_3" \
+    "TTbar_mt1715_1" \
+    "TTbar_mt1715_2" \
+    "TTbar_mt1735_1" \
+    "TTbar_mt1735_2" \
+    "TTbar_mt1755_1" \
+    "TTbar_mt1755_2" \
+    "TTbar_mt1755_3" \
+    "TTbar_mt1785" \
+    "ST_tW_top" \
+    "ST_tW_antitop" \
+    "ST_tW_top_mt1695" \
+    "ST_tW_top_mt1755" \
+    "ST_tW_antitop_mt1695" \
+    "ST_tW_antitop_mt1755" \
 )
+
 signal=""
 var=""
-if [ "${sampleType[job]}:0:5" == "TTbar" ] ; then
+if [ "${sampleType[job]:0:5}" == "TTbar" ] ; then
     signal="TTbar"
-elif [ "${sampleType[job]}:0:9" == "ST_tW_top" ] ; then
+elif [ "${sampleType[job]:0:9}" == "ST_tW_top" ] ; then
     signal="ST_tW_top"
 else
     signal="ST_tW_antitop"
 fi
 
-if [ "${sampleType[job]:${#signal}+4:2}" == "Up" ] ; then
+if [ "${sampleType[job]:${#signal}+1+${#jobType}:2}" == "Up" ] ; then
     var="up"
-elif [ "${sampleType[job]:${#signal}+4:4}" == "Down" ] ; then
+elif [ "${sampleType[job]:${#signal}+1+${#jobType}:4}" == "Down" ] ; then
     var="down"
 fi
 echo "signal: ${signal}"
+echo "var: ${var}"
 #Copy skim ntuple from eos
 
 if [ "${sampleType[job]}" == "TTbar" ] ; then

@@ -74,11 +74,10 @@ declare -a oneSidedSysts=(
         "herwigpp" \
         "DS" \
         )
-#declare -a backgroundSystematics=( 
-#        "PU" \
-#                )
+declare -a backgroundSystematics=( 
+        "PU" \
+        )
 
-declare -a backgroundSystematics=()
 
 # Systematics only available at nominal mass point 
 declare -a separateSampleSysts=(
@@ -116,8 +115,23 @@ declare -a variations=("up" \
             "down" \
             )
 #addPlots="--addPlots --plot nBJet bjetPt bjetEta bjetPhi"
-#addPlots="--addPlots --plot rec_ptpos --binning 180 20 200 --outDir histograms_cut200"
-addPlots=""
+#addPlots="--addPlots --plot rec_ptll --outDir secondtry_histograms"
+#addPlots="--addPlots --plot muPt jetPt --outDir secondtry_histograms"
+addPlots="--addPlots --plot elePt muPt jetPt --outDir histograms"
+#addPlots="--addPlots --plot rec_ptll --binning 300 20 320 --outDir histograms_cut320"
+#addPlots="--addPlots --plot rec_ptll --binning 20 0 200 --outDir histograms_bin10"
+#addPlots='--addPlots --plot rec_ptll --varBins "range(0,210,10) + [220]" --outDir histograms_varbin_220'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,5) + range(100,160,10) + range(160,240,20)" --outDir histograms_varBins5_220'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,5) + range(100,160,10) + range(160,200,20)" --outDir histograms_varBins5_180'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,8) + range(100,160,12) + range(160,200,20)" --outDir histograms_varBins8_12_180'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,8) + range(100,160,12) + range(160,240,20)" --outDir histograms_varBins8_12_220'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,10) + range(100,160,15) + range(160,200,20)" --outDir histograms_varBins10_15_180'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,10) + range(100,160,15) + range(160,240,20)" --outDir histograms_varBins10_15_220'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,40,2) + range(40,80,1) + range(80,120,2) + range(120,140,5) + range(140,200,20)" --outDir histograms_varBins2_1_180'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,120,1) + range(120,140,5) + range(140,200,20)" --outDir histograms_varBins1_5_180'
+#addPlots='--addPlots --plot rec_ptll --varBins "range(20,120,1) + range(120,140,10) + range(140,220,40)" --outDir histograms_varBins1_10_180'
+
+#addPlots=""
 #test="--testone"
 test=""
 signalLength=${#signal[@]}
@@ -137,17 +151,17 @@ if [ "$option" == "nosyst" ] ; then
     for (( s=0; s < $signalLength; s++ )); do
         echo ${signal[$s]} 
         echo "./fillHistograms.py -s ${signal[$s]} ${addPlots}"
-        ./fillHistograms.py -s ${signal[$s]} ${addPlots}
+        eval ./fillHistograms.py -s ${signal[$s]} ${addPlots}
     done
 
     for (( m=0; m < $ttbarMassLength; m++ )); do
         echo "./fillHistograms.py -s ${ttbarMass[$m]} ${addPlots}"
-        ./fillHistograms.py -s ${ttbarMass[$m]} ${addPlots}
+        eval ./fillHistograms.py -s ${ttbarMass[$m]} ${addPlots}
     done
 
     for (( m=0; m < $tWMassLength; m++ )); do
         echo "./fillHistograms.py -s ${tWMass[$m]} ${addPlots}"
-        ./fillHistograms.py -s ${tWMass[$m]} ${addPlots}
+        eval ./fillHistograms.py -s ${tWMass[$m]} ${addPlots}
     done
 
 elif [ "$option" == "sig" ] ; then
@@ -177,13 +191,13 @@ elif [ "$option" == "sig" ] ; then
                 # One sided systs
                 echo "${systematics[sys]} is a one-sided systematic"
                 echo "./fillHistograms.py -s ${signal[$s]} --syst ${systematics[$sys]} ${addPlots} ${test}"
-                ./fillHistograms.py -s ${signal[$s]} --syst ${systematics[$sys]} ${addPlots} ${test}
+                eval ./fillHistograms.py -s ${signal[$s]} --syst ${systematics[$sys]} ${addPlots} ${test}
             else
                 # Up/Down variations
                 echo "${systematics[sys]} has up/down variations"
                 for (( var=0; var < $variationsLength; var++ )); do 
                     echo "./fillHistograms.py -s ${signal[$s]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}"
-                    ./fillHistograms.py -s ${signal[$s]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}
+                    eval ./fillHistograms.py -s ${signal[$s]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}
                 done
             fi
         done
@@ -216,12 +230,12 @@ elif [ "$option" == "ttmt" ] || [ "$option" == "ttmt_1" ] || [ "$option" == "ttm
             elif [[ "${oneSidedSysts[@]}" =~  "${systematics[$sys]}" ]] ; then
                 # One sided systs
                 echo "./fillHistograms.py -s ${ttbarMass[$m]} --syst ${systematics[$sys]} ${addPlots} ${test}"
-                ./fillHistograms.py -s ${ttbarMass[$m]} --syst ${systematics[$sys]} ${addPlots} ${test}
+                eval ./fillHistograms.py -s ${ttbarMass[$m]} --syst ${systematics[$sys]} ${addPlots} ${test}
             else
                 # Up/Down variations
                 for (( var=0; var < $variationsLength; var++ )); do 
                     echo "./fillHistograms.py -s ${ttbarMass[$m]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}"
-                    ./fillHistograms.py -s ${ttbarMass[$m]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}
+                    eval ./fillHistograms.py -s ${ttbarMass[$m]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}
                 done
 
             fi
@@ -229,28 +243,28 @@ elif [ "$option" == "ttmt" ] || [ "$option" == "ttmt_1" ] || [ "$option" == "ttm
     done
 elif [ "$option" == "tWmt" ] ; then
     for (( m=0; m < $tWMassLength; m++ )); do
-        echo "./fillHistograms.py -s ${tWMass[$m]} ${addPlots} ${test}"
-        ./fillHistograms.py -s ${tWMass[$m]} ${addPlots} ${test}
-#        for (( sys=0; sys<systematicsLength; sys++ )); do
-#            if [[ "${ttOnlySysts[@]}" =~ "${systematics[$sys]}" ]] ; then
-#                continue
-#            fi
-#
-#            if [[ "${separateSampleSysts[@]}" =~  "${systematics[$sys]}" ]] ; then
-#                # Separate sample syst not available at alternate mass points
-#                continue
-#            elif [[ "${oneSidedSysts[@]}" =~  "${systematics[$sys]}" ]] ; then
-#                # One sided systs
-#                echo "./fillHistograms.py -s ${tWMass[$m]} --syst ${systematics[$sys]} ${addPlots} ${test}"
-#                ./fillHistograms.py -s ${tWMass[$m]} --syst ${systematics[$sys]} ${addPlots} ${test}
-#            else
-#                # Up/Down variations
-#                for (( var=0; var < $variationsLength; var++ )); do 
-#                    echo "./fillHistograms.py -s ${tWMass[$m]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}"
-#                    ./fillHistograms.py -s ${tWMass[$m]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}
-#                done
-#            fi
-#        done
+#        echo "./fillHistograms.py -s ${tWMass[$m]} ${addPlots} ${test}"
+#        ./fillHistograms.py -s ${tWMass[$m]} ${addPlots} ${test}
+        for (( sys=0; sys<systematicsLength; sys++ )); do
+            if [[ "${ttOnlySysts[@]}" =~ "${systematics[$sys]}" ]] ; then
+                continue
+            fi
+
+            if [[ "${separateSampleSysts[@]}" =~  "${systematics[$sys]}" ]] ; then
+                # Separate sample syst not available at alternate mass points
+                continue
+            elif [[ "${oneSidedSysts[@]}" =~  "${systematics[$sys]}" ]] ; then
+                # One sided systs
+                echo "./fillHistograms.py -s ${tWMass[$m]} --syst ${systematics[$sys]} ${addPlots} ${test}"
+                eval ./fillHistograms.py -s ${tWMass[$m]} --syst ${systematics[$sys]} ${addPlots} ${test}
+            else
+                # Up/Down variations
+                for (( var=0; var < $variationsLength; var++ )); do 
+                    echo "./fillHistograms.py -s ${tWMass[$m]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}"
+                    eval ./fillHistograms.py -s ${tWMass[$m]} --syst ${systematics[$sys]} -l ${variations[$var]} ${addPlots} ${test}
+                done
+            fi
+        done
     done
 elif [ "$option" == "bkg" ] ; then
    echo "backgroundSystematicsLength = $backgroundSystematicsLength"
@@ -258,18 +272,18 @@ elif [ "$option" == "bkg" ] ; then
    for (( b=0; b < $backgroundLength; b++ )); do
         echo ${background[$b]}    
         echo "./fillHistograms.py -s ${background[$b]} ${addPlots}"
-        ./fillHistograms.py -s ${background[$b]} ${addPlots}
+        eval ./fillHistograms.py -s ${background[$b]} ${addPlots}
         for (( sys=0; sys < $backgroundSystematicsLength; sys++ )); do
             for (( var=0; var < $variationsLength; var++ )); do
                 echo "./fillHistograms.py -s ${background[$b]} --syst ${backgroundSystematics[$sys]} -l ${variations[$var]} ${addPlots}"
-                ./fillHistograms.py -s ${background[$b]} --syst ${backgroundSystematics[$sys]} -l ${variations[$var]} ${addPlots}
+                eval ./fillHistograms.py -s ${background[$b]} --syst ${backgroundSystematics[$sys]} -l ${variations[$var]} ${addPlots}
             done
         done
     done 
 
 elif [ "$option" == "data" ] ; then
     echo "./fillHistograms.py -s Data ${addPlots}"
-        ./fillHistograms.py -s Data ${addPlots}
+        eval ./fillHistograms.py -s Data ${addPlots}
 else
     echo "Invalid option ${1}. Choose from:"
     echo "sig, nosyst, ttmt, ttmt_1, ttmt_2, tWmt, bkg, data"

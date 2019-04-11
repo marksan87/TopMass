@@ -10,15 +10,21 @@ Error  = condor/eleSkim_$(cluster)_$(process).stderr
 Log    = condor/eleSkim_$(cluster)_$(process).condor
 Requirements          = (OpSys == "LINUX" && (Arch != "DUMMY"))
 
+# Send the job to Held state on failure.
+on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
+
+# Periodically retry the jobs every 1 minutes, up to a maximum of 5 retries.
+periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 60)
+
 #use_x509userproxy = true
 #x509userproxy = $ENV(X509_USER_PROXY)
 
 # important, number of instances (jobs) of script
-Arguments = "$(process)-26"
-Queue 4
+#Arguments = "$(process)+39"
+#Queue 21
 
-#Arguments = $(process)
-#Queue 50 
+Arguments = $(process)
+Queue 60 
 
 
 

@@ -206,8 +206,9 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 		if(doOverlapRemoval || doOverlapRemoval_WZ || doOverlapRemoval_Tchannel) std::cout << "########## Will apply overlap removal ###########" << std::endl;
 	}
 
-	if( sampleType == "TTbarPowheg" || sampleType == "TTbarPowheg1" || sampleType == "TTbarPowheg2" || sampleType == "TTbarPowheg3" || sampleType == "TTbarPowheg4" || sampleType=="TTbar_amcanlo" || sampleType=="TTGamma_Dilepton" || sampleType == "TTGamma_SingleLeptFromT" || sampleType == "TTGamma_SingleLeptFromTbar" || sampleType == "TTGamma_Hadronic" || sampleType == "TTGJets"){
-		 applypdfweight = true; 	
+//	if( sampleType == "TTbarPowheg" || sampleType == "TTbarPowheg1" || sampleType == "TTbarPowheg2" || sampleType == "TTbarPowheg3" || sampleType == "TTbarPowheg4" || sampleType=="TTbar_amcanlo" || sampleType=="TTGamma_Dilepton" || sampleType == "TTGamma_SingleLeptFromT" || sampleType == "TTGamma_SingleLeptFromTbar" || sampleType == "TTGamma_Hadronic" || sampleType == "TTGJets"){
+    if( sampleType.substr(0,5)=="TTbar"){
+         applypdfweight = true; 	
 		 applyqsquare = true;
 	}
 	
@@ -240,16 +241,13 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	if(systematicType=="phoscale_up") {phoscale012_g=2;selector->phoscaleLevel=2; isSystematicRun = true;}
 	if(systematicType=="elescale_down") {elescale012_g=0;selector->elescaleLevel=0; isSystematicRun = true;}
 	if(systematicType=="elescale_up") {elescale012_g=2;  selector->elescaleLevel=2; isSystematicRun = true;}
+	if(systematicType=="muscale_up")   {muscale012_g = 2; selector->muscaleLevel=2; isSystematicRun = true;}
+	if(systematicType=="muscale_down") {muscale012_g = 0; selector->muscaleLevel=0; isSystematicRun = true;}
+    if(systematicType=="hdamp_up" || systematicType=="hdamp_down" || systematicType=="UE_up" || systematicType=="UE_down") { isSystematicRun = true; }
 
-    
-
-	if( systematicType=="muscale_up")   {muscale012_g = 2; selector->muscaleLevel=2; isSystematicRun = true;}
-	if( systematicType=="muscale_down") {muscale012_g = 0; selector->muscaleLevel=0; isSystematicRun = true;}
-
-	if( systematicType=="Dilep")     {dileptonsample =true; evtPick->Nmu_eq=2; evtPick->Nele_eq=2;}
-	if( systematicType=="QCDcr")       {selector->QCDselect = true; evtPick->ZeroBExclusive=true;}
-	std::cout << "Dilepton Sample :" << dileptonsample << std::endl;
-	std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << " eleScale "<< elescale012_g << " phoScale" << phoscale012_g << "   ";
+    if( (sampleType.substr(0,13) == "TTbar_CRerdON") || (sampleType.substr(0,13) == "TTbar_CRGluon") || (sampleType.substr(0,11) == "TTbar_CRQCD") || (sampleType.substr(0,13)=="TTbar_amcanlo") || (sampleType.substr(0,14)=="TTbar_madgraph") || (sampleType.substr(0,14)=="TTbar_herwigpp") || (sampleType.substr(0,9)=="TTbar_isr") || (sampleType.substr(0,9)=="TTbar_fsr") || (sampleType.substr(0,13)=="ST_tW_top_isr") || (sampleType.substr(0,13)=="ST_tW_top_fsr") || (sampleType.substr(0,17)=="ST_tW_antitop_isr") || (sampleType.substr(0,17)=="ST_tW_antitop_fsr") || (sampleType.substr(0,12)=="ST_tW_top_DS") || (sampleType.substr(0,16)=="ST_tW_antitop_DS") ) { isSystematicRun = true; }
+	
+    std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << " eleScale "<< elescale012_g << " phoScale" << phoscale012_g << "   ";
 	std::cout << "  PhoSmear: " << phosmear012_g << "  muSmear: " << muscale012_g << "  eleSmear: " << elesmear012_g << endl;
 
 	if (isSystematicRun){
@@ -1106,18 +1104,18 @@ void makeAnalysisNtuple::FillEvent()
 			double mean=0.;
 			for (int i=9;i<tree->pdfSystWeight_->size();i++){
 				_pdfSystWeight.push_back(tree->pdfSystWeight_->at(i));
-				if (i<109){
+				if (i<111){
 					mean += tree->pdfSystWeight_->at(i);
 				}
 			}
 
-			mean = mean/100.;
+			mean = mean/102.;
 
 			double sum=0.;
-			for (int j=0;j<100;j++){
+			for (int j=0;j<102;j++){
 				sum+=pow((_pdfSystWeight[j]-mean),2.);
 			}
-			_pdfuncer = sqrt(sum/100.);
+			_pdfuncer = sqrt(sum/102.);
 
 			_pdfweight_Up = (_pdfWeight + _pdfuncer)/_pdfWeight;
 			_pdfweight_Do = (_pdfWeight - _pdfuncer)/_pdfWeight;

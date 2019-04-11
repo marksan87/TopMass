@@ -10,51 +10,57 @@ Error  = condor/eleSkim_$(cluster)_$(process).stderr
 Log    = condor/eleSkim_$(cluster)_$(process).condor
 Requirements          = (OpSys == "LINUX" && (Arch != "DUMMY"))
 
+# Send the job to Held state on failure.
+on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
+
+# Periodically retry the jobs every 1 minutes, up to a maximum of 5 retries.
+periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 60)
+
 #use_x509userproxy = true
-x509userproxy = $ENV(X509_USER_PROXY)
+#x509userproxy = $ENV(X509_USER_PROXY)
 
 # important, number of instances (jobs) of script
-Arguments = "13 amcanlo"
-Queue 1
-
-#Arguments = "$(process) hdamp"
-#Queue 4
-#Arguments = "$(process) UE"
-#Queue 4
-#Arguments = "$(process) CRerdON"
-#Queue 2
-#Arguments = "$(process) CRGluon"
+#Arguments = "13 amcanlo"
 #Queue 1
-#Arguments = "$(process) CRQCD"
-#Queue 2
-#Arguments = "$(process) amcanlo"
-#Queue 1 
-#Arguments = "$(process) madgraph"
-#Queue 1 
-#Arguments = "$(process) herwigpp"
-#Queue 3 
 
-
+Arguments = "$(process) hdamp"
+Queue 4
+Arguments = "$(process) UE"
+Queue 4
+Arguments = "$(process) CRerdON"
+Queue 2
+Arguments = "$(process) CRGluon"
+Queue 1
+Arguments = "$(process) CRQCD"
+Queue 2
+Arguments = "$(process) amcanlo"
+Queue 1 
+Arguments = "$(process) madgraph"
+Queue 1 
+Arguments = "$(process) herwigpp"
+Queue 3 
+                 
+####### Obselete #######
 #Arguments = "$(process) isr"
 #Queue 9
 #Arguments = "$(process) fsr"
 #Queue 10
 #Arguments = "$(process) DS"
 #Queue 2
+#########################
 
 
 
-
-#Arguments = "$(process)+0 JEC1"
-#Queue 18
-#Arguments = "$(process)-18 JER"
-#Queue 18
-#Arguments = "$(process)-36 elescale"
-#Queue 18
-#Arguments = "$(process)-54 elesmear"
-#Queue 18
-#Arguments = "$(process)-72 muscale"
-#Queue 18
+Arguments = "$(process)+0 JEC1"
+Queue 19
+Arguments = "$(process)-19 JER"
+Queue 19
+Arguments = "$(process)-38 elescale"
+Queue 19
+Arguments = "$(process)-57 elesmear"
+Queue 19
+Arguments = "$(process)-76 muscale"
+Queue 19
 
 
 
