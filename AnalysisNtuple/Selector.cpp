@@ -165,7 +165,7 @@ void Selector::applyRoccor(int sysLvl)
                 cor = rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), rand1);
                 if (sysLvl != 1)
                 {
-                    cor_var = abs(rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), rand1) - cor);
+                    cor_var = abs(rc->kScaleFromGenMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), tree->mcPt->at(muGenIndex), rand1, 2) - cor);
                     if (sysLvl == 2)
                         cor += cor_var;
                     else if (sysLvl == 0)
@@ -192,7 +192,7 @@ void Selector::applyRoccor(int sysLvl)
                 cor = rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), rand1, rand2);
                 if (sysLvl != 1)
                 {
-                    cor_var = abs(rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), rand1, rand2) - cor);
+                    cor_var = abs(rc->kScaleAndSmearMC(tree->muCharge_->at(muInd), tree->muPt_->at(muInd), tree->muEta_->at(muInd), tree->muPhi_->at(muInd), tree->muTrkLayers_->at(muInd), rand1, rand2, 2) - cor);
                     if (sysLvl == 2)
                         cor += cor_var;
                     else if (sysLvl == 0)
@@ -437,10 +437,10 @@ void Selector::filter_electrons(){
 
 
 		// D0 and Dz cuts are different for barrel and endcap
-		bool passD0 = ((absEta < 1.479 && tree->eleD0_->at(eleInd) < 0.05) ||
-			       (absEta > 1.479 && tree->eleD0_->at(eleInd) < 0.1));
-		bool passDz = ((absEta < 1.479 && tree->eleDz_->at(eleInd) < 0.1) ||
-			       (absEta > 1.479 && tree->eleDz_->at(eleInd) < 0.2));
+		bool passD0 = ((absEta < 1.479 && abs(tree->eleD0_->at(eleInd)) < 0.05) ||
+			       (absEta > 1.479 && abs(tree->eleD0_->at(eleInd)) < 0.1));
+		bool passDz = ((absEta < 1.479 && abs(tree->eleDz_->at(eleInd)) < 0.1) ||
+			       (absEta > 1.479 && abs(tree->eleDz_->at(eleInd)) < 0.2));
 
 
 

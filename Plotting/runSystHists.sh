@@ -116,8 +116,8 @@ declare -a variations=("up" \
             )
 #addPlots="--addPlots --plot nBJet bjetPt bjetEta bjetPhi"
 #addPlots="--addPlots --plot rec_ptll --outDir secondtry_histograms"
-#addPlots="--addPlots --plot muPt jetPt --outDir secondtry_histograms"
-addPlots="--addPlots --plot elePt muPt jetPt --outDir histograms"
+addPlots="--addPlots --plot rec_ptll elePt muPt jetPt --outDir histograms"
+#addPlots="--addPlots --analysisNtupleDir fixed_13TeV_AnalysisNtuples --plot rec_ptll elePt muPt jetPt --outDir histograms"
 #addPlots="--addPlots --plot rec_ptll --binning 300 20 320 --outDir histograms_cut320"
 #addPlots="--addPlots --plot rec_ptll --binning 20 0 200 --outDir histograms_bin10"
 #addPlots='--addPlots --plot rec_ptll --varBins "range(0,210,10) + [220]" --outDir histograms_varbin_220'

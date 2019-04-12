@@ -11,6 +11,7 @@ from pprint import pprint
 
 parser = ArgumentParser()
 
+parser.add_argument("--analysisNtupleDir", default="13TeV_AnalysisNtuples", help="eos directory name for analysis ntuples")
 parser.add_argument("-s", "--sample", dest="sample", default="", help="Specify which sample to run on" )
 parser.add_argument("-l", "--level", dest="level", default="", help="Specify up/down of systematic")
 parser.add_argument("--syst", "--systematic", dest="systematic", default="", help="Specify which systematic to run on")
@@ -139,7 +140,8 @@ if ("TTbar" in sample or "ST_tW" in sample) and syst in separateSystSamples:
             sampleListName+="Down"
 
 
-analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/"
+#analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/"
+analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/%s/emu/V08_00_26_07/" % args.analysisNtupleDir
 outputhistName = "%s/%s" % (outputDirectory,outputFileName)
 if runsystematic:
     outputhistName = "%s/" % outputDirectory

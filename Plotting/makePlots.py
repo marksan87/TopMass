@@ -284,7 +284,7 @@ R = 0.1*W
 
 errorbandFillStyle = 3245
 
-legendHeightPer = 0.02
+legendHeightPer = 0.03
 #legendHeightPer = 0.04
 legList = stackList[:]
 legList.reverse()
@@ -302,7 +302,7 @@ legend.SetNColumns(2)
 
 legendR = TLegend(2*legendStart - legendEnd , 0.99 - (T/H)/(1.-padRatio+padOverlap) - legendHeightPer/(1.-padRatio+padOverlap)*round((len(legList)+1)/2.)-0.1, legendEnd, 0.99-(T/H)/(1.-padRatio+padOverlap))
 
-legendR.SetNColumns(2)
+legendR.SetNColumns(3)
 
 legendR.SetBorderSize(0)
 legendR.SetFillColor(0)

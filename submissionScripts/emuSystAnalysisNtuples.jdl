@@ -16,12 +16,8 @@ on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
 # Periodically retry the jobs every 1 minutes, up to a maximum of 5 retries.
 periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 60)
 
-#use_x509userproxy = true
-#x509userproxy = $ENV(X509_USER_PROXY)
 
 # important, number of instances (jobs) of script
-#Arguments = "13 amcanlo"
-#Queue 1
 
 Arguments = "$(process) hdamp"
 Queue 4
@@ -40,16 +36,6 @@ Queue 1
 Arguments = "$(process) herwigpp"
 Queue 3 
                  
-####### Obselete #######
-#Arguments = "$(process) isr"
-#Queue 9
-#Arguments = "$(process) fsr"
-#Queue 10
-#Arguments = "$(process) DS"
-#Queue 2
-#########################
-
-
 
 Arguments = "$(process)+0 JEC1"
 Queue 19
@@ -61,7 +47,6 @@ Arguments = "$(process)-57 elesmear"
 Queue 19
 Arguments = "$(process)-76 muscale"
 Queue 19
-
 
 
 
