@@ -220,19 +220,9 @@ void Selector::process_objects(EventTree* inp_tree){
 	//	cout << "before selector electrons" << endl;
  	filter_electrons();
 
-	if (isTTGamma){
-		//	cout << "before selector photons" << endl;
-		filter_photons();
-	}
-
 	//	cout << "before selector jets" << endl;
 	filter_jets();
 
-	if (isTTGamma){
-		//	cout << "before photon jet dr" << endl;
-		// add in the DR(photon,jet), removing photons with jet < 0.4 away, needs to be done after the jet selection
-		filter_photons_jetsDR();
-	}
 	//	cout << "end selector" << endl;
 
 }

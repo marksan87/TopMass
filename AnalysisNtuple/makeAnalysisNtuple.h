@@ -196,7 +196,6 @@ private :
 	std::vector<float>   _phoPFNeuIso;
 	std::vector<std::vector<float>>   _phoPFRandConeChIso;
 	std::vector<std::vector<float>>   _phoPFRandConeEta;
-	std::vector<std::vector<float>>   _phoPFRandConePhi;
 	std::vector<std::vector<float>>   _phoPFRandConeJetDR;
 	std::vector<std::vector<float>>   _phoPFRandConeChIsoUnCorr;
 	std::vector<float>   _phoPFChIsoUnCorr;
@@ -525,7 +524,6 @@ void makeAnalysisNtuple::InitBranches(){
 		if (!isSystematicRun){
 			outputTree->Branch("phoPFRandConeChIso"         , &_phoPFRandConeChIso          ); 
 			outputTree->Branch("phoPFRandConeEta"           , &_phoPFRandConeEta            ); 
-			outputTree->Branch("phoPFRandConePhi"           , &_phoPFRandConePhi            ); 
 			outputTree->Branch("phoPFRandConeJetDR"         , &_phoPFRandConeJetDR          ); 
 			outputTree->Branch("phoPFRandConeChIsoUnCorr"   , &_phoPFRandConeChIsoUnCorr    ); 
 			outputTree->Branch("phoPFChIsoUnCorr"                 , &_phoPFChIsoUnCorr                  ); 
@@ -797,7 +795,6 @@ void makeAnalysisNtuple::InitVariables()
 	_phoPFNeuIso.clear();
 	_phoPFRandConeChIso.clear();
 	_phoPFRandConeEta.clear();
-	_phoPFRandConePhi.clear();
 	_phoPFRandConeJetDR.clear();
 	_phoPFChIsoUnCorr.clear();
 	_phoPFPhoIsoUnCorr.clear();

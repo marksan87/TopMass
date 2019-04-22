@@ -15,6 +15,8 @@ using std::cout;
 using std::endl;
 using std::string;
 using std::flush;
+using std::snprintf;
+using std::vector;
 
 string PUfilename = "mt_pileupNominal.root";
 
@@ -45,6 +47,74 @@ TH1F* muIso_GH_SF;
 TGraphAsymmErrors* muTrack_SF;
 TH1F* trigger_SF;
 
+bool saveOutputTree = false;
+
+TTree* outputTree;
+
+Long64_t __event;
+Float_t __PUweight;
+//vector<float> __btagWeight;
+float __btagWeight;
+Float_t __topptWeight;
+Float_t __eleIDEffWeight;
+Float_t __eleRecoEffWeight;
+Float_t __muIDEffWeight;
+Float_t __muIsoEffWeight;
+Float_t __muTrackEffWeight;
+Float_t __trigEffWeight;
+Float_t __evtWeight;
+Float_t __lumiWeight;
+Float_t __nVtx;
+Int_t __nEle;
+Int_t __nMu;
+Int_t __nJet;
+Int_t __nBJet;
+
+vector<float> __elePt;
+vector<float> __elePhi;
+vector<float> __eleSCEta;
+
+vector<float> __muPt;
+vector<float> __muPhi;
+vector<float> __muEta;
+
+vector<float> __jetPt;
+vector<float> __jetPhi;
+vector<float> __jetEta;
+
+
+void InitVariables(TTree* _tree);
+void InitVariables(TTree* _tree)
+{
+    __event = -1;
+    __PUweight = 1.;
+    __btagWeight = 1.;
+    __topptWeight = 1.;
+    __eleIDEffWeight = 1.;
+    __eleRecoEffWeight = 1.;
+    __muIDEffWeight = 1.;
+    __muIsoEffWeight = 1.;
+    __muTrackEffWeight = 1.;
+    __trigEffWeight = 1.;
+    __evtWeight = 1.;
+    __nVtx = -999;
+    __nEle = -999;
+    __nMu = -999;
+    __nJet = -999;
+    __nBJet = -999;
+    __elePt.clear();
+    __elePhi.clear();
+    __eleSCEta.clear();
+    __muPt.clear();
+    __muPhi.clear();
+    __muEta.clear();
+    __jetPt.clear();
+    __jetPhi.clear();
+    __jetEta.clear();
+}
+
+// No stochastic scaling or smearing for leptons/jets
+bool noScaleSmear = true;
 
 #include"PUReweight.h"
 #include "BTagCalibrationStandalone.h"
@@ -62,6 +132,35 @@ int main(int ac, char** av){
 		std::cout << "usage: ./makeCutflows sampleType outputFile inputFile[s]" << std::endl;
 		return -1;
 	}
+    if (saveOutputTree)
+    {
+        outputTree = new TTree("AnalysisTree", "AnalysisTree");
+        outputTree->Branch("event", &__event);
+        outputTree->Branch("PUweight", &__PUweight);
+        outputTree->Branch("btagWeight", &__btagWeight);
+        outputTree->Branch("topptWeight", &__topptWeight);
+        outputTree->Branch("eleIDEffWeight", &__eleIDEffWeight);
+        outputTree->Branch("eleRecoEffWeight", &__eleRecoEffWeight);
+        outputTree->Branch("muIDEffWeight", &__muIDEffWeight);
+        outputTree->Branch("muIsoEffWeight", &__muIsoEffWeight);
+        outputTree->Branch("muTrackEffWeight", &__muTrackEffWeight);
+        outputTree->Branch("trigEffWeight", &__trigEffWeight);
+        outputTree->Branch("evtWeight", &__evtWeight);
+        outputTree->Branch("nVtx", &__nVtx);
+        outputTree->Branch("nEle", &__nEle);
+        outputTree->Branch("nMu", &__nMu);
+        outputTree->Branch("nJet", &__nJet);
+        outputTree->Branch("nBJet", &__nBJet);
+        outputTree->Branch("elePt", &__elePt);
+        outputTree->Branch("elePhi", &__elePhi);
+        outputTree->Branch("eleSCEta", &__eleSCEta);
+        outputTree->Branch("muPt", &__muPt);
+        outputTree->Branch("muPhi", &__muPhi);
+        outputTree->Branch("muEta", &__muEta);
+        outputTree->Branch("jetPt", &__jetPt);
+        outputTree->Branch("jetPhi", &__jetPhi);
+        outputTree->Branch("jetEta", &__jetEta);
+    }
 
     TFile* f = new TFile(eleID_SF_path, "read");
     eleID_SF = (TH1F*)f->Get("EGamma_SF2D");
@@ -104,7 +203,6 @@ int main(int ac, char** av){
 
 	string sampleType = av[1];
 	string systematicType = "";
-	cout << sampleType << endl;
 
 	size_t pos = sampleType.find("__");
 	if (pos != std::string::npos){
@@ -161,15 +259,37 @@ int main(int ac, char** av){
 
 	selector->looseJetID = true; 
 	selector->useDeepCSVbTag = true;
-    selector->useRoccor = true;
+    selector->useRoccor = false;
     selector->fixedSeed = true;
     selector->isTTGamma = false;
+	selector->smearJetPt = false;
 
 	evtPick->Njet_ge = 2;	
 	evtPick->NBjet_ge = 1;	
 
+    if (noScaleSmear)
+    {
+        // Don't scale or smear any lepton/jet energies
+        selector->smearJetPt = false;
+        selector->smearEle = false;
+        selector->scaleEle = false;
+        selector->useRoccor = false;
+    }
+
 	//	selector->veto_jet_pho_dR = -1.;
 	//	selector->veto_pho_jet_dR = -1.;
+
+    if (selector->smearJetPt)
+    {
+        cout<<"Applying jet pt smearing"<<endl;
+    }
+    if (selector->scaleEle || selector->smearEle)
+    {
+        if (selector->scaleEle && selector->smearEle)
+            cout<<"Applying electron scale and smear corrections"<<flush<<endl;
+        else
+            cout<<"Applying electron "<<(selector->scaleEle ? "scale" : "smear")<<" corrections"<<flush<<endl;
+    }
 
     if (selector->useRoccor) { cout<<"Applying Rochester Muon Corrections using "<<((selector->fixedSeed) ? "fixed" : "random")<<" seed"<<endl; }
 
@@ -202,7 +322,6 @@ int main(int ac, char** av){
 
 
 
-	selector->smearJetPt = false;
 
     double _muEffWeight, _muIDEffWeight, _muIsoEffWeight, _muTrackEffWeight;
     double _eleEffWeight, _eleIDEffWeight, _eleRecoEffWeight, _trigEffWeight;
@@ -260,20 +379,18 @@ int main(int ac, char** av){
 
 			if (selector->Muons.size()>=1) {
 				int muInd_ = selector->Muons.at(0);
-                _muEffWeight    = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
                 _muIDEffWeight    = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
                 _muIsoEffWeight    = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
                 _muTrackEffWeight    = muTrackEffSF(tree->muEta_->at(muInd_),1);
-				_muWeight = _muEffWeight * _muIDEffWeight * _muIsoEffWeight * _muTrackEffWeight;
+				_muWeight = _muIDEffWeight * _muIsoEffWeight * _muTrackEffWeight;
 				weight *= _muWeight;
 			}
 
 			if (selector->Electrons.size()>=1) {
 				int eleInd_ = selector->Electrons.at(0);
-                _eleEffWeight    = eleEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
                 _eleIDEffWeight    = eleIDEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
                 _eleRecoEffWeight    = eleRecoEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
-				_eleWeight = _eleEffWeight * _eleIDEffWeight * _eleRecoEffWeight;
+				_eleWeight =  _eleIDEffWeight * _eleRecoEffWeight;
 				weight *= _eleWeight;
 			}
 
@@ -288,10 +405,10 @@ int main(int ac, char** av){
 
 			_btagWeight    = getBtagSF(tree, selector, "central", reader, evtPick->NBjet_ge);
             weight *= _btagWeight;
+            _topptWeight = topPtWeight(tree);
 
             if (applyTopptWeight)
             {
-                _topptWeight = topPtWeight(tree);
                 weight *= _topptWeight;
             }
 		}
@@ -300,11 +417,60 @@ int main(int ac, char** av){
 
         if (evtPick->passPresel_emu && selector->bJets.size() > 0) 
         {
-            //cout<<"Event "<<tree->event_<<"\tweight = "<<weight<<flush<<endl;
-            cout<<"Event "<<tree->event_<<"\tPUweight "<<_PUweight<<"\t_btagWeight "<<_btagWeight<<flush<<endl;
+//            cout<<"Event "<<tree->event_<<"\tweight = "<<weight<<flush<<endl;
+            
+            //cout<<"Event "<<tree->event_<<"\tPUweight "<<_PUweight<<"\t_btagWeight "<<_btagWeight<<flush<<endl;
+            
             //cout<<"This is entry "<<entry<<endl;
 //            cout<<"nEle =  "<<selector->Electrons.size()<<"\tnMu = "<<selector->Muons.size()<<endl;
 //            cout<<"--------------------------------------"<<endl<<flush;
+       
+            if (saveOutputTree)
+            {
+                InitVariables(outputTree);
+                
+                // FillEvent
+                __event = tree->event_;
+                __PUweight = _PUweight;
+                __btagWeight = _btagWeight;
+                __topptWeight = _topptWeight;
+                __eleIDEffWeight = _eleIDEffWeight;
+                __eleRecoEffWeight = _eleRecoEffWeight;
+                __muIDEffWeight = _muIDEffWeight;
+                __muIsoEffWeight = _muIsoEffWeight;
+                __muTrackEffWeight = _muTrackEffWeight;
+                __trigEffWeight = _trigEffWeight;
+                __evtWeight = _evtWeight;
+                __nVtx = tree->nVtx_;
+                __nEle = selector->Electrons.size();
+                __nMu = selector->Muons.size();
+                __nJet = selector->Jets.size();
+                __nBJet = selector->bJets.size();
+
+                for (int i_ele = 0; i_ele <__nEle; i_ele++){
+                    int eleInd = selector->Electrons.at(i_ele);
+                    __elePt.push_back(tree->elePt_->at(eleInd));
+                    __elePhi.push_back(tree->elePhi_->at(eleInd));
+                    __eleSCEta.push_back(tree->eleSCEta_->at(eleInd));
+                }
+                
+                for (int i_mu = 0; i_mu <__nMu; i_mu++){
+                    int muInd = selector->Muons.at(i_mu);
+                    __muPt.push_back(tree->muPt_->at(muInd));
+                    __muPhi.push_back(tree->muPhi_->at(muInd));
+                    __muEta.push_back(tree->muEta_->at(muInd));
+                }
+                
+                for (int i_jet = 0; i_jet <__nJet; i_jet++){
+                    int jetInd = selector->Jets.at(i_jet);
+                    __jetPt.push_back(tree->jetPt_->at(jetInd));
+                    __jetPhi.push_back(tree->jetPhi_->at(jetInd));
+                    __jetEta.push_back(tree->jetEta_->at(jetInd));
+                }
+                
+                
+                outputTree->Fill();
+            }
         }
 		// if (evtPick->passPresel_mu){
 		// 	cout << tree->event_ << endl;// "  " << tree->phoEt_->at(selector->PhotonsPresel.at(0)) << endl;
@@ -312,14 +478,20 @@ int main(int ac, char** av){
 		// }
 
 	}
+    
+    cout<<"\nRaw events"<<flush<<endl;
+    evtPick->print_cutflow_emu(evtPick->cutFlow_emu);
 
-	evtPick->print_cutflow_emu(evtPick->cutFlow_emu);
+    cout<<"\nWeighted events"<<flush<<endl;
+    evtPick->print_cutflow_emu(evtPick->cutFlowWeight_emu);
+    
     string outputDir(av[2]);
     string outputFileName = outputDir + "/" + sampleType + "_cutflow.root";
 	TFile* outputFile = new TFile(outputFileName.c_str(),"RECREATE");
 
 	outputFile->cd();
-	evtPick->cutFlow_emu->Write();
+	if (saveOutputTree) { outputTree->Write(); }
+    evtPick->cutFlow_emu->Write();
 	evtPick->cutFlowWeight_emu->Write();
 	outputFile->Close();
 

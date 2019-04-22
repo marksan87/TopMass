@@ -120,7 +120,7 @@ inputFile = args.inputFile
 makeMorePlots = args.makeMorePlots
 makeAllPlots = args.makeAllPlots
 
-scaleTTbarXS = not args.theoryTTxs     # Scale to 803 pb, value from TOP-17-001
+scaleTTbarXS = args.theoryTTxs     # Scale to theory xsec of 831.76pb instead of 803 pb (value from TOP-17-001)
 
 showUnc = not args.hideUnc    # If true, include data/mc uncertainty in plot
 
@@ -514,7 +514,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         hist.SetLineColor(samples[sample][1])
         if scaleTTbarXS and sample == "TTbar":
             # Scale to xsec measured in TOP-17-001
-            hist.Scale(803./831)
+            hist.Scale(831.76/803.)
 
         if type(plotInfo[2]) is type(list()):
             hist = hist.Rebin(len(plotInfo[2])-1,"",array('d',plotInfo[2]))

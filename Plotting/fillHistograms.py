@@ -20,7 +20,6 @@ parser.add_argument("--addPlots","--addOnly", dest="onlyAddPlots", default=False
 parser.add_argument("--outDir", default="histograms", help="output histogram directory")
 parser.add_argument("-o","--output", dest="outputFileName", default="hists",
                      help="Give the name of the root file for histograms to be saved in (default is hists.root)" )
-
 parser.add_argument("--binning", nargs="+", type=float, default=[], help="nbins binMin binMax, to be used ONLY when --plot is specified")
 parser.add_argument("--varBins", type=str, default="", help="list of variable bin sizes (overrides --binning option)")
 parser.add_argument("--plot", dest="plotList",action="store", nargs='*',

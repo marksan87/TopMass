@@ -15,35 +15,32 @@
 #include"JEC/JECvariation.h"
 //#include"OverlapRemove.cpp"
 #include <cmath>
-#include "elemuSF.h"
 
 using std::cout;
 using std::endl;
 using std::flush;
 
-std::string TTGamma_PUfilename = "Data_2016BCDGH_Pileup.root";
-std::string TTGamma_PUfilename_up = "Data_2016BCDGH_Pileup_scaledUp.root";
-std::string TTGamma_PUfilename_down = "Data_2016BCDGH_Pileup_scaledDown.root";
 
 std::string mt_PUfilename = "mt_pileupNominal.root";
 std::string mt_PUfilename_up = "mt_pileupUp.root"; 
 std::string mt_PUfilename_down = "mt_pileupDown.root"; 
 
-int jecvar012_g = 1; // 0:down, 1:norm, 2:up
-int jervar012_g = 1; // 0:down, 1:norm, 2:up
-int phosmear012_g = 1; // 0:down, 1:norm, 2:up 
-int muscale012_g = 1; // 0:down, 1:norm, 2: up
-int elesmear012_g = 1; // 0:down, 1:norm, 2: up
-int phoscale012_g = 1;
-int elescale012_g = 1;
+int jecvar012_g = 1;   // 0:down, 1:norm, 2:up
+int jervar012_g = 1;   // 0:down, 1:norm, 2:up
+int muscale012_g = 1;  // 0:down, 1:norm, 2:up
+int elesmear012_g = 1; // 0:down, 1:norm, 2:up
+int elescale012_g = 1; // 0:down, 1:norm, 2:up
+
 #include "BTagCalibrationStandalone.h"
+
+// No stochastic scaling or smearing for leptons/jets
+bool noScaleSmear = false;
 
 bool overlapRemovalTT(EventTree* tree);
 bool overlapRemovalWZ(EventTree* tree);
 bool overlapRemoval_Tchannel(EventTree* tree);
 double getJetResolution(double, double, double);
 
-bool dileptonsample;
 std::clock_t startClock;
 double duration;
 
@@ -59,14 +56,11 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	startClock = clock();
 	tree = new EventTree(ac-3, av+3);
 
-    //gRandom->SetSeed();     // Set gRandom seed for Rochester muon corrections
-    
     sampleType = av[1];
 	systematicType = "";
-	cout << sampleType << endl;
 	
 	isSystematicRun = false;
-	isTTGamma = false;
+    isTTGamma = false;
     mtAnalysis = true;
 
     if (mtAnalysis)
@@ -133,21 +127,35 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 
 	evtPick = new EventPick("nominal");
 
-	selector->pho_applyPhoID = false;
-	//selector->looseJetID = false;
 	selector->looseJetID = true;
-
 	selector->useDeepCSVbTag = true;
 
-	// selector->veto_pho_jet_dR = -1.; //remove jets which have a photon close to them 
-	selector->veto_jet_pho_dR = -1.; //remove photons which have a jet close to them (after having removed jets too close to photon from above cut)
-
-	selector->isTTGamma = isTTGamma;
     selector->useRoccor = true;	
     selector->fixedSeed = false; 
    
-    evtPick->saveCutflows = true;
-    
+//    evtPick->saveCutflows = true;
+
+    if (noScaleSmear)
+    {
+        // Don't scale or smear any lepton/jet energies
+        selector->smearJetPt = false;
+        selector->smearEle = false;
+        selector->scaleEle = false;
+        selector->useRoccor = false;
+    }
+   
+    if (selector->smearJetPt)
+    {
+        cout<<"Applying jet pt smearing"<<endl;
+    }
+    if (selector->scaleEle || selector->smearEle)
+    {
+        if (selector->scaleEle && selector->smearEle)
+            cout<<"Applying electron scale and smear corrections"<<flush<<endl;
+        else
+            cout<<"Applying electron "<<(selector->scaleEle ? "scale" : "smear")<<" corrections"<<flush<<endl;
+    }
+
     if (selector->useRoccor) { cout<<"Applying Rochester Muon Corrections using "<<((selector->fixedSeed) ? "fixed" : "random")<<" seed"<<endl; }
 
     if (!selector->fixedSeed) { gRandom->SetSeed(); }
@@ -182,32 +190,15 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 				"incl");               // measurement type
 
 	getGenScaleWeights = false;
-	if( sampleType.substr(0,5)=="TTbar" || sampleType.substr(0,7)=="TTGamma"){
+	if( sampleType.substr(0,5)=="TTbar"){
 		getGenScaleWeights = true;
 	}
 
-	bool doOverlapRemoval = false;
-	bool doOverlapRemoval_WZ = false;	
-	bool doOverlapRemoval_Tchannel = false;	
-
 	
-	bool invertOverlap = false;
-	bool skipOverlap = false;
-
 	applypdfweight = false;
 	applyqsquare  = false;
 
-	if (isTTGamma){
-		if( sampleType == "TTbarPowheg" || sampleType == "TTbarPowheg1" || sampleType == "TTbarPowheg2" || sampleType == "TTbarPowheg3" || sampleType == "TTbarPowheg4" || sampleType == "TTbarMCatNLO" || sampleType == "TTbarMadgraph_SingleLeptFromT" || sampleType == "TTbarMadgraph_SingleLeptFromTbar" || sampleType == "TTbarMadgraph_Dilepton" || sampleType == "TTbarMadgraph" ) doOverlapRemoval = true;
-		
-		if( sampleType == "W1jets" || sampleType == "W2jets" ||  sampleType == "W3jets" || sampleType == "W4jets" || sampleType=="DYjetsM10to50" || sampleType=="DYjetsM50") doOverlapRemoval_WZ = true;
 
-		if( sampleType == "ST_t-channel" || sampleType == "ST_tbar-channel") doOverlapRemoval_Tchannel = true;
-
-		if(doOverlapRemoval || doOverlapRemoval_WZ || doOverlapRemoval_Tchannel) std::cout << "########## Will apply overlap removal ###########" << std::endl;
-	}
-
-//	if( sampleType == "TTbarPowheg" || sampleType == "TTbarPowheg1" || sampleType == "TTbarPowheg2" || sampleType == "TTbarPowheg3" || sampleType == "TTbarPowheg4" || sampleType=="TTbar_amcanlo" || sampleType=="TTGamma_Dilepton" || sampleType == "TTGamma_SingleLeptFromT" || sampleType == "TTGamma_SingleLeptFromTbar" || sampleType == "TTGamma_Hadronic" || sampleType == "TTGJets"){
     if( sampleType.substr(0,5)=="TTbar"){
          applypdfweight = true; 	
 		 applyqsquare = true;
@@ -215,7 +206,6 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	
 	if (applypdfweight||applyqsquare)  std::cout<<"###### Will apply pdfWeights and Q2 weights ######"<< std::endl;
 
-	dileptonsample = false;
 	string JECsystLevel = "";
 	if( systematicType.substr(0,3)=="JEC" ){
 		int pos = systematicType.find("_");
@@ -227,19 +217,13 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 		}
 		if (systematicType.substr(pos+1,2)=="up"){ jecvar012_g = 2; }
 		if (systematicType.substr(pos+1,2)=="do"){ jecvar012_g = 0; }
-		// evtPick->Njet_ge = 3;	
-		// evtPick->NBjet_ge = 1;	
 		isSystematicRun = true;
 	}
 		
 	if( systematicType=="JER_up")       {jervar012_g = 2; selector->JERsystLevel=2; isSystematicRun = true;}
 	if( systematicType=="JER_down")     {jervar012_g = 0; selector->JERsystLevel=0; isSystematicRun = true;}
-	if(systematicType=="phosmear_down") {phosmear012_g=0;selector->phosmearLevel=0; isSystematicRun = true;}
-	if(systematicType=="phosmear_up") {phosmear012_g=2;selector->phosmearLevel=2; isSystematicRun = true;}
 	if(systematicType=="elesmear_down") {elesmear012_g=0;selector->elesmearLevel=0; isSystematicRun = true;}
 	if(systematicType=="elesmear_up") {elesmear012_g=2;selector->elesmearLevel=2; isSystematicRun = true;}
-	if(systematicType=="phoscale_down") {phoscale012_g=0;selector->phoscaleLevel=0; isSystematicRun = true;} 
-	if(systematicType=="phoscale_up") {phoscale012_g=2;selector->phoscaleLevel=2; isSystematicRun = true;}
 	if(systematicType=="elescale_down") {elescale012_g=0;selector->elescaleLevel=0; isSystematicRun = true;}
 	if(systematicType=="elescale_up") {elescale012_g=2;  selector->elescaleLevel=2; isSystematicRun = true;}
 	if(systematicType=="muscale_up")   {muscale012_g = 2; selector->muscaleLevel=2; isSystematicRun = true;}
@@ -248,8 +232,8 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 
     if( (sampleType.substr(0,13) == "TTbar_CRerdON") || (sampleType.substr(0,13) == "TTbar_CRGluon") || (sampleType.substr(0,11) == "TTbar_CRQCD") || (sampleType.substr(0,13)=="TTbar_amcanlo") || (sampleType.substr(0,14)=="TTbar_madgraph") || (sampleType.substr(0,14)=="TTbar_herwigpp") || (sampleType.substr(0,9)=="TTbar_isr") || (sampleType.substr(0,9)=="TTbar_fsr") || (sampleType.substr(0,13)=="ST_tW_top_isr") || (sampleType.substr(0,13)=="ST_tW_top_fsr") || (sampleType.substr(0,17)=="ST_tW_antitop_isr") || (sampleType.substr(0,17)=="ST_tW_antitop_fsr") || (sampleType.substr(0,12)=="ST_tW_top_DS") || (sampleType.substr(0,16)=="ST_tW_antitop_DS") ) { isSystematicRun = true; }
 	
-    std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << " eleScale "<< elescale012_g << " phoScale" << phoscale012_g << "   ";
-	std::cout << "  PhoSmear: " << phosmear012_g << "  muSmear: " << muscale012_g << "  eleSmear: " << elesmear012_g << endl;
+    std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << "  eleScale: "<< elescale012_g  
+              << "  eleSmear: " << elesmear012_g << "  muScale: " << muscale012_g << endl;
 
 	if (isSystematicRun){
 		std::cout << "  Systematic Run : Dropping genMC variables from tree" << endl;
@@ -271,9 +255,9 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	InitBranches();
     
 
-	PUReweight* PUweighter = new PUReweight(ac-3, av+3, (mtAnalysis ? mt_PUfilename : TTGamma_PUfilename));
-	PUReweight* PUweighterUp = new PUReweight(ac-3, av+3, (mtAnalysis ? mt_PUfilename_up : TTGamma_PUfilename_up));
-	PUReweight* PUweighterDown = new PUReweight(ac-3, av+3, (mtAnalysis ? mt_PUfilename_down : TTGamma_PUfilename_down));
+	PUReweight* PUweighter = new PUReweight(ac-3, av+3, mt_PUfilename);
+	PUReweight* PUweighterUp = new PUReweight(ac-3, av+3, mt_PUfilename_up);
+	PUReweight* PUweighterDown = new PUReweight(ac-3, av+3, mt_PUfilename_down);
 	bool isMC;
 
 	tree->GetEntry(0);
@@ -287,7 +271,8 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 		jecvar = new JECvariation("./jecFiles/Summer16_23Sep2016V4", isMC, JECsystLevel);//SubTotalAbsolute");
 	}
 
-	_lumiWeight = getEvtWeight(sampleType);
+
+    _lumiWeight = getEvtWeight(sampleType);
 	
 	_PUweight       = 1.;
 	_muEffWeight    = 1.;
@@ -340,7 +325,6 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	int count_overlapVJets=0;
 	int count_overlapTTbar=0;
 
-    //nEntr = 3;
 
 	for(Long64_t entry=0; entry<nEntr; entry++){
 		if(entry%dumpFreq == 0){
@@ -353,33 +337,6 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 		tree->GetEntry(entry);
 		isMC = !(tree->isData_);
 
-		if( isMC && doOverlapRemoval){
-			if (!invertOverlap){
-				if (overlapRemovalTT(tree)){	
-					count_overlapTTbar++;			
-					//	cout << "removing event " << entry << endl;
-					continue;
-				}
-			} else {
-				if (!overlapRemovalTT(tree)){	
-					count_overlapTTbar++;			
-					//	cout << "removing event " << entry << endl;
-					continue;
-				}
-			}
-		}
-		if( isMC && doOverlapRemoval_WZ){
-			if (overlapRemovalWZ(tree)){
-				count_overlapVJets++;
-				continue;
-			}
-		}
-		if( isMC && doOverlapRemoval_Tchannel){
-			if (overlapRemoval_Tchannel(tree)){
-				count_overlapTchannel++;
-				continue;
-			}
-		}
 		// //		Apply systematics shifts where needed
 		if( isMC ){
 			if (jecvar012_g != 1){
@@ -407,7 +364,7 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 //			cout << "    nBJets= "<<selector->bJets.size() << endl;
 //			return;
 //		}
-		if ( (mtAnalysis && evtPick->passPresel_emu) || ( isTTGamma && (evtPick->passPresel_ele || evtPick->passPresel_mu) ) || saveAllEntries) {
+		if ( (mtAnalysis && evtPick->passPresel_emu) || saveAllEntries) {
 			InitVariables();
 			FillEvent();
 			//			cout << tree->run_ <<"\t"<<tree->lumis_ << "\t" << tree->event_ << endl;
@@ -457,30 +414,6 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
                     _trigEffWeight_Do = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),0);
                     _trigEffWeight_Up = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),2);
                 }
-
-
-                else if (isTTGamma)
-                {
-                    if (evtPick->passPresel_mu) {
-                        int muInd_ = selector->Muons.at(0);
-                        _muEffWeight    = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
-                        _muEffWeight_Do = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
-                        _muEffWeight_Up = getMuSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
-                        _eleEffWeight    = 1.;
-                        _eleEffWeight_Up = 1.;
-                        _eleEffWeight_Do = 1.;
-                    }
-                    if (evtPick->passPresel_ele) {
-                        int eleInd_ = selector->Electrons.at(0);
-                        _muEffWeight    = 1.;
-                        _muEffWeight_Do = 1.;
-                        _muEffWeight_Up = 1.;
-                        _eleEffWeight    = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),1);
-                        _eleEffWeight_Do = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
-                        _eleEffWeight_Up = getEleSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
-                             //               std::cout<<"done with Ele scaling"<<std::endl;
-                    }
-                }
 			}
 
 			if (tree->isData_){
@@ -504,15 +437,6 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	//		std::cout<<"done with filling"<<std::endl;
 		}
 	}
-	if (doOverlapRemoval){
-		std::cout << "Total number of events removed from TTbar:"<< count_overlapTTbar <<std::endl;
-	}
-	if(doOverlapRemoval_WZ){
-		 std::cout << "Total number of events removed from W/ZJets:"<< count_overlapVJets <<std::endl;
-	}
-	if(doOverlapRemoval_Tchannel){
-		 std::cout << "Total number of events removed from t-channel:"<< count_overlapTchannel <<std::endl;
-	}
 
     cout<<flush<<"Output tree has "<<outputTree->GetEntriesFast()<<" entries"<<endl;
 //	std::cout <<outputFile <<std::endl;		
@@ -520,6 +444,12 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	outputTree->Write();
     if (evtPick->saveCutflows)
     {
+        cout<<"\nRaw events"<<flush<<endl;
+        evtPick->print_cutflow_emu(evtPick->cutFlow_emu);
+
+        cout<<"\nWeighted events"<<flush<<endl;
+        evtPick->print_cutflow_emu(evtPick->cutFlowWeight_emu);
+        
         std::cout << "Saving cutflow tables" << std::endl;
         evtPick->cutFlow_emu->Write();
         evtPick->cutFlowWeight_emu->Write();
@@ -550,8 +480,6 @@ void makeAnalysisNtuple::FillEvent()
 	_pfMET		     = tree->pfMET_;
 	_pfMETPhi	     = tree->pfMETPhi_;
 
-	_nPho		     = selector->Photons.size();
-	_nLoosePho	     = selector->LoosePhotons.size();
 	_nEle		     = selector->Electrons.size();
 	_nEleLoose           = selector->ElectronsLoose.size();
 	_nMuLoose            = selector->MuonsLoose.size();
@@ -601,323 +529,43 @@ void makeAnalysisNtuple::FillEvent()
 	}
 	
 
-    if (mtAnalysis){
-        int eleInd = selector->Electrons.at(0);
-        int muInd = selector->Muons.at(0);
+    int eleInd = selector->Electrons.at(0);
+    int muInd = selector->Muons.at(0);
 
-        if (tree->eleCharge_->at(eleInd) * tree->muCharge_->at(muInd) > 0){
-            cout<<"Event "<<_event<<" contains leading emu pair with same sign!"<<endl;
-        }
-
-        if (tree->muCharge_->at(muInd) > 0) {
-            lpVector.SetPtEtaPhiE(tree->muPt_->at(muInd),
-                                  tree->muEta_->at(muInd),
-                                  tree->muPhi_->at(muInd),
-                                  tree->muEn_->at(muInd));
-
-            lmVector.SetPtEtaPhiE(tree->elePt_->at(eleInd),
-                                  tree->eleEta_->at(eleInd),
-                                  tree->elePhi_->at(eleInd),
-                                  tree->eleEn_->at(eleInd));
-
-        }
-        else {
-            lpVector.SetPtEtaPhiE(tree->elePt_->at(eleInd),
-                                  tree->eleEta_->at(eleInd),
-                                  tree->elePhi_->at(eleInd),
-                                  tree->eleEn_->at(eleInd));
-            
-            lmVector.SetPtEtaPhiE(tree->muPt_->at(muInd),
-                                  tree->muEta_->at(muInd),
-                                  tree->muPhi_->at(muInd),
-                                  tree->muEn_->at(muInd));
-        }
+    if (tree->eleCharge_->at(eleInd) * tree->muCharge_->at(muInd) > 0){
+        cout<<"Event "<<_event<<" contains leading emu pair with same sign!"<<endl;
     }
 
-	else if (isTTGamma && dileptonsample){
-		if (_nMu==2) {
+    if (tree->muCharge_->at(muInd) > 0) {
+        lpVector.SetPtEtaPhiE(tree->muPt_->at(muInd),
+                              tree->muEta_->at(muInd),
+                              tree->muPhi_->at(muInd),
+                              tree->muEn_->at(muInd));
 
-			int muInd1 = selector->Muons.at(0);
-			int muInd2 = selector->Muons.at(1);
+        lmVector.SetPtEtaPhiE(tree->elePt_->at(eleInd),
+                              tree->eleEta_->at(eleInd),
+                              tree->elePhi_->at(eleInd),
+                              tree->eleEn_->at(eleInd));
 
-			lepVector.SetPtEtaPhiE(tree->muPt_->at(muInd1),
-								   tree->muEta_->at(muInd1),
-								   tree->muPhi_->at(muInd1),
-								   tree->muEn_->at(muInd1));
-			lepVector2.SetPtEtaPhiE(tree->muPt_->at(muInd2),
-									tree->muEta_->at(muInd2),
-									tree->muPhi_->at(muInd2),
-									tree->muEn_->at(muInd2));	
-			_DilepMass = (lepVector+lepVector2).M();
-			_DilepDelR = lepVector.DeltaR(lepVector2);
-			
-		}
-		
-		
-		if (_nEle==2){
-			//		std::cout<<"doing electrons"<<std::endl;
-			int eleInd1 = selector->Electrons.at(0);
-			int eleInd2 = selector->Electrons.at(1);
-			
-			lepVector.SetPtEtaPhiE(tree->elePt_->at(eleInd1),
-								   tree->eleEta_->at(eleInd1),
-								   tree->elePhi_->at(eleInd1),
-								   tree->eleEn_->at(eleInd1));
-			lepVector2.SetPtEtaPhiE(tree->elePt_->at(eleInd2),
-									tree->eleEta_->at(eleInd2),
-									tree->elePhi_->at(eleInd2),
-									tree->eleEn_->at(eleInd2));
-			
-			_DilepMass = (lepVector+lepVector2).M();
-			
-			_DilepDelR = lepVector.DeltaR(lepVector2);
-			
-		}
-	}
+    }
+    else {
+        lpVector.SetPtEtaPhiE(tree->elePt_->at(eleInd),
+                              tree->eleEta_->at(eleInd),
+                              tree->elePhi_->at(eleInd),
+                              tree->eleEn_->at(eleInd));
+        
+        lmVector.SetPtEtaPhiE(tree->muPt_->at(muInd),
+                              tree->muEta_->at(muInd),
+                              tree->muPhi_->at(muInd),
+                              tree->muEn_->at(muInd));
+    }
 
-    if (isTTGamma) 
-    {
-        //dipho Mass
-        if (_nPho>1){
-            //	std::cout<<_nPho<<std::endl;
-            int phoInd1 = selector->Photons.at(0);
-            int phoInd2 = selector->Photons.at(1);
-            phoVector1.SetPtEtaPhiM(tree->phoEt_->at(phoInd1),
-                                    tree->phoEta_->at(phoInd1),
-                                    tree->phoPhi_->at(phoInd1),
-                                    0.0);
-            phoVector2.SetPtEtaPhiM(tree->phoEt_->at(phoInd2),
-                                    tree->phoEta_->at(phoInd2),
-                                    tree->phoPhi_->at(phoInd2),
-                                    0.0);
-            
-            
-            _DiphoMass = (phoVector1+phoVector2).M();
-        }
-    }	
+
 	
 
 	_passPresel_EMu  = evtPick->passPresel_emu;
 
-	_passPresel_Ele  = evtPick->passPresel_ele;
-	_passPresel_Mu   = evtPick->passPresel_mu;
-	_passAll_Ele     = evtPick->passAll_ele;
-	_passAll_Mu      = evtPick->passAll_mu;
 
-	int countMediumIDPho = 0;
-	int countTightIDPho = 0;
-
-	int parentPID = -1;
-
-    if (isTTGamma)
-    {
-        for (int i_pho = 0; i_pho <_nPho; i_pho++){
-            int phoInd = selector->Photons.at(i_pho);
-            phoVector.SetPtEtaPhiM(tree->phoEt_->at(phoInd),
-                                   tree->phoEta_->at(phoInd),
-                                   tree->phoPhi_->at(phoInd),
-                                   0.0);
-        //	std::cout << "separate" << phoVector.M()<<std::endl;
-            _phoEt.push_back(tree->phoEt_->at(phoInd));
-            _phoEta.push_back(tree->phoEta_->at(phoInd));
-            
-
-            _phoSCEta.push_back(tree->phoSCEta_->at(phoInd));
-            _phoPhi.push_back(tree->phoPhi_->at(phoInd));
-            _phoIsBarrel.push_back( abs(tree->phoSCEta_->at(phoInd))<1.47 );
-            _phoHoverE.push_back(tree->phoHoverE_->at(phoInd));
-            _phoSIEIE.push_back(tree->phoSigmaIEtaIEtaFull5x5_->at(phoInd));
-            _phoPFChIso.push_back( selector->PhoChHadIso_corr.at(phoInd));
-            _phoPFNeuIso.push_back(selector->PhoNeuHadIso_corr.at(phoInd));
-            _phoPFPhoIso.push_back(selector->PhoPhoIso_corr.at(phoInd));
-
-            if (tree->isData_){
-                _phoEffWeight.push_back(1.);
-                _phoEffWeight_Do.push_back(1.);
-                _phoEffWeight_Up.push_back(1.);
-            } else {
-                _phoEffWeight.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),1));
-                _phoEffWeight_Do.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),0));
-                _phoEffWeight_Up.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),2));
-            }
-
-            if (tree->isData_){
-
-                std::vector<float> randConeIso;
-                std::vector<float> randConeIsoUnCorr;
-                std::vector<float> randConeEta;
-                std::vector<float> randConePhi;
-                std::vector<float> randConeJetDR;
-                for (unsigned int i_randCone = 0; i_randCone < tree->phoPFRandConeChIso_->at(phoInd).size(); i_randCone++){
-                    randConeIso.push_back( selector->PhoRandConeChHadIso_corr.at(phoInd).at(i_randCone));
-                    randConeIsoUnCorr.push_back( tree->phoPFRandConeChIso_->at(phoInd).at(i_randCone) );
-                    randConeEta.push_back( tree->phoEta_->at(phoInd));
-                    randConePhi.push_back( tree->phoPFRandConePhi_->at(phoInd).at(i_randCone));
-                    randConeJetDR.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPFRandConePhi_->at(phoInd).at(i_randCone),selector->Jets,tree->jetEta_,tree->jetPhi_));
-                }
-                _phoPFRandConeChIso.push_back( randConeIso );
-                _phoPFRandConeChIsoUnCorr.push_back( randConeIsoUnCorr );
-                _phoPFRandConeEta.push_back( randConeEta );
-                _phoPFRandConePhi.push_back( randConePhi );
-                _phoPFRandConeJetDR.push_back( randConeJetDR );
-            }
-            _phoPFChIsoUnCorr.push_back( tree->phoPFChIso_->at(phoInd));
-            _phoPFNeuIsoUnCorr.push_back(tree->phoPFNeuIso_->at(phoInd));
-            _phoPFPhoIsoUnCorr.push_back(tree->phoPFPhoIso_->at(phoInd));
-            _phoTightID.push_back(tree->phoIDbit_->at(phoInd)>>2&1);
-            _phoMediumID.push_back(tree->phoIDbit_->at(phoInd)>>1&1);
-
-            if (_nEle==1 && _nMu==0){
-                _phoMassEGamma.push_back( (phoVector+lepVector).M() );
-            }
-            _phoMassLepGamma.push_back( (phoVector+lepVector).M() );
-
-
-            bool isGenuine = false;
-            bool isMisIDEle = false;
-            bool isHadronicPhoton = false;
-            bool isHadronicFake = false;
-            int phoGenMatchInd = -1.;
-            
-            if (!tree->isData_){
-                phoGenMatchInd = findPhotonGenMatch(phoInd, tree);
-
-                _phoGenMatchInd.push_back(phoGenMatchInd);
-
-                findPhotonCategory(phoGenMatchInd, tree, &isGenuine, &isMisIDEle, &isHadronicPhoton, &isHadronicFake);
-                _photonIsGenuine.push_back(isGenuine);
-                _photonIsMisIDEle.push_back(isMisIDEle);
-                _photonIsHadronicPhoton.push_back(isHadronicPhoton);
-                _photonIsHadronicFake.push_back(isHadronicFake);
-            }
-
-
-
-            parentPID = -888;
-            int gparentPID = -888;
-            int parentage = -1;
-
-            if (!tree->isData_ && phoGenMatchInd!=-1){
-                parentPID = tree->mcMomPID->at(phoGenMatchInd);
-                gparentPID = tree->mcGMomPID->at(phoGenMatchInd);
-                // photon parentage for event categorization
-                // -1 is unmatched photon; 0 is matched, but not top/W/lepton, 1 is top parent or ISR parent, 2 is W parent, 3 is lepton parent,
-                if (abs(parentPID)==22 || abs(parentPID)<6 && gparentPID==-999) parentage = 1;
-                else if (abs(parentPID)==6) parentage = 2;
-                else if (abs(parentPID)==24 || abs(parentPID)==11 || abs(parentPID)==13 || abs(parentPID)==15) parentage = 3;
-                else if (parentPID!=-999) parentage = 0;
-            }
-
-            _photonParentage.push_back(parentage);
-            _photonParentPID.push_back(parentPID);
-            
-            _dRPhotonJet.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPhi_->at(phoInd),selector->Jets,tree->jetEta_,tree->jetPhi_));
-            _dRPhotonLepton.push_back(phoVector.DeltaR(lepVector));
-            _MPhotonLepton.push_back((phoVector+lepVector).M());
-            _AnglePhotonLepton.push_back(phoVector.Angle(lepVector.Vect()));	
-
-            _phoJetDR.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPhi_->at(phoInd),selector->Jets,tree->jetEta_,tree->jetPhi_));
-        
-
-        }
-    }
-    if (isTTGamma) {
-        for (int i_pho = 0; i_pho <_nLoosePho; i_pho++){
-            int phoInd = selector->LoosePhotons.at(i_pho);
-            phoVector.SetPtEtaPhiM(tree->phoEt_->at(phoInd),
-                                   tree->phoEta_->at(phoInd),
-                                   tree->phoPhi_->at(phoInd),
-                                   0.0);
-
-            _loosePhoEt.push_back(tree->phoEt_->at(phoInd));
-            _loosePhoEta.push_back(tree->phoEta_->at(phoInd));
-            _loosePhoSCEta.push_back(tree->phoSCEta_->at(phoInd));
-            _loosePhoPhi.push_back(tree->phoPhi_->at(phoInd));
-            _loosePhoIsBarrel.push_back( abs(tree->phoSCEta_->at(phoInd))<1.47 );
-            _loosePhoHoverE.push_back(tree->phoHoverE_->at(phoInd));
-            _loosePhoSIEIE.push_back(tree->phoSigmaIEtaIEtaFull5x5_->at(phoInd));
-            _loosePhoPFChIso.push_back( selector->PhoChHadIso_corr.at(phoInd));
-            _loosePhoPFNeuIso.push_back(selector->PhoNeuHadIso_corr.at(phoInd));
-            _loosePhoPFPhoIso.push_back(selector->PhoPhoIso_corr.at(phoInd));
-
-            if (tree->isData_){
-                _loosePhoEffWeight.push_back(1.);
-                _loosePhoEffWeight_Do.push_back(1.);
-                _loosePhoEffWeight_Up.push_back(1.);
-            } else {
-                _loosePhoEffWeight.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),1));
-                _loosePhoEffWeight_Do.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),0));
-                _loosePhoEffWeight_Up.push_back(getPhoSF(tree->phoEt_->at(phoInd),tree->phoSCEta_->at(phoInd),2));
-            }
-
-            if (tree->isData_){
-                std::vector<float> randConeIso;
-                std::vector<float> randConeIsoUnCorr;
-                std::vector<float> randConeEta;
-                std::vector<float> randConePhi;
-                std::vector<float> randConeJetDR;
-                for (unsigned int i_randCone = 0; i_randCone < tree->phoPFRandConeChIso_->at(phoInd).size(); i_randCone++){
-                    randConeIso.push_back( selector->PhoRandConeChHadIso_corr.at(phoInd).at(i_randCone));
-                    randConeIsoUnCorr.push_back( tree->phoPFRandConeChIso_->at(phoInd).at(i_randCone) );
-                    randConeEta.push_back( tree->phoEta_->at(phoInd));
-                    randConePhi.push_back( tree->phoPFRandConePhi_->at(phoInd).at(i_randCone));
-                    randConeJetDR.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPFRandConePhi_->at(phoInd).at(i_randCone),selector->Jets,tree->jetEta_,tree->jetPhi_));
-                }
-                _loosePhoPFRandConeChIso.push_back( randConeIso );
-                _loosePhoPFRandConeChIsoUnCorr.push_back( randConeIsoUnCorr );
-                _loosePhoPFRandConeEta.push_back( randConeEta );
-                _loosePhoPFRandConePhi.push_back( randConePhi );
-                _loosePhoPFRandConeJetDR.push_back( randConeJetDR );
-            }
-
-            _loosePhoPFChIsoUnCorr.push_back( tree->phoPFChIso_->at(phoInd));
-            _loosePhoPFNeuIsoUnCorr.push_back(tree->phoPFNeuIso_->at(phoInd));
-            _loosePhoPFPhoIsoUnCorr.push_back(tree->phoPFPhoIso_->at(phoInd));
-            _loosePhoTightID.push_back(tree->phoIDbit_->at(phoInd)>>2&1);
-            _loosePhoMediumID.push_back(tree->phoIDbit_->at(phoInd)>>1&1);
-            _loosePhoLooseID.push_back(tree->phoIDbit_->at(phoInd)>>0&1);
-            vector<bool> phoMediumCuts =  passPhoMediumID(phoInd);
-            _loosePhoMediumIDFunction.push_back(  phoMediumCuts.at(0));
-            _loosePhoMediumIDPassHoverE.push_back(phoMediumCuts.at(1));
-            _loosePhoMediumIDPassSIEIE.push_back( phoMediumCuts.at(2));
-            _loosePhoMediumIDPassChIso.push_back( phoMediumCuts.at(3));
-            _loosePhoMediumIDPassNeuIso.push_back(phoMediumCuts.at(4));
-            _loosePhoMediumIDPassPhoIso.push_back(phoMediumCuts.at(5));
-
-            vector<bool> phoTightCuts =  passPhoTightID(phoInd);
-            _loosePhoTightIDFunction.push_back(  phoTightCuts.at(0));
-            _loosePhoTightIDPassHoverE.push_back(phoTightCuts.at(1));
-            _loosePhoTightIDPassSIEIE.push_back( phoTightCuts.at(2));
-            _loosePhoTightIDPassChIso.push_back( phoTightCuts.at(3));
-            _loosePhoTightIDPassNeuIso.push_back(phoTightCuts.at(4));
-            _loosePhoTightIDPassPhoIso.push_back(phoTightCuts.at(5));
-                
-            if (_nEle==1 && _nMu==0){
-                _loosePhoMassEGamma.push_back( (phoVector+lepVector).M() );
-            }
-            _loosePhoMassLepGamma.push_back( (phoVector+lepVector).M() );
-
-            bool isGenuine = false;
-            bool isMisIDEle = false;
-            bool isHadronicPhoton = false;
-            bool isHadronicFake = false;
-            int phoGenMatchInd = -1.;
-
-            if (!tree->isData_){
-                phoGenMatchInd = findPhotonGenMatch(phoInd, tree);
-
-                _loosePhoGenMatchInd.push_back(phoGenMatchInd);
-
-                findPhotonCategory(phoGenMatchInd, tree, &isGenuine, &isMisIDEle, &isHadronicPhoton, &isHadronicFake);
-                _loosePhotonIsGenuine.push_back(isGenuine);
-                _loosePhotonIsMisIDEle.push_back(isMisIDEle);
-                _loosePhotonIsHadronicPhoton.push_back(isHadronicPhoton);
-                _loosePhotonIsHadronicFake.push_back(isHadronicFake);
-            }
-            _loosePhoJetDR.push_back(minDr(tree->phoEta_->at(phoInd),tree->phoPhi_->at(phoInd),selector->Jets,tree->jetEta_,tree->jetPhi_));
-
-        }
-    }
 
     for (int i_jet = 0; i_jet <_nJet; i_jet++){
         
@@ -953,144 +601,22 @@ void makeAnalysisNtuple::FillEvent()
         }
     }	
 
-    if (mtAnalysis) {
-//        if (tree->event_ == 101927)// 101760)
-//        {
-//            cout<<endl<<"lpVector"<<endl<<lpVector<<endl;
-//            cout<<"lmVector"<<endl<<lmVector<<endl;
-//            cout<<"ll = "<<endl<<(lpVector + lmVector)<<endl;
-//        }
-        _pt_ll = (lpVector + lmVector).Pt();
-        _m_ll = (lpVector + lmVector).M();
-        _pt_pos = lpVector.Pt();
-        _E_pos = lpVector.E();
-        _ptp_ptm = lpVector.Pt() + lmVector.Pt();
-        _Ep_Em = lpVector.E() + lmVector.E();
+    _pt_ll = (lpVector + lmVector).Pt();
+    _m_ll = (lpVector + lmVector).M();
+    _pt_pos = lpVector.Pt();
+    _E_pos = lpVector.E();
+    _ptp_ptm = lpVector.Pt() + lmVector.Pt();
+    _Ep_Em = lpVector.E() + lmVector.E();
 
-        if (!tree->isData_) { _topptWeight = topPtWeight(); }
-    }
+    if (!tree->isData_) { _topptWeight = topPtWeight(); }
 
 
-	else if (isTTGamma) {
-		//Compute M3
-		_M3 = -1.;
-		double maxPt = -1;
-		if (_nJet>2) {
-			TLorentzVector jet1;
-			TLorentzVector jet2;
-			TLorentzVector jet3;
-			for (int i_jet1 = 0; i_jet1 <_nJet-2; i_jet1++){
-				int jetInd1 = selector->Jets.at(i_jet1);
-				jet1.SetPtEtaPhiM(tree->jetPt_->at(jetInd1),tree->jetEta_->at(jetInd1),tree->jetPhi_->at(jetInd1),0.0);
-				
-				for (int i_jet2 = i_jet1+1; i_jet2 <_nJet-1; i_jet2++){
-					int jetInd2 = selector->Jets.at(i_jet2);
-					jet2.SetPtEtaPhiM(tree->jetPt_->at(jetInd2),tree->jetEta_->at(jetInd2),tree->jetPhi_->at(jetInd2),0.0);
-
-					for (int i_jet3 = i_jet2+1; i_jet3 <_nJet; i_jet3++){
-						int jetInd3 = selector->Jets.at(i_jet3);
-						jet3.SetPtEtaPhiM(tree->jetPt_->at(jetInd3),tree->jetEta_->at(jetInd3),tree->jetPhi_->at(jetInd3),0.0);
-
-						if ((jet1 + jet2 + jet3).Pt()>maxPt){
-							_M3 = (jet1 + jet2 + jet3).M();
-							maxPt=(jet1 + jet2 + jet3).Pt();
-						}
-					}
-				}
-			}
-		}
-		//Calculate transverse mass variables
-		//W transverse mass		
-
-		//	_WtransMass = TMath::Sqrt(2*lepVector.Pt()*tree->pfMET_*( 1.0 - TMath::Cos(dR(0.0,lepVector.Phi(),0.0,tree->pfMETPhi_)) ));
-		_WtransMass = TMath::Sqrt(2*lepVector.Pt()*tree->pfMET_*( 1.0 - TMath::Cos( lepVector.DeltaPhi(METVector))));
-
-
-		// // Calculate MET z
-
-		metZ.SetLepton(lepVector);
-
-		METVector.SetPtEtaPhiM(tree->pfMET_,
-							   0.,
-							   tree->pfMETPhi_,
-							   0.);
-	
-		metZ.SetMET(METVector);
-
-		TLorentzVector tempLep;
-		tempLep.SetPtEtaPhiM(lepVector.Pt(),
-							 lepVector.Eta(),
-							 lepVector.Phi(),
-							 0.1056);
-
-		double _met_px = METVector.Px();
-		double _met_py = METVector.Py();
-
-		double _met_pz = metZ.Calculate();
-		double _met_pz_other = metZ.getOther();
-
-		topEvent.SetBJetVector(bjetVectors);
-		topEvent.SetLJetVector(ljetVectors);
-		topEvent.SetLepton(lepVector);
-		topEvent.SetMET(METVector);
-
-		topEvent.SetBJetResVector(bjetResVectors);
-		topEvent.SetLJetResVector(ljetResVectors);
-		topEvent.SetIgnoreBtag(true);
-		
-		topEvent.Calculate();
-		if (topEvent.GoodCombination()){
-			bhad = topEvent.getBHad();
-			blep = topEvent.getBLep();
-			Wj1 = topEvent.getJ1();
-			Wj2 = topEvent.getJ2();
-
-			_Mt_blgammaMET = TMath::Sqrt( pow(TMath::Sqrt( pow( (blep + lepVector + phoVector).Pt(),2) + pow( (blep + lepVector + phoVector).M(),2) ) + METVector.Pt(), 2) - pow((blep + lepVector + phoVector + METVector ).Pt(),2) );
-			_Mt_lgammaMET = TMath::Sqrt( pow(TMath::Sqrt( pow( (lepVector + phoVector).Pt(),2) + pow( (lepVector + phoVector).M(),2) ) + METVector.Pt(), 2) - pow((lepVector + phoVector + METVector ).Pt(),2) );
-			_M_bjj = ( bhad + Wj1 + Wj2 ).M();
-			_M_jj  = ( Wj1 + Wj2 ).M();
-
-
-			// _Mt_blgammaMET = TMath::Sqrt( pow(TMath::Sqrt( pow( (jetVectors.at(ind_bl) + lepVector + phoVector).Pt(),2) + pow( (jetVectors.at(ind_bl) + lepVector + phoVector).M(),2) ) + METVector.Pt(), 2) - pow((jetVectors.at(ind_bl) + lepVector + phoVector + METVector ).Pt(),2) );
-			// _Mt_lgammaMET = TMath::Sqrt( pow(TMath::Sqrt( pow( (lepVector + phoVector).Pt(),2) + pow( (lepVector + phoVector).M(),2) ) + METVector.Pt(), 2) - pow((lepVector + phoVector + METVector ).Pt(),2) );
-			// _M_bjj = ( jetVectors.at(ind_bh) + jetVectors.at(ind_j1) + jetVectors.at(ind_j2)).M();
-			// _M_jj = ( jetVectors.at(ind_j1) + jetVectors.at(ind_j2)).M();
-
-
-			_MassCuts = ( _Mt_blgammaMET > 180 &&
-						  _Mt_lgammaMET > 90 && 
-						  _M_bjj > 160 && 
-						  _M_bjj < 180 && 
-						  _M_jj > 70 &&
-						  _M_jj < 90 &&
-						  _nPho > 0);
-	
-		}
-
-	}
-//	else{
-//		int eleInd = selector->Electrons.at(0);
-//		int muInd = selector->Muons.at(0);
-//		lepVector.SetPtEtaPhiE(tree->elePt_->at(eleInd),
-//							   tree->eleSCEta_->at(eleInd),
-//							   tree->elePhi_->at(eleInd),
-//							   tree->eleEn_->at(eleInd));
-//		lepVector2.SetPtEtaPhiE(tree->muPt_->at(muInd),
-//								tree->muEta_->at(muInd),
-//								tree->muPhi_->at(muInd),
-//								tree->muEn_->at(muInd));
-//		_pt_ll = (lepVector + lepVector2).Pt();
-//		_m_ll = (lepVector + lepVector2).M();
-//	}
 
 	ljetVectors.clear();
 	bjetVectors.clear();
 
 	ljetResVectors.clear();
 	bjetResVectors.clear();
-	// isBjet.clear();
-	// b_ind.clear();
-	// j_ind.clear();
 
 	
 	if (!tree->isData_){
@@ -1143,14 +669,6 @@ void makeAnalysisNtuple::FillEvent()
 			_mcMomPID.push_back(tree->mcMomPID->at(i_mc));
 			_mcGMomPID.push_back(tree->mcGMomPID->at(i_mc));
 			_mcParentage.push_back(tree->mcParentage->at(i_mc));
-		//	if(applypdfweight){
-			
-		//	_pdfWeight.push_back(tree->pdfWeight_->at(i_mc));
-		//	for (int i=0;i<9;i++){
-		//	print i, tree->pdfSystWeight_->at(i)
-                  //      _pdfSystWeight.push_back(tree->pdfSystWeight_->at(i));
-		//	}
-		 //  }
 		}
 	}
 

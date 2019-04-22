@@ -1,10 +1,20 @@
 #!/usr/bin/env python
 from ROOT import *
-from sampleInformation import samples,sampleList
+from sampleInformation import samples
 import os
 import sys
 from argparse import ArgumentParser
 from pprint import pprint
+
+sampleList = ["TTbar",
+              "ST_tW",
+              "DY",
+              "WJets",
+              "Diboson",
+              "ST_bkgd",
+              "TTV",
+              "Data",
+              ]
 
 # Mapping of cuts to bins
 cutToBin = {"input":1,      # Total input events
@@ -24,19 +34,30 @@ cutTitle = {"input":"Pass skim",
             "vertex":"$\geq 1$ Good Vertex",     
             "1ele1mu":"Good ele and mu",
             "emusigned":"Op signed emu pair",
-            "lepton":"e\$mu$",
-            "1jet":"$\geq 1 jet",       
-            "2jet":"$\geq 2 jets",       
-            "1bjet":"$\geq 1 b-tag",     
+            "lepton":"e$\mu$",
+            "1jet":"$\geq$ 1 jet",       
+            "2jet":"$\geq$ 2 jets",       
+            "1bjet":"$\geq$ 1 b-tag",     
             "2bjet":"$\geq 2 b-tags"      
             }
 
+sampleTitle = {"TTbar":"\\ttbar",
+               "ST_tW":"Single Top (\\tW)",
+               "DY":"Drell-Yan",
+               "WJets":"\\WJets",
+               "Diboson":"Diboson",
+               "ST_bkgd":"Single Top (s+t)",
+               "TTV":"\\TTV",
+               "Data":"Data"
+              }
+
 
 parser = ArgumentParser()
-#parser.add_argument("-i", "--inDir", default="store/user/msaunder/backup_13TeV_AnalysisNtuples/emu/V08_00_26_07/", help="input eos analysis ntuple directory") 
-parser.add_argument("-i", "--inDir", default="store/user/msaunder/13TeV_cutflows/emu/V08_00_26_07/", help="input eos analysis ntuple directory") 
+parser.add_argument("-i", "--inDir", default="store/user/msaunder/old_13TeV_cutflows/emu/V08_00_26_07/", help="input eos analysis ntuple directory") 
+#parser.add_argument("-i", "--inDir", default="store/user/msaunder/13TeV_cutflows/emu/V08_00_26_07/", help="input eos analysis ntuple directory") 
 parser.add_argument("-c", "--cuts", nargs="+", default=["lepton", "2jet", "1bjet"], choices=cutToBin.keys(), help="which cuts to include in table")
-parser.add_argument("-o", "--outF", default="cutflow.tex", help="output tex file with cutflow table")
+#parser.add_argument("-o", "--outF", default="cutflow.tex", help="output tex file with cutflow table")
+parser.add_argument("-o", "--outF", default="/uscms/homes/m/msaunder/private/documentation/AN-17-249/cutflow.tex", help="output tex file with cutflow table")
 args = parser.parse_args()
 
 cutflowHistName = "cut_flow_weight_emu"
@@ -45,7 +66,7 @@ cutflowHistName = "cut_flow_weight_emu"
 cuts = sorted(args.cuts, key=lambda kv: cutToBin[kv])
 
 cutflowH = {}
-totalMC = None
+TotalMC = None
 for sample in sampleList:
 #    print "Now on", sample
     for ntupleF in samples[sample][0]:
@@ -60,10 +81,10 @@ for sample in sampleList:
         f.Close()
 
     if sample != "Data":
-        if totalMC is None:
-            totalMC = cutflowH[sample].Clone("totalMC")
+        if TotalMC is None:
+            TotalMC = cutflowH[sample].Clone("TotalMC")
         else:
-            totalMC.Add(cutflowH[sample])
+            TotalMC.Add(cutflowH[sample])
 
 def value(sampleType, cut):    
     return cutflowH[sample].GetBinContent(cutToBin[cut])
@@ -90,7 +111,7 @@ for sample in sampleList:
 print "-" * 90
 print "Total MC\t",
 for c in cuts:
-    print "%.1f +- %.1f%s" % (totalMC.GetBinContent(cutToBin[c]), totalMC.GetBinError(cutToBin[c]), "\t\t" if totalMC.GetBinContent(cutToBin[c]) < 10000 else "\t"),
+    print "%.1f +- %.1f%s" % (TotalMC.GetBinContent(cutToBin[c]), TotalMC.GetBinError(cutToBin[c]), "\t\t" if TotalMC.GetBinContent(cutToBin[c]) < 10000 else "\t"),
 print ""
 print "-" * 90
 print "Data\t\t",
@@ -101,16 +122,42 @@ print "-" * 90
 
 
 # Write output tex file
-#with open(args.outF, "w") as f:
-#    f.write( \
-#"""
-#\\begin{table*}[h]
-#\t\\begin{center}
-#\t\t\\topcaption{Event yields at various stages of the offline selection. The final selection is given in the rightmost column.}
-#\t\t\\label{table:cutflow}
-#\t\t\\begin{tabular}[l c c c]
-#\t\t\t\\hline
-#\t\t\tSample & e$\mu$ & $\\geq$ 2 jets & $\\geq$ 1 b-tag \\\\
+f = open(args.outF, "w")
+f.write( \
+"""\\begin{table*}[h]
+\t\\begin{center}
+\t\t\\topcaption{Event yields at various stages of the offline selection. The final selection is given in the rightmost column.}
+\t\t\\label{table:cutflow}
+\t\t\\begin{tabular}{l r r r}
+\t\t\t\\hline
+\t\t\tSample """)
+for c in cuts:
+    f.write(" & %s" % cutTitle[c])
+f.write(""" \\\\\n\t\t\t\\hline\n""")
+
+for sample in sampleList:
+    if sample == "Data": continue
+    f.write("\t\t\t%s" % sampleTitle[sample])
+    for c in cuts:
+        f.write(" & %.1f $\\pm$ %.1f" % (cutflowH[sample].GetBinContent(cutToBin[c]), cutflowH[sample].GetBinError(cutToBin[c])) )
+    f.write(""" \\\\\n""")
+
+f.write("\t\t\t\\hline\n")
+f.write("\t\t\tTotal MC")
+for c in cuts:
+    f.write(" & %.0f $\\pm$ %.0f" % (TotalMC.GetBinContent(cutToBin[c]), TotalMC.GetBinError(cutToBin[c])) )
+f.write(""" \\\\\n\t\t\t\\hline\n""")
+f.write("\t\t\tData")
+for c in cuts:
+    f.write(" & %.0f $\\pm$ %.0f" % (cutflowH["Data"].GetBinContent(cutToBin[c]), cutflowH["Data"].GetBinError(cutToBin[c])) )
+f.write(""" \\\\\n\t\t\t\\hline\n""")
+f.write(
+"""\t\t\\end{tabular}
+\t\\end{center}
+\\end{table*}
+"""
+    )
+#\t\t\tSample & e$\\mu$ & $\\geq$ 2 jets & $\\geq$ 1 b-tag \\\\
 #\t\t\t\\hline
 #\t\t\t\\ttbar & %.1f & %.1f & %.1f \\\\
 #\t\t\tSingle Top (\\tW channel) & %.1f & %.1f & %.1f \\\\
@@ -127,8 +174,8 @@ print "-" * 90
 #\t\t\\end{tabular}
 #\t\\end{center}
 #\\end{table*}
-#
+
 #""" % (value("TTbar","lepton"), 
 #            )
-
+f.close()
 print "Output saved in %s" % args.outF

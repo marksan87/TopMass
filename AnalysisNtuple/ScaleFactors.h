@@ -177,15 +177,27 @@ double totalST_tW_antitop_isrDown = 3101321.;
 // Cross Sections Used  //
 //////////////////////////
 
-double TTbar_xs             =  831.76;  //ttbar NNLO (http://inspirehep.net/search?p=find+eprint+1112.5675)
+// Theory TT xsec
+//double TTbar_xs             =  831.76;  //ttbar NNLO (http://inspirehep.net/search?p=find+eprint+1112.5675)
+//
+//// TOP 17-007  AN-16-327
+//double TTbar_mt1665_xs  = 982.; 
+//double TTbar_mt1695_xs  = 903.; 
+//double TTbar_mt1715_xs  = 855.;
+//double TTbar_mt1735_xs  = 809.;
+//double TTbar_mt1755_xs  = 767.;
+//double TTbar_mt1785_xs  = 708.;
 
-// TOP 17-007  AN-16-327
-double TTbar_mt1665_xs  = 982.; 
-double TTbar_mt1695_xs  = 903.; 
-double TTbar_mt1715_xs  = 855.;
-double TTbar_mt1735_xs  = 809.;
-double TTbar_mt1755_xs  = 767.;
-double TTbar_mt1785_xs  = 708.;
+double TTbar_xs             =  803.; // TOP-17-001: Dilepton channel TT xsec measurement 
+
+// Calculated from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO#Parametrisations 
+// using NNPDF2.3 NNLO 5f central with sigma_ref = 803, a1 = -0.745047, a2 = 0.127417
+double TTbar_mt1665_xs  = 949.; 
+double TTbar_mt1695_xs  = 872.; 
+double TTbar_mt1715_xs  = 825.;
+double TTbar_mt1735_xs  = 781.;
+double TTbar_mt1755_xs  = 740.;
+double TTbar_mt1785_xs  = 682.;
 
 double WJetsToLNu_xs = 61526.7;
 double WWTo2L2Nu_xs = 12.178;
