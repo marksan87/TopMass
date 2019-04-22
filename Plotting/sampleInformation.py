@@ -1,17 +1,17 @@
 isMC=999
 isData=1
 
-from ROOT import kRed,kOrange,kBlack,kCyan 
+from ROOT import kRed,kOrange,kBlue,kBlack,kCyan,kGray,kYellow,kGreen 
 
 samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
            "TTbar_mt1665" : [["TTbar_mt1665_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -20,7 +20,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                               "TTbar_mt1695_2_AnalysisNtuple.root",
                               "TTbar_mt1695_3_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -28,7 +28,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_mt1715" : [["TTbar_mt1715_1_AnalysisNtuple.root",
                               "TTbar_mt1715_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -36,7 +36,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_mt1735" : [["TTbar_mt1735_1_AnalysisNtuple.root",
                               "TTbar_mt1735_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -45,14 +45,14 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                               "TTbar_mt1755_2_AnalysisNtuple.root",
                               "TTbar_mt1755_3_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
            
            "TTbar_mt1785" : [["TTbar_mt1785_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -60,7 +60,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_hdampUp" : [["TTbar_hdampUp_1_AnalysisNtuple.root",
                                "TTbar_hdampUp_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -68,7 +68,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_hdampDown" : [["TTbar_hdampDown_1_AnalysisNtuple.root",
                                  "TTbar_hdampDown_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -76,7 +76,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_UEUp" : [["TTbar_UEUp_1_AnalysisNtuple.root",
                             "TTbar_UEUp_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -84,7 +84,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_UEDown" : [["TTbar_UEDown_1_AnalysisNtuple.root",
                               "TTbar_UEDown_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -92,14 +92,14 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_CRerdON" : [["TTbar_CRerdON_1_AnalysisNtuple.root",
                                "TTbar_CRerdON_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
            
            "TTbar_CRGluon" : [["TTbar_CRGluon_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -107,21 +107,21 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_CRQCD" : [["TTbar_CRQCD_1_AnalysisNtuple.root",
                              "TTbar_CRQCD_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
           
            "TTbar_amcanlo" : [["TTbar_amcanlo_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
             
            "TTbar_madgraph" : [["TTbar_madgraph_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -130,7 +130,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                                 "TTbar_herwigpp_2_AnalysisNtuple.root",
                                 "TTbar_herwigpp_3_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -139,7 +139,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                                "TTbar_fsrDown_2_AnalysisNtuple.root",
                                "TTbar_fsrDown_3_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -148,7 +148,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                              "TTbar_fsrUp_2_AnalysisNtuple.root",
                              "TTbar_fsrUp_3_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -156,7 +156,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "TTbar_isrDown" : [["TTbar_isrDown_1_AnalysisNtuple.root",
                                "TTbar_isrDown_2_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
@@ -165,77 +165,77 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                              "TTbar_isrUp_2_AnalysisNtuple.root",
                              "TTbar_isrUp_3_AnalysisNtuple.root",
                              ],
-                             kRed+1,
+                             kGray,
                              "t#bar{t}",
                              isMC
                              ],
            
            "TTbar_MuScaleUp" :  [["TTbar_muscale_up_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_MuScaleDown" : [["TTbar_muscale_down_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_EleScaleUp" :  [["TTbar_elescale_up_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_EleScaleDown" : [["TTbar_elescale_down_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_EleSmearUp" :  [["TTbar_elesmear_up_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_EleSmearDown" : [["TTbar_elesmear_down_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_JERUp" :  [["TTbar_JER_up_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_JERDown" : [["TTbar_JER_down_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_JECUp" :  [["TTbar_JECTotal_up_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
            
            "TTbar_JECDown" : [["TTbar_JECTotal_down_AnalysisNtuple.root",
                                   ],
-                                  kRed+1,
+                                  kGray,
                                   "t#bar{t}",
                                   isMC
                                   ],
@@ -362,9 +362,10 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                                   ],
            
            
-           "WJets"     : [["WJetsToLNu_AnalysisNtuple.root",
+#           "WJets"     : [["WJetsToLNu_AnalysisNtuple.root",
+           "WJets"     : [["WJetsToLNu_LO_AnalysisNtuple.root",
                            ],
-                          kCyan-3,
+                          kBlue,
                           "W+jets",
                           isMC
                           ],
@@ -372,7 +373,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
            "DY"         : [["DY_M_10to50_AnalysisNtuple.root",
                             "DY_M_50_AnalysisNtuple.root", 
                            ],
-                          kCyan-5,
+                          kYellow+1,
                           "DY",
                           isMC
                           ],
@@ -414,8 +415,8 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                            "ST_t_top_AnalysisNtuple.root",
                            "ST_t_antitop_AnalysisNtuple.root",
                            ],
-                          kOrange-5,
-                          "ST bkgd",
+                          kGreen+1,
+                          "ST s+t",
                           isMC
                           ],
            
@@ -446,7 +447,7 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
 _signals = ["TTbar", "ST_tW"]
 _massFiles = {"TTbar":{1665:1, 1695:3, 1715:2, 1735:2, 1755:3, 1785:1},
              "ST_tW":{1695:1, 1755:1} }
-_color = {"TTbar":(kRed+1), "ST_tW":618}
+_color = {"TTbar":(kGray), "ST_tW":618}
 _title = {"TTbar":"t#bar{t}", "ST_tW":"ST_tW"}
 for sig in _signals:
     for m in _massFiles[sig]:
@@ -495,63 +496,63 @@ for sig in _signals:
         
 #           "TTbar_MuScaleDown" : [["TTbar_muscale_down_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
 #           
 #           "TTbar_EleScaleUp" :  [["TTbar_elescale_up_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
 #           
 #           "TTbar_EleScaleDown" : [["TTbar_elescale_down_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
 #           
 #           "TTbar_EleSmearUp" :  [["TTbar_elesmear_up_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
 #           
 #           "TTbar_EleSmearDown" : [["TTbar_elesmear_down_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
 #           
 #           "TTbar_JERUp" :  [["TTbar_JER_up_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
 #           
 #           "TTbar_JERDown" : [["TTbar_JER_down_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
 #           
 #           "TTbar_JECUp" :  [["TTbar_JECTotal_up_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
 #           
 #           "TTbar_JECDown" : [["TTbar_JECTotal_down_AnalysisNtuple.root",
 #                                  ],
-#                                  kRed+1,
+#                                  kGray,
 #                                  "t#bar{t}",
 #                                  isMC
 #                                  ],
@@ -560,10 +561,10 @@ for sig in _signals:
 # List that is the same as the keys of samples, but given in the order we want to draw
 sampleList = ["TTbar",
               "ST_tW",
-              "ST_bkgd",
               "DY",
               "WJets",
               "Diboson",
+              "ST_bkgd",
               "TTV",
               "Data",
               ]

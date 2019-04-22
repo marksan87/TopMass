@@ -8,6 +8,9 @@ RoccoR.o: RocMuonCorrections/RoccoR.cc
 countEvents: EventTree.o
 	g++ -I`root-config --incdir` `root-config --libs` -std=c++11 EventTree.o countEvents.cpp -o countEvents
 
+makeCutflows: Selector.o ScaleFactors.h EventPick.o EventTree.o PUReweight.cpp BTagCalibrationStandalone.o makeCutflows.cpp OverlapRemove.cpp RocMuonCorrections/RoccoR.o
+	g++ -o makeCutflows `root-config --libs` -I`root-config --incdir` -std=c++11 EventTree.o EventPick.o Selector.o RocMuonCorrections/RoccoR.o PUReweight.cpp OverlapRemove.cpp BTagCalibrationStandalone.o makeCutflows.cpp 
+
 makeSkim: Selector.o EventPick.o EventTree.o  makeSkim.cpp OverlapRemove.cpp RocMuonCorrections/RoccoR.o
 	g++ -o makeSkim `root-config --libs` -I`root-config --incdir` -std=c++11 EventTree.o EventPick.o Selector.o RocMuonCorrections/RoccoR.o  OverlapRemove.cpp makeSkim.cpp 
 

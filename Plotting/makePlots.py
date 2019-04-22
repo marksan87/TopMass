@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-from ROOT import gROOT,TFile, TLegend, TCanvas, TPad, THStack, TF1, TPaveText, TGaxis, SetOwnership, TObject, gStyle,TH1F, kRed,kAzure,kBlack,kRed,kOrange,kBlue,kViolet,kGreen,kPink
+from ROOT import gROOT,TFile, TLegend, TCanvas, TPad, THStack, TF1, TPaveText, TGaxis, SetOwnership, TObject, gStyle,TH1F, kGray,kRed,kAzure,kBlack,kRed,kOrange,kBlue,kViolet,kGreen,kPink
 from sampleInformation import *
 import os
 import sys
-from optparse import OptionParser
 from argparse import ArgumentParser
 from numpy import log10
 from array import array
@@ -103,7 +102,7 @@ parser.add_argument("--reorderBot", dest="newStackListBot",action="append",
 parser.add_argument("--theoryTTxs", action="store_true", default=False, help="Use theory xs of 831.76 pb instead of 803")
 parser.add_argument("--norm", action="store_true", default=False, help="normalize plots")
 parser.add_argument("-o", "--outDir", default="plots", help="output plot directory")
-parser.add_argument("--showUnc", action="store_true", default=False, help="show data & MC uncertainty bands")
+parser.add_argument("--hideUnc", action="store_true", default=False, help="hide uncertainty bands")
 parser.add_argument("--systPlots", action="store_true", default=False, help="make systematic variation plots")
 args = parser.parse_args()
 
@@ -123,7 +122,7 @@ makeAllPlots = args.makeAllPlots
 
 scaleTTbarXS = not args.theoryTTxs     # Scale to 803 pb, value from TOP-17-001
 
-showUnc = args.showUnc    # If true, include data/mc uncertainty in plot
+showUnc = not args.hideUnc    # If true, include data/mc uncertainty in plot
 
 
 _fileDir = "histograms/hists"
@@ -190,6 +189,12 @@ histograms = {  \
           "rec_Epos"        : ["Reco E(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
           "rec_ptp_ptm"     : ["Reco p_{T}(l^{+}) + p_{T}(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
           "rec_Ep_Em"       : ["Reco E(l^{+}) + E(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "Log_rec_ptll"        : ["Reco p_{T}(ll) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_rec_Mll"         : ["Reco M(ll) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_rec_ptpos"       : ["Reco p_{T}(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_rec_Epos"        : ["Reco E(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_rec_ptp_ptm"     : ["Reco p_{T}(l^{+}) + p_{T}(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_rec_Ep_Em"       : ["Reco E(l^{+}) + E(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
           }
 
 
@@ -284,7 +289,7 @@ R = 0.1*W
 
 errorbandFillStyle = 3245
 
-legendHeightPer = 0.03
+legendHeightPer = 0.0295
 #legendHeightPer = 0.04
 legList = stackList[:]
 legList.reverse()
@@ -295,7 +300,7 @@ legendEnd = 0.97-(R/W)
 
 #legend = TLegend(2*legendStart - legendEnd, 1-T/H-0.01 - legendHeightPer*(len(legList)+1), legendEnd, 0.99-(T/H)-0.01)
 legend = TLegend(2*legendStart - legendEnd , 0.99 - (T/H)/(1.-padRatio+padOverlap) - legendHeightPer/(1.-padRatio+padOverlap)*round((len(legList)+1)/2.), legendEnd, 0.99-(T/H)/(1.-padRatio+padOverlap))
-legend.SetNColumns(2)
+legend.SetNColumns(3)
 
 #legendR = TLegend(0.71, 0.99 - (T/H)/(1.-padRatio+padOverlap) - legendHeightPer/(1.-padRatio+padOverlap)*(len(legList)+1), 0.99-(R/W), 0.99-(T/H)/(1.-padRatio+padOverlap))
 
@@ -330,7 +335,8 @@ _file = {}
 
 _filesys_up={}
 _filesys_down={}
-for sample in (stackList+["TTbar_amcanlo"]):
+#for sample in (stackList+["TTbar_amcanlo"]):
+for sample in stackList: 
     _filesys_up[sample]={}
     _filesys_down[sample]={}
 #    if sample == "TTbar_amcanlo":
@@ -368,8 +374,8 @@ histName = plotList[0]
 #print "\n\n_filesys_down"
 #pprint(_filesys_down)
 print "\n"
-
-dataHist = _file["Data"].Get("%s_Data" % histName)
+print histName
+dataHist = _file["Data"].Get("%s_Data" % (histName if histName[:4] != "Log_" else histName[4:]))
 
 legend.AddEntry(dataHist, "Data", 'pe')
 legendR.AddEntry(dataHist, "Data", 'pe')
@@ -377,7 +383,7 @@ legendR.AddEntry(dataHist, "Data", 'pe')
 
 
 for sample in legList:
-    hist = _file[sample].Get("%s_%s"%(histName,sample))
+    hist = _file[sample].Get("%s_%s"%(histName if histName[:4] != "Log_" else histName[4:],sample))
     hist.SetFillColor(samples[sample][1])
     hist.SetLineColor(samples[sample][1])
     legend.AddEntry(hist,samples[sample][2],'f')
@@ -388,21 +394,21 @@ for sample in legList:
 X = int(len(legList)/2)
 sample = legList[X]
 #print histName, _file[sample], "%s_%s"%(histName,sample)
-hist = _file[sample].Get("%s_%s"%(histName,sample))
+hist = _file[sample].Get("%s_%s"%(histName if histName[:4] != "Log_" else histName[4:],sample))
 hist.SetFillColor(samples[sample][1])
 hist.SetLineColor(samples[sample][1])
 legendR.AddEntry(hist,samples[sample][2],'f')
 
 for i in range(X):
     sample = legList[i]
-    hist = _file[sample].Get("%s_%s"%(histName,sample))
+    hist = _file[sample].Get("%s_%s"%(histName if histName[:4] != "Log_" else histName[4:],sample))
     hist.SetFillColor(samples[sample][1])
     hist.SetLineColor(samples[sample][1])
     legendR.AddEntry(hist,samples[sample][2],'f')
 
     if X+i+1 < len(legList):
         sample = legList[i+X+1]
-        hist = _file[sample].Get("%s_%s"%(histName,sample))
+        hist = _file[sample].Get("%s_%s"%(histName if histName[:4] != "Log_" else histName[4:],sample))
         hist.SetFillColor(samples[sample][1])
         hist.SetLineColor(samples[sample][1])
         legendR.AddEntry(hist,samples[sample][2],'f')
@@ -412,10 +418,16 @@ for i in range(X):
 
 errorband=TH1F("error","error",20,0,20)
 errorband.SetLineColor(0)
-errorband.SetFillColor(kBlack)
+errorband.SetFillColor(kBlue)
 errorband.SetFillStyle(errorbandFillStyle)
 errorband.SetMarkerSize(0)
-if showUnc: legendR.AddEntry(errorband,"Uncertainty","f")
+systErrorband = errorband.Clone("_systerrband")
+systErrorband.SetFillColor(kRed)
+if showUnc:
+    legend.AddEntry(errorband,"Stat Uncertainty","f")
+    legend.AddEntry(systErrorband,"Stat+Syst Uncertainty","f")
+    legendR.AddEntry(errorband,"Stat Uncertainty","f")
+    legendR.AddEntry(systErrorband,"Stat+Syst Uncertainty","f")
 
 TGaxis.SetMaxDigits(3)
 
@@ -424,7 +436,12 @@ TGaxis.SetMaxDigits(3)
 
 def drawHist(histName,plotInfo, plotDirectory, _file):
     #print "start drawing"
+    useLogY = plotInfo[5]
+#    if useLogY and histName[:4] == "Log_":
+#        histName = histName[4:]
+#        print "new histName:", histName
 
+    trueHistName = histName if histName[:4] != "Log_" else histName[4:]
     canvas = TCanvas('c1','c1',W,H)
     canvas.SetFillColor(0)
     canvas.SetBorderMode(0)
@@ -490,7 +507,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     SetOwnership(stack,True)
     for sample in stackList:
         #print sample, histName, _file[sample], "%s_%s"%(histName,sample)
-        hist = _file[sample].Get("%s_%s"%(histName,sample))
+        hist = _file[sample].Get("%s_%s"%(trueHistName,sample))
         if type(hist)==type(TObject()):continue
         hist = hist.Clone(sample)   
         hist.SetFillColor(samples[sample][1])
@@ -523,11 +540,10 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         stack.Add(hist)
 
 
-    dataHist = _file["Data"].Get("%s_Data" % histName)
+    dataHist = _file["Data"].Get("%s_Data" % trueHistName).Clone(histName)
     noData = False
     #print dataHist
     if type(dataHist)==type(TObject()): noData = True
-    print histName  
     
     if not noData:
         dataHist.Sumw2()
@@ -595,11 +611,15 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     #print histName
     errorband=stack.GetStack().Last().Clone("error")
     errorband.Sumw2()
-    errorband.SetLineColor(kBlack)
-    errorband.SetFillColor(kBlack)
+    errorband.SetLineColor(kBlue)
+    errorband.SetFillColor(kBlue)
     #errorband.SetFillStyle(3245)
     errorband.SetFillStyle(errorbandFillStyle)
     errorband.SetMarkerSize(0)
+    systErrorband = errorband.Clone("totalError")
+    systErrorband.SetLineColor(kRed)
+    systErrorband.SetFillColor(kRed)
+    
     h1_up={}
     h1_do={}
     
@@ -620,10 +640,10 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
 #                if sample not in ["TTbar","ST_tW"]:continue
             #if sys=="toppt":
             if syst in oneSidedSysts:
-                h1_up[sample][syst]=_filesys_up[sample][syst].Get("%s_%s"%(histName,sample)).Clone("%s_%s_up"%(syst,sample))
+                h1_up[sample][syst]=_filesys_up[sample][syst].Get("%s_%s"%(trueHistName,sample)).Clone("%s_%s_up"%(syst,sample))
             else:
-                h1_up[sample][syst]=_filesys_up[sample][syst].Get("%s_%s"%(histName,sample)).Clone("%s_%s_up"%(syst,sample))
-                h1_do[sample][syst]=_filesys_down[sample][syst].Get("%s_%s"%(histName,sample)).Clone("%s_%s_do"%(syst,sample))
+                h1_up[sample][syst]=_filesys_up[sample][syst].Get("%s_%s"%(trueHistName,sample)).Clone("%s_%s_up"%(syst,sample))
+                h1_do[sample][syst]=_filesys_down[sample][syst].Get("%s_%s"%(trueHistName,sample)).Clone("%s_%s_do"%(syst,sample))
 
             if type(plotInfo[2]) is type(list()):
                 h1_up[sample][syst] = h1_up[sample][syst].Rebin(len(plotInfo[2])-1,"",array('d',plotInfo[2]))
@@ -661,7 +681,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
 #print (sum_[i_bin])**0.5       
         
         #################################################
-        #errorband.SetBinError(i_bin,(sum_[i_bin])**0.5)
+        systErrorband.SetBinError(i_bin,(sum_[i_bin] + errorband.GetBinError(i_bin)**2)**0.5)
         #################################################
     
     stack.Draw('hist')
@@ -700,7 +720,9 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     #residue.Draw("hist")
     #canvas.Print("%s/%s_residue.pdf"%(plotDirectory,histName))
     #canvas.Clear()
-    if showUnc: errorband.DrawCopy('e2,same')
+    if showUnc: 
+        systErrorband.DrawCopy('e2 same')
+        errorband.DrawCopy('e2,same')
     legend.Draw("same")
 
 
@@ -708,8 +730,8 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     CMS_lumi.channelText = _channelText+plotInfo[4]
     CMS_lumi.CMS_lumi(canvas, 4, 11)
 
-    canvas.Print("%s/%s.pdf"%(plotDirectory,histName))
-    canvas.Print("%s/%s.png"%(plotDirectory,histName))
+    canvas.Print("%s/%s%s.pdf"%(plotDirectory,trueHistName, "_logY" if useLogY else ""))
+    canvas.Print("%s/%s%s.png"%(plotDirectory,trueHistName, "_logY" if useLogY else ""))
 
     if not noData:
         ratio = dataHist.Clone("temp")
@@ -718,7 +740,6 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         for i_bin in range(1,temp.GetNbinsX()+1):
             temp.SetBinError(i_bin,0.)
         ratio.Divide(temp)
-#errorband.Divide(temp)
 
 
 # pad1.Clear()
@@ -763,6 +784,10 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         dataHist.Draw('E,X0,SAME')
         #print "dataHist.GetXaxis().GetTitle() =", dataHist.GetXaxis().GetTitle() 
 #       legendR.AddEntry(errorband,"Uncertainty","f")
+        if showUnc: 
+            systErrorband.DrawCopy('e2 same')
+            errorband.DrawCopy('e2,same')
+        
         legendR.Draw()
 
         _text = TPaveText(0.42,.75,0.5,0.85,"NDC")
@@ -824,14 +849,17 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         ratio.SetLineWidth(dataHist.GetLineWidth())
         ratio.Draw('e,x0')
         errorband.Divide(temp)
-        if showUnc: errorband.DrawCopy('e2,same')
+        systErrorband.Divide(temp)
+        if showUnc: 
+            systErrorband.DrawCopy('e2 same')
+            errorband.DrawCopy('e2,same')
         oneLine.Draw("same")
         
         #    pad2.Update()
         canvasRatio.Update()
         canvasRatio.RedrawAxis()
-        canvasRatio.SaveAs("%s/%s_ratio.pdf"%(plotDirectory,histName))
-        canvasRatio.SaveAs("%s/%s_ratio.png"%(plotDirectory,histName))
+        canvasRatio.SaveAs("%s/%s_ratio%s.pdf"%(plotDirectory,trueHistName, "_logY" if useLogY else ""))
+        canvasRatio.SaveAs("%s/%s_ratio%s.png"%(plotDirectory,trueHistName, "_logY" if useLogY else ""))
             #canvasRatio.Clear()
         canvasRatio.SetLogy(0)
 
@@ -925,7 +953,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 y2 = pad1.GetY2()
 
 
-                _stack.SetTitle(histName + "  Pileup %s" % var)    # Set ratio plot title here
+                _stack.SetTitle(trueHistName + "  Pileup %s" % var)    # Set ratio plot title here
 
                 # No x axis title on upper pad of stack plot
                 _stack.GetXaxis().SetTitle("")
@@ -1000,14 +1028,16 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 ratio.SetLineWidth(dataHist.GetLineWidth())
                 ratio.Draw('e,x0')
                 #errorband.Divide(temp)
-                if showUnc: errorband.Draw('e2,same')
+                if showUnc: 
+                    systErrorband.DrawCopy('e2 same')
+                    errorband.DrawCopy('e2,same')
                 oneLine.Draw("same")
 
                 #    pad2.Update()
                 canvasRatio.Update()
                 canvasRatio.RedrawAxis()
-                canvasRatio.SaveAs("%s/%s_PU_%s_ratio.pdf"%(plotDirectory,histName,var))
-                canvasRatio.SaveAs("%s/%s_PU_%s_ratio.png"%(plotDirectory,histName,var))
+                canvasRatio.SaveAs("%s/%s_PU_%s_ratio%s.pdf"%(plotDirectory,trueHistName,var, "_logY" if useLogY else ""))
+                canvasRatio.SaveAs("%s/%s_PU_%s_ratio%s.png"%(plotDirectory,trueHistName,var, "_logY" if useLogY else ""))
                     #canvasRatio.Clear()
                 canvasRatio.SetLogy(0)
     
@@ -1017,14 +1047,15 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     if makeSystPlots and histName.find("rec_") >= 0 or histName.find("gen_") >=0:
         # Systematic variation plots
         print "\n","="*50
-        print "Now making systematics plots for %s" % histName
+        print "Now making systematics plots for %s" % trueHistName
         print "="*50,"\n"
+
         for sample in signal: 
             print "Now on:", sample
             if sample == "TTbar_amcanlo":
-                nominal = _file[sample].Get("%s_TTbar" % (histName))
+                nominal = _file[sample].Get("%s_TTbar" % trueHistName)
             else:
-                nominal = _file[sample].Get("%s_%s"%(histName,sample))
+                nominal = _file[sample].Get("%s_%s"%(trueHistName,sample))
             
             # Set X,Y axis labels
             #nominal.GetXaxis().SetTitle(obsTitle[histName[4:]] + " [GeV]")
@@ -1075,7 +1106,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 one.SetTitle("")
                 one.GetXaxis().SetTitleSize(0.1)
                 #one.GetXaxis().SetTitle(obsTitle[histName[4:]] + " [GeV]")
-                one.GetXaxis().SetTitle((obsTitle[histName[4:]] if (histName[4:].find("rec_") >=0 or histName[4:].find("gen_") >=0) else histName) + " [GeV]")
+                one.GetXaxis().SetTitle((obsTitle[trueHistName[4:]] if (trueHistName[4:].find("rec_") >=0 or trueHistName[4:].find("gen_") >=0) else trueHistName) + " [GeV]")
                 one.GetXaxis().SetTitleOffset(1.1)
                 one.GetYaxis().SetRangeUser(0.8,1.2)
                 one.GetYaxis().SetTitle("ratio wrt nominal")
@@ -1128,7 +1159,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                         ratioUp.GetXaxis().SetTitleSize(0.1)
                         #print "ratioUp.GetXaxis().GetTitleSize() = %.2f" % ratioUp.GetXaxis().GetTitleSize()
                         #ratioUp.GetXaxis().SetTitle(obsTitle[histName[4:]] + " [GeV]")
-                        ratioUp.GetXaxis().SetTitle((obsTitle[histName[4:]] if (histName[4:].find("rec_") >=0 or histName[4:].find("gen_") >=0) else histName) + " [GeV]")
+                        ratioUp.GetXaxis().SetTitle((obsTitle[trueHistName[4:]] if (trueHistName[4:].find("rec_") >=0 or trueHistName[4:].find("gen_") >=0) else trueHistName) + " [GeV]")
                         ratioUp.GetXaxis().SetTitleOffset(1.1)
                         
 
@@ -1164,8 +1195,8 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 pad1.cd()                
                 l.AddEntry(nominal, "nominal")
                 l.Draw("same")
-                canvasRatio.SaveAs("%s/%s_%s_%sSysts.pdf" %(plotDirectory,sample,histName,sysType))
-                canvasRatio.SaveAs("%s/%s_%s_%sSysts.png" %(plotDirectory,sample,histName,sysType))
+                canvasRatio.SaveAs("%s/%s_%s_%sSysts%s.pdf" %(plotDirectory,sample,trueHistName,sysType, "_logY" if useLogY else ""))
+                canvasRatio.SaveAs("%s/%s_%s_%sSysts%s.png" %(plotDirectory,sample,trueHistName,sysType, "_logY" if useLogY else ""))
 
             canvasRatio.cd()
             canvasRatio.ResetDrawn()
@@ -1256,7 +1287,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                     ratioUp.GetXaxis().SetTitleSize(0.1)
                     #print "ratioUp.GetXaxis().GetTitleSize() = %.2f" % ratioUp.GetXaxis().GetTitleSize()
                     #ratioUp.GetXaxis().SetTitle(obsTitle[histName[4:]] + " [GeV]")
-                    ratioUp.GetXaxis().SetTitle((obsTitle[histName[4:]] if (histName[4:].find("rec_") >=0 or histName[4:].find("gen_") >=0) else histName) + " [GeV]")
+                    ratioUp.GetXaxis().SetTitle((obsTitle[trueHistName[4:]] if (trueHistName[4:].find("rec_") >=0 or trueHistName[4:].find("gen_") >=0) else trueHistName) + " [GeV]")
                     ratioUp.GetXaxis().SetTitleOffset(1.1)
                     if syst == "Q2":
                         ratioUp.GetYaxis().SetRangeUser(0.5,1.5)
@@ -1278,8 +1309,8 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
 #                pad2.Draw()
                 one.Draw("hist same")
                 CMS_lumi.CMS_lumi(canvasRatio, 4, 12)
-                canvasRatio.SaveAs("%s/%s_%s_%s.pdf" %(plotDirectory,sample,histName,syst))
-                canvasRatio.SaveAs("%s/%s_%s_%s.png" %(plotDirectory,sample,histName,syst))
+                canvasRatio.SaveAs("%s/%s_%s_%s%s.pdf" %(plotDirectory,sample,trueHistName,syst, "_logY" if useLogY else ""))
+                canvasRatio.SaveAs("%s/%s_%s_%s%s.png" %(plotDirectory,sample,trueHistName,syst, "_logY" if useLogY else ""))
 
     canvas.Close()
     canvasRatio.Close()

@@ -28,11 +28,11 @@ else
 
 	echo "tar -xvf CMSSW_8_0_26_patch1.tgz"
 	tar -xzf CMSSW_8_0_26_patch1.tgz
-
+	
     echo "rm CMSSW_8_0_26_patch1.tgz"
     rm CMSSW_8_0_26_patch1.tgz
-
-	cd CMSSW_8_0_26_patch1/src/
+	
+    cd CMSSW_8_0_26_patch1/src/
 	source /cvmfs/cms.cern.ch/cmsset_default.sh
 	cd TopNtuplizer/
     
@@ -72,6 +72,7 @@ MarkEOS="/store/user/msaunder/"
 LPCtop="/store/user/lpctop/TopMass/13TeV_ggNTuples/V08_00_26_07/"
 
 TEST="/store/user/msaunder/test/"
+
 
 
 #list of all of the input files, space separates to indicate new entry.  Can have multiple input files per entry
@@ -241,12 +242,14 @@ sampleType=(
 
 
 #run the make skim
-echo "AnalysisNtuple/makeSkim ${channel} ${sampleType[job]}_skim.root \`xrdfs root://cmseos.fnal.gov ls -u ${inputfiles[job]} | grep '\.root'\`"
-AnalysisNtuple/makeSkim ${channel} ${sampleType[job]}_skim.root `xrdfs root://cmseos.fnal.gov ls -u ${inputfiles[job]} | grep '\.root'`
+echo "AnalysisNtuple/makeCutflows ${sampleType[job]} . `xrdfs root://cmseos.fnal.gov ls -u ${inputfiles[job]} | grep '\.root'`"
+AnalysisNtuple/makeCutflows ${sampleType[job]} . `xrdfs root://cmseos.fnal.gov ls -u ${inputfiles[job]} | grep '\.root'`
+
+#AnalysisNtuple/makeCutflows ${channel} ${sampleType[job]}_cutflow.root `xrdfs root://cmseos.fnal.gov ls -u ${inputfiles[job]} | grep '\.root'`
 
 
 #Copy results over to eos 
-echo "xrdcp -f ${sampleType[job]}_skim.root ${outputdir}skims/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root"
-xrdcp -f ${sampleType[job]}_skim.root ${outputdir}skims/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root
+echo "xrdcp -f ${sampleType[job]}_cutflow.root ${outputdir}cutflows/${channelDir}/V08_00_26_07/${sampleType[job]}_cutflow.root"
+xrdcp -f ${sampleType[job]}_cutflow.root ${outputdir}cutflows/${channelDir}/V08_00_26_07/${sampleType[job]}_cutflow.root
 
 

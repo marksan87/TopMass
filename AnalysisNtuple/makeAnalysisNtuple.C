@@ -131,7 +131,7 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 
 	selector = new Selector();
 
-	evtPick = new EventPick("");
+	evtPick = new EventPick("nominal");
 
 	selector->pho_applyPhoID = false;
 	//selector->looseJetID = false;
@@ -145,7 +145,8 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	selector->isTTGamma = isTTGamma;
     selector->useRoccor = true;	
     selector->fixedSeed = false; 
-    
+   
+    evtPick->saveCutflows = true;
     
     if (selector->useRoccor) { cout<<"Applying Rochester Muon Corrections using "<<((selector->fixedSeed) ? "fixed" : "random")<<" seed"<<endl; }
 
@@ -392,7 +393,9 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 		//		selector->process_objects(tree);
 		selector->clear_vectors();
 
-		evtPick->process_event(tree, selector, _PUweight);
+        if (isMC)
+            _PUweight    = PUweighter->getWeight(tree->nPUInfo_, tree->puBX_, tree->puTrue_);
+		evtPick->process_event(tree, selector, _lumiWeight * _PUweight * ((tree->genWeight_ >= 0) ? 1 : -1));
 //		if (tree->lumis_==225916 && tree->event_==36191688){
 //			cout << tree->run_ <<"\t"<<tree->lumis_ << "\t" << tree->event_ << endl;
 //			cout << "Pass Event Pick: " << evtPick->passPresel_emu << endl;
@@ -515,6 +518,13 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 //	std::cout <<outputFile <<std::endl;		
 	outputFile->cd();
 	outputTree->Write();
+    if (evtPick->saveCutflows)
+    {
+        std::cout << "Saving cutflow tables" << std::endl;
+        evtPick->cutFlow_emu->Write();
+        evtPick->cutFlowWeight_emu->Write();
+    }
+
 
 	outputFile->Close();
 

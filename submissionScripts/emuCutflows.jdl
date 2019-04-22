@@ -1,5 +1,5 @@
 universe = vanilla
-Executable = runSkims_emu.sh
+Executable = runCutflows.sh
 
 should_transfer_files = YES
 WhenTOTransferOutput  = ON_EXIT

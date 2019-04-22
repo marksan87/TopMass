@@ -21,7 +21,9 @@ public:
     void process_event(EventTree* inp_tree, Selector* inp_selector, double weight=1.0);
 	void print_cutflow_mu(TH1D* _cutflow);
 	void print_cutflow_ele(TH1D* _cutflow);
-	
+    void print_cutflow_emu(TH1D* _cutflow);
+
+
 	std::string title;
 	
 	/* // selected object indices */
@@ -95,7 +97,8 @@ public:
 	bool passPresel_mu; // passed preselection
 	bool passAll_mu; // single flag: event passed all cuts: preselection + photon
 	bool passFirstcut; // pass the sync cut	
-	// histograms
+	
+    // histograms
 	//	std::vector<TH1D*> histVector;
 	TH1D* cutFlow_emu;
 	TH1D* cutFlowWeight_emu;

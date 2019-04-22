@@ -27,7 +27,9 @@ else
 
 	echo "tar -xvf CMSSW_8_0_26_patch1.tgz"
 	tar -xzf CMSSW_8_0_26_patch1.tgz
-	
+
+    rm CMSSW_8_0_26_patch1.tgz
+
 	cd CMSSW_8_0_26_patch1/src/
 	source /cvmfs/cms.cern.ch/cmsset_default.sh
 	cd TopNtuplizer/

@@ -28,7 +28,9 @@ else
 
 	echo "tar -xvf CMSSW_8_0_26_patch1.tgz"
 	tar -xzf CMSSW_8_0_26_patch1.tgz
-	
+
+    rm CMSSW_8_0_26_patch1.tgz
+
 	cd CMSSW_8_0_26_patch1/src/
 	source /cvmfs/cms.cern.ch/cmsset_default.sh
 	cd TopNtuplizer/
@@ -101,6 +103,7 @@ sampleType=("TTbarPowheg" \
             "TTbar_mt1755_3" \
             "TTbar_mt1785" \
             "WJetsToLNu" \
+            "WJetsToLNu_LO" \
             "WWTo2L2Nu" \
             "WZTo3LNu" \
             "ZZTo2L2Nu" \

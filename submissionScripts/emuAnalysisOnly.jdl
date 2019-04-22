@@ -20,11 +20,6 @@ periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) 
 #x509userproxy = $ENV(X509_USER_PROXY)
 
 # important, number of instances (jobs) of script
-#Arguments = "$(process)+39"
-#Queue 21
-
 Arguments = $(process)
-Queue 60 
-
-
+Queue 61 
 

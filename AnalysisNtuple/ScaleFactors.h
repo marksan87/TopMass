@@ -86,13 +86,14 @@ double totalGJets_HT600toInf = 2463751.;
 
 // Top mass analysis
 double totalTTbarPowheg   = 77078997.;   // Updated for mt analysis
-double totalTTWJetsToLNu  = 2160030.;
-double totalTTZToLLNuNu   = 1992334.;
-double totalWJetsToLNu    = 24119956.;
+double totalTTWJetsToLNu  = 1112646.;  // Positive: 1636338  Negative: 523692  Total: 2160030
+double totalTTZToLLNuNu   = 927930.;   // Positive: 1460132  Negative: 532202  Total: 1992334
+double totalWJetsToLNu    = 16777216.; // Positive: 16777216  Negative: 3811598  Total: 24119956 
+double totalWJetsToLNu_LO = 29705372.;
 double totalWWTo2L2Nu     = 1998956.; 
 double totalWZTo3LNu      = 1993154.;
 double totalZZTo2L2Nu     = 8842251.;
-double totalST_s          = 999976.;
+double totalST_s          = 622974.;  // Positive: 811475  Negative: 188501  Total: 999976
 double totalST_t_top      = 67130469.;
 double totalST_t_antitop  = 38736451.;
 double totalST_tW_top     = 3256548.; 
@@ -147,8 +148,7 @@ double totalTTbar_CRQCD   = 59618551.;
 
 // Alternate generators      
 
-//double totalTTbar_amcanlo  = 43560332.;
-double totalTTbar_amcanlo  = 15065312.;  // PosEvents - NegEvents
+double totalTTbar_amcanlo  = 2529706.;  // Positive: 16777216  Negative: 14247510  Total: 43560332
 double totalTTbar_madgraph = 10139697.;
 double totalTTbar_herwigpp = 59172906.;
 
@@ -196,9 +196,14 @@ double TTZToLLNuNu_xs = 0.253;
 double ST_s_xs = 3.4;
 double ST_t_top_xs = 136.02;
 double ST_t_antitop_xs = 80.95;
-double ST_tW_top_xs = 19.3;
-double ST_tW_antitop_xs = 19.3;
+double ST_tW_top_xs = 19.467;
+double ST_tW_antitop_xs = 19.467;
 
+
+double ST_tW_top_mt1695_xs = 20.4;
+double ST_tW_antitop_mt1695_xs = 20.4;
+double ST_tW_top_mt1755_xs = 18.6;
+double ST_tW_antitop_mt1755_xs = 18.6;
 
 double TTbar_dilepton_xs             =  87.315;
 double TTbar_semilept_xs             =  182.175;
@@ -380,6 +385,7 @@ double TTbar_herwigpp_SF = TTbar_xs  * luminosity / totalTTbar_herwigpp;
 
 
 double WJetsToLNu_SF = WJetsToLNu_xs * luminosity / totalWJetsToLNu;
+double WJetsToLNu_LO_SF = WJetsToLNu_xs * luminosity / totalWJetsToLNu_LO;
 double WWTo2L2Nu_SF = WWTo2L2Nu_xs * luminosity / totalWWTo2L2Nu;
 double WZTo3LNu_SF = WZTo3LNu_xs * luminosity / totalWZTo3LNu;
 double ZZTo2L2Nu_SF = ZZTo2L2Nu_xs * luminosity / totalZZTo2L2Nu;
@@ -397,10 +403,10 @@ double ST_tW_antitop_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop;
 double ST_tW_top_DS_SF = ST_tW_top_xs * luminosity / totalST_tW_top_DS;
 double ST_tW_antitop_DS_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_DS;
 
-double ST_tW_top_mt1695_SF = ST_tW_top_xs * luminosity / totalST_tW_top_mt1695;
-double ST_tW_top_mt1755_SF = ST_tW_top_xs * luminosity / totalST_tW_top_mt1755;
-double ST_tW_antitop_mt1695_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_mt1695;
-double ST_tW_antitop_mt1755_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_mt1755;
+double ST_tW_top_mt1695_SF = ST_tW_top_mt1695_xs * luminosity / totalST_tW_top_mt1695;
+double ST_tW_top_mt1755_SF = ST_tW_top_mt1755_xs * luminosity / totalST_tW_top_mt1755;
+double ST_tW_antitop_mt1695_SF = ST_tW_antitop_mt1695_xs * luminosity / totalST_tW_antitop_mt1695;
+double ST_tW_antitop_mt1755_SF = ST_tW_antitop_mt1755_xs * luminosity / totalST_tW_antitop_mt1755;
 
 double ST_tW_top_fsrUp_SF = ST_tW_top_xs * luminosity / totalST_tW_top_fsrUp;
 double ST_tW_top_fsrDown_SF = ST_tW_top_xs * luminosity / totalST_tW_top_fsrDown;
@@ -459,9 +465,10 @@ double getEvtWeight(string sampleType){
 	else if( sampleType=="TTbar_herwigpp_2") {evtWeight = TTbar_herwigpp_SF;}
 	else if( sampleType=="TTbar_herwigpp_3") {evtWeight = TTbar_herwigpp_SF;}
     else if( sampleType=="WJetsToLNu"){evtWeight = WJetsToLNu_SF;} 
+    else if( sampleType=="WJetsToLNu_LO"){evtWeight = WJetsToLNu_LO_SF;} 
     else if( sampleType=="WWTo2L2Nu"){evtWeight = WWTo2L2Nu_SF;} 
     else if( sampleType=="WZTo3LNu"){evtWeight = WZTo3LNu_SF;} 
-    else if( sampleType=="WZTo3LNu"){evtWeight = WZTo3LNu_SF;} 
+    else if( sampleType=="ZZTo2L2Nu"){evtWeight = ZZTo2L2Nu_SF;} 
     else if( sampleType=="TTWJetsToLNu"){evtWeight = TTWJetsToLNu_SF;} 
     else if( sampleType=="TTZToLLNuNu"){evtWeight = TTZToLLNuNu_SF;}
     else if( sampleType=="ST_s"){evtWeight = ST_s_SF;} 
@@ -640,6 +647,7 @@ const std::string allowedSampleTypes[199] = {"Data",
                                             "TTbar_herwigpp_2",
                                             "TTbar_herwigpp_3",
                                             "WJetsToLNu",
+                                            "WJetsToLNu_LO",
                                             "WWTo2L2Nu",
                                             "WZTo3LNu",
                                             "ZZTo2L2Nu",
