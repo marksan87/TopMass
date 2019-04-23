@@ -281,7 +281,7 @@ elif [ "$option" == "bkg" ] ; then
         done
     done 
 
-elif [ "$option" == "data" ] ; then
+elif [ "${option,,}" == "data" ] ; then
     echo "./fillHistograms.py -s Data ${addPlots}"
         eval ./fillHistograms.py -s Data ${addPlots}
 else

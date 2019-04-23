@@ -362,8 +362,8 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                                   ],
            
            
-#           "WJets"     : [["WJetsToLNu_AnalysisNtuple.root",
-           "WJets"     : [["WJetsToLNu_LO_AnalysisNtuple.root",
+           "WJets"     : [["WJetsToLNu_AnalysisNtuple.root",
+#           "WJets"     : [["WJetsToLNu_LO_AnalysisNtuple.root",
                            ],
                           kBlue,
                           "W+jets",

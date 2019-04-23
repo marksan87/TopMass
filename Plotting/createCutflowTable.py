@@ -126,30 +126,30 @@ f = open(args.outF, "w")
 f.write( \
 """\\begin{table*}[h]
 \t\\begin{center}
-\t\t\\topcaption{Event yields at various stages of the offline selection. The final selection is given in the rightmost column.}
+\t\t\\topcaption{Event yields at various stages of the offline selection. The final selection is given in the rightmost column. Uncertainties quoted are statistical.}
 \t\t\\label{table:cutflow}
-\t\t\\begin{tabular}{l r r r}
+\t\t\\begin{tabular}{l | r c l | r c l | r c l}
 \t\t\t\\hline
 \t\t\tSample """)
 for c in cuts:
-    f.write(" & %s" % cutTitle[c])
+    f.write(" & %s & &" % cutTitle[c])
 f.write(""" \\\\\n\t\t\t\\hline\n""")
 
 for sample in sampleList:
     if sample == "Data": continue
     f.write("\t\t\t%s" % sampleTitle[sample])
     for c in cuts:
-        f.write(" & %.1f $\\pm$ %.1f" % (cutflowH[sample].GetBinContent(cutToBin[c]), cutflowH[sample].GetBinError(cutToBin[c])) )
+        f.write(" & %.1f & $\\pm$ & %.1f" % (cutflowH[sample].GetBinContent(cutToBin[c]), cutflowH[sample].GetBinError(cutToBin[c])) )
     f.write(""" \\\\\n""")
 
 f.write("\t\t\t\\hline\n")
 f.write("\t\t\tTotal MC")
 for c in cuts:
-    f.write(" & %.0f $\\pm$ %.0f" % (TotalMC.GetBinContent(cutToBin[c]), TotalMC.GetBinError(cutToBin[c])) )
+    f.write(" & %.0f & $\\pm$ & %.0f" % (TotalMC.GetBinContent(cutToBin[c]), TotalMC.GetBinError(cutToBin[c])) )
 f.write(""" \\\\\n\t\t\t\\hline\n""")
 f.write("\t\t\tData")
 for c in cuts:
-    f.write(" & %.0f $\\pm$ %.0f" % (cutflowH["Data"].GetBinContent(cutToBin[c]), cutflowH["Data"].GetBinError(cutToBin[c])) )
+    f.write(" & %.0f & $\\pm$ & %.0f" % (cutflowH["Data"].GetBinContent(cutToBin[c]), cutflowH["Data"].GetBinError(cutToBin[c])) )
 f.write(""" \\\\\n\t\t\t\\hline\n""")
 f.write(
 """\t\t\\end{tabular}

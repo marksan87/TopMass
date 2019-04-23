@@ -86,9 +86,9 @@ double totalGJets_HT600toInf = 2463751.;
 
 // Top mass analysis
 double totalTTbarPowheg   = 77078997.;   // Updated for mt analysis
-double totalTTWJetsToLNu  = 1112646.;  // Positive: 1636338  Negative: 523692  Total: 2160030
-double totalTTZToLLNuNu   = 927930.;   // Positive: 1460132  Negative: 532202  Total: 1992334
-double totalWJetsToLNu    = 16777216.; // Positive: 16777216  Negative: 3811598  Total: 24119956 
+double totalTTWJetsToLNu  = 1112646.;  // Positive: 1636338   Negative:  523692  Total:  2160030
+double totalTTZToLLNuNu   = 927930.;   // Positive: 1460132   Negative:  532202  Total:  1992334
+double totalWJetsToLNu    = 16496760.; // Positive: 20308358  Negative: 3811598  Total: 24119956 
 double totalWJetsToLNu_LO = 29705372.;
 double totalWWTo2L2Nu     = 1998956.; 
 double totalWZTo3LNu      = 1993154.;
@@ -148,7 +148,7 @@ double totalTTbar_CRQCD   = 59618551.;
 
 // Alternate generators      
 
-double totalTTbar_amcanlo  = 2529706.;  // Positive: 16777216  Negative: 14247510  Total: 43560332
+double totalTTbar_amcanlo  = 15065312.;  // Positive: 29312822  Negative: 14247510  Total: 43560332
 double totalTTbar_madgraph = 10139697.;
 double totalTTbar_herwigpp = 59172906.;
 
