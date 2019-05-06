@@ -172,6 +172,15 @@ double totalST_tW_top_isrDown     = 3201563.;
 double totalST_tW_antitop_isrUp   = 3076275.; 
 double totalST_tW_antitop_isrDown = 3101321.; 
 
+double totalST_tW_top_Q2Up       = 3188665.; 
+double totalST_tW_top_Q2Down     = 3051991.; 
+double totalST_tW_antitop_Q2Up   = 1606961.; 
+double totalST_tW_antitop_Q2Down = 1575142.; 
+
+double totalST_tW_top_hdampUp       = 3124846.; 
+double totalST_tW_top_hdampDown     = 3181559.; 
+double totalST_tW_antitop_hdampUp   = 1628470.; 
+double totalST_tW_antitop_hdampDown = 1628292.; 
 
 //////////////////////////
 // Cross Sections Used  //
@@ -429,6 +438,15 @@ double ST_tW_top_isrDown_SF = ST_tW_top_xs * luminosity / totalST_tW_top_isrDown
 double ST_tW_antitop_isrUp_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_isrUp;
 double ST_tW_antitop_isrDown_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_isrDown;
 
+double ST_tW_top_Q2Up_SF = ST_tW_top_xs * luminosity / totalST_tW_top_Q2Up;
+double ST_tW_top_Q2Down_SF = ST_tW_top_xs * luminosity / totalST_tW_top_Q2Down;
+double ST_tW_antitop_Q2Up_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_Q2Up;
+double ST_tW_antitop_Q2Down_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_Q2Down;
+double ST_tW_top_hdampUp_SF = ST_tW_top_xs * luminosity / totalST_tW_top_hdampUp;
+double ST_tW_top_hdampDown_SF = ST_tW_top_xs * luminosity / totalST_tW_top_hdampDown;
+double ST_tW_antitop_hdampUp_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_hdampUp;
+double ST_tW_antitop_hdampDown_SF = ST_tW_antitop_xs * luminosity / totalST_tW_antitop_hdampDown;
+
 
 double getEvtWeight(string sampleType){
 	double evtWeight = -1.;
@@ -504,6 +522,14 @@ double getEvtWeight(string sampleType){
     else if( sampleType=="ST_tW_antitop_isrDown"){evtWeight = ST_tW_antitop_isrDown_SF;} 
     else if( sampleType=="ST_tW_top_DS"){evtWeight = ST_tW_top_DS_SF;} 
     else if( sampleType=="ST_tW_antitop_DS"){evtWeight = ST_tW_antitop_DS_SF;} 
+    else if( sampleType=="ST_tW_top_Q2Up"){evtWeight = ST_tW_top_Q2Up_SF;} 
+    else if( sampleType=="ST_tW_top_Q2Down"){evtWeight = ST_tW_top_Q2Down_SF;} 
+    else if( sampleType=="ST_tW_antitop_Q2Up"){evtWeight = ST_tW_antitop_Q2Up_SF;} 
+    else if( sampleType=="ST_tW_antitop_Q2Down"){evtWeight = ST_tW_antitop_Q2Down_SF;} 
+    else if( sampleType=="ST_tW_top_hdampUp"){evtWeight = ST_tW_top_hdampUp_SF;} 
+    else if( sampleType=="ST_tW_top_hdampDown"){evtWeight = ST_tW_top_hdampDown_SF;} 
+    else if( sampleType=="ST_tW_antitop_hdampUp"){evtWeight = ST_tW_antitop_hdampUp_SF;} 
+    else if( sampleType=="ST_tW_antitop_hdampDown"){evtWeight = ST_tW_antitop_hdampDown_SF;} 
     else if( sampleType=="TGJets"){evtWeight = TGJets_SF;} 
 	else if( sampleType=="TTGJets"){evtWeight = TTGJets_SF;} 
 	else if( sampleType=="TTGamma_Hadronic") {evtWeight = TTGamma_hadronic_SF;}
@@ -686,6 +712,14 @@ const std::string allowedSampleTypes[199] = {"Data",
                                             "ST_tW_antitop_fsrDown",
                                             "ST_tW_antitop_isrUp",
                                             "ST_tW_antitop_isrDown",
+                                            "ST_tW_top_Q2Up",
+                                            "ST_tW_top_Q2Down",
+                                            "ST_tW_top_hdampUp",
+                                            "ST_tW_top_hdampDown",
+                                            "ST_tW_antitop_Q2Up",
+                                            "ST_tW_antitop_Q2Down",
+                                            "ST_tW_antitop_hdampUp",
+                                            "ST_tW_antitop_hdampDown",
                                             "Data_SingleMu_b",
 											"Data_SingleMu_c",
 											"Data_SingleMu_d",

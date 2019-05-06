@@ -230,8 +230,8 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	if(systematicType=="muscale_down") {muscale012_g = 0; selector->muscaleLevel=0; isSystematicRun = true;}
     if(systematicType=="hdamp_up" || systematicType=="hdamp_down" || systematicType=="UE_up" || systematicType=="UE_down") { isSystematicRun = true; }
 
-    if( (sampleType.substr(0,13) == "TTbar_CRerdON") || (sampleType.substr(0,13) == "TTbar_CRGluon") || (sampleType.substr(0,11) == "TTbar_CRQCD") || (sampleType.substr(0,13)=="TTbar_amcanlo") || (sampleType.substr(0,14)=="TTbar_madgraph") || (sampleType.substr(0,14)=="TTbar_herwigpp") || (sampleType.substr(0,9)=="TTbar_isr") || (sampleType.substr(0,9)=="TTbar_fsr") || (sampleType.substr(0,13)=="ST_tW_top_isr") || (sampleType.substr(0,13)=="ST_tW_top_fsr") || (sampleType.substr(0,17)=="ST_tW_antitop_isr") || (sampleType.substr(0,17)=="ST_tW_antitop_fsr") || (sampleType.substr(0,12)=="ST_tW_top_DS") || (sampleType.substr(0,16)=="ST_tW_antitop_DS") ) { isSystematicRun = true; }
-	
+    if( (sampleType.substr(0,13) == "TTbar_CRerdON") || (sampleType.substr(0,13) == "TTbar_CRGluon") || (sampleType.substr(0,11) == "TTbar_CRQCD") || (sampleType.substr(0,13)=="TTbar_amcanlo") || (sampleType.substr(0,14)=="TTbar_madgraph") || (sampleType.substr(0,14)=="TTbar_herwigpp") || (sampleType.substr(0,9)=="TTbar_isr") || (sampleType.substr(0,9)=="TTbar_fsr") || (sampleType.substr(0,13)=="ST_tW_top_isr") || (sampleType.substr(0,13)=="ST_tW_top_fsr") || (sampleType.substr(0,17)=="ST_tW_antitop_isr") || (sampleType.substr(0,17)=="ST_tW_antitop_fsr") || (sampleType.substr(0,12)=="ST_tW_top_DS") || (sampleType.substr(0,16)=="ST_tW_antitop_DS") || (sampleType.substr(0,15)=="ST_tW_top_hdamp") || (sampleType.substr(0,12)=="ST_tW_top_Q2") || (sampleType.substr(0,19)=="ST_tW_antitop_hdamp") || (sampleType.substr(0,16)=="ST_tW_antitop_Q2") ) { isSystematicRun = true; }
+
     std::cout << "JEC: " << jecvar012_g << "  JER: " << jervar012_g << "  eleScale: "<< elescale012_g  
               << "  eleSmear: " << elesmear012_g << "  muScale: " << muscale012_g << endl;
 

@@ -52,7 +52,9 @@ def GetHistogramInfo(extraCuts="", nBJets=1):
                       "rec_Mll"          : ["m_ll"      , "rec_Mll"          ,     [400,20,420], extraCuts, ""],
                       "rec_ptpos"        : ["pt_pos"    , "rec_ptpos"        ,     [200,20,220], extraCuts, ""],
                       "rec_Epos"         : ["E_pos"     , "rec_Epos"         ,     [300,20,320], extraCuts, ""],
-                      "rec_ptp_ptm"      : ["ptp_ptm"   , "rec_ptp_ptm"      ,     [300,20,320], extraCuts, ""],
-                      "rec_Ep_Em"        : ["Ep_Em"     , "rec_Ep_Em"        ,     [500,20,520], extraCuts, ""],
+                      "rec_ptp_ptm"      : ["ptp_ptm"   , "rec_ptp_ptm"      ,     [300,45,345], extraCuts, ""],
+                      "rec_Ep_Em"        : ["Ep_Em"     , "rec_Ep_Em"        ,     [500,50,550], extraCuts, ""],
+                      "rec_leadLepPt"        : ["elePt[0] >= muPt[0] ? elePt[0] : muPt[0]", "rec_leadLepPt", [200, 25, 225], extraCuts, ""],
+                      "rec_leadJetPt"        : ["jetPt[0]", "rec_leadJetPt", [200, 30, 230], extraCuts, ""],
                       }
     return histogramInfo

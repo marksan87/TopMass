@@ -2,8 +2,11 @@
 
 eval `scramv1 runtime -sh`
 
-declare -a signal=("TTbar" \
-                   "ST_tW" \
+#declare -a signal=("TTbar" \
+#                   "ST_tW" \
+#                  )
+
+declare -a signal=("ST_tW" \
                   )
 
 declare -a background=("ST_bkgd" \
@@ -32,35 +35,45 @@ declare -a tWMass=("ST_tW_mt1695" \
                    "ST_tW_mt1755" \
                   )
 
+#declare -a systematics=(
+#             "EleScale" \
+#             "EleSmear" \
+#             "MuScale" \
+#             "JEC" \
+#             "JER" \
+#             "isr" \
+#             "fsr" \
+#             "hdamp" \
+#             "UE" \
+#             "EleIDEff"
+#             "EleRecoEff"
+#             "MuIDEff"
+#             "MuIsoEff"
+#             "MuTrackEff"
+#             "TrigEff"
+#             "BTagSF"
+#             "Lumi"
+#             "PU" \
+#             "Pdf" \
+#             "Q2" \
+#             "CRerdON" \
+#             "CRGluon" \
+#             "CRQCD" \
+#             "amcanlo" \
+#             "herwigpp" \
+#             "madgraph" \
+#             "DS" \
+#             "toppt" \
+#             "MEscale1" \
+#             "MEscale2" \
+#             "MEscale3" \
+#             "MEscale4" \
+#             "MEscale5" \
+#             "MEscale6" \
+#             )
+
 declare -a systematics=(
-             "EleScale" \
-             "EleSmear" \
-             "MuScale" \
-             "JEC" \
-             "JER" \
-             "isr" \
-             "fsr" \
              "hdamp" \
-             "UE" \
-             "EleIDEff"
-             "EleRecoEff"
-             "MuIDEff"
-             "MuIsoEff"
-             "MuTrackEff"
-             "TrigEff"
-             "BTagSF"
-             "Lumi"
-             "PU" \
-             "Pdf" \
-             "Q2" \
-             "CRerdON" \
-             "CRGluon" \
-             "CRQCD" \
-             "amcanlo" \
-             "herwigpp" \
-             "madgraph" \
-             "DS" \
-             "toppt" \
              )
 
 
@@ -73,6 +86,12 @@ declare -a oneSidedSysts=(
         "madgraph" \
         "herwigpp" \
         "DS" \
+        "MEscale1" \
+        "MEscale2" \
+        "MEscale3" \
+        "MEscale4" \
+        "MEscale5" \
+        "MEscale6" \
         )
 declare -a backgroundSystematics=( 
         "PU" \
@@ -96,7 +115,6 @@ declare -a separateSampleSysts=(
 
 declare -a ttOnlySysts=(
         "toppt" \
-        "hdamp" \
         "UE" \
         "CRerdON" \ 
         "CRGluon" \
@@ -104,6 +122,12 @@ declare -a ttOnlySysts=(
         "amcanlo" \
         "madgraph" \
         "herwigpp" \
+        "MEscale1" \
+        "MEscale2" \
+        "MEscale3" \
+        "MEscale4" \
+        "MEscale5" \
+        "MEscale6" \
         )
 
 
@@ -114,6 +138,7 @@ declare -a tWOnlySysts=(
 declare -a variations=("up" \
             "down" \
             )
+#addPlots="--addPlots --plot rec_leadJetPt rec_leadLepPt rec_Mll --analysisNtupleDir 1jet_13TeV_AnalysisNtuples --outDir 1jet_histograms"
 #addPlots="--addPlots --plot nBJet bjetPt bjetEta bjetPhi"
 #addPlots="--addPlots --plot rec_ptll --outDir secondtry_histograms"
 #addPlots="--addPlots --plot rec_ptll elePt muPt jetPt --outDir histograms"
@@ -121,17 +146,8 @@ declare -a variations=("up" \
 #addPlots="--addPlots --plot rec_ptll --binning 300 20 320 --outDir histograms_cut320"
 #addPlots="--addPlots --plot rec_ptll --binning 20 0 200 --outDir histograms_bin10"
 #addPlots='--addPlots --plot rec_ptll --varBins "range(0,210,10) + [220]" --outDir histograms_varbin_220'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,5) + range(100,160,10) + range(160,240,20)" --outDir histograms_varBins5_220'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,5) + range(100,160,10) + range(160,200,20)" --outDir histograms_varBins5_180'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,8) + range(100,160,12) + range(160,200,20)" --outDir histograms_varBins8_12_180'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,8) + range(100,160,12) + range(160,240,20)" --outDir histograms_varBins8_12_220'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,10) + range(100,160,15) + range(160,200,20)" --outDir histograms_varBins10_15_180'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,100,10) + range(100,160,15) + range(160,240,20)" --outDir histograms_varBins10_15_220'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,40,2) + range(40,80,1) + range(80,120,2) + range(120,140,5) + range(140,200,20)" --outDir histograms_varBins2_1_180'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,120,1) + range(120,140,5) + range(140,200,20)" --outDir histograms_varBins1_5_180'
-#addPlots='--addPlots --plot rec_ptll --varBins "range(20,120,1) + range(120,140,10) + range(140,220,40)" --outDir histograms_varBins1_10_180'
 
-#addPlots=""
+addPlots=""
 #test="--testone"
 test=""
 signalLength=${#signal[@]}
@@ -250,7 +266,7 @@ elif [ "$option" == "tWmt" ] ; then
                 continue
             fi
 
-            if [[ "${separateSampleSysts[@]}" =~  "${systematics[$sys]}" ]] ; then
+            if [[ "${separateSampleSysts[@]}" =~  "${systematics[$sys]}" ]] || ( ${systematics[$sys]} == "Q2") ; then
                 # Separate sample syst not available at alternate mass points
                 continue
             elif [[ "${oneSidedSysts[@]}" =~  "${systematics[$sys]}" ]] ; then

@@ -119,7 +119,7 @@ if [ "$jobType" == "herwigpp" ] ; then
 fi
 
 
-#outputdir="root://cmseos.fnal.gov//store/user/lpctop/TopMass/13TeV_"
+skimdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_skims"
 outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_"
 
 #variables for the directory names where the ttgamma analysis was storing ggNtuples
@@ -243,11 +243,11 @@ echo "var: ${var}"
 
 if [ "${sampleType[job]}" == "TTbar" ] ; then
     # Copy the TTbarPowheg skim file
-    echo "xrdcp -f ${outputdir}skims/${channelDir}/V08_00_26_07/TTbarPowheg_skim.root ${sampleType[job]}_skim.root" 
-    xrdcp -f ${outputdir}skims/${channelDir}/V08_00_26_07/TTbarPowheg_skim.root ${sampleType[job]}_skim.root 
+    echo "xrdcp -f ${skimdir}/${channelDir}/V08_00_26_07/TTbarPowheg_skim.root ${sampleType[job]}_skim.root" 
+    xrdcp -f ${skimdir}/${channelDir}/V08_00_26_07/TTbarPowheg_skim.root ${sampleType[job]}_skim.root 
 else
-    echo "xrdcp -f ${outputdir}skims/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sampleType[job]}_skim.root"
-    xrdcp -f ${outputdir}skims/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sampleType[job]}_skim.root 
+    echo "xrdcp -f ${skimdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sampleType[job]}_skim.root"
+    xrdcp -f ${skimdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sampleType[job]}_skim.root 
 fi
 
 

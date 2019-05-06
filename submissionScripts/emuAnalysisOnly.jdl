@@ -21,5 +21,5 @@ periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) 
 
 # important, number of instances (jobs) of script
 Arguments = $(process)
-Queue 61 
+Queue 69 
 

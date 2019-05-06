@@ -281,6 +281,39 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                                 isMC
                                 ],
            
+           "ST_tW_hdampUp" :  [["ST_tW_top_hdampUp_AnalysisNtuple.root",
+                                "ST_tW_antitop_hdampUp_AnalysisNtuple.root",
+                               ],
+                               618,
+                               "ST tW",
+                               isMC
+                               ],
+           
+           "ST_tW_hdampDown" :  [["ST_tW_top_hdampDown_AnalysisNtuple.root",
+                                  "ST_tW_antitop_hdampDown_AnalysisNtuple.root",
+                                ],
+                                618,
+                                "ST tW",
+                                isMC
+                                ],
+           
+           
+           "ST_tW_Q2Up" :  [["ST_tW_top_Q2Up_AnalysisNtuple.root",
+                             "ST_tW_antitop_Q2Up_AnalysisNtuple.root",
+                               ],
+                               618,
+                               "ST tW",
+                               isMC
+                               ],
+           
+           "ST_tW_Q2Down" :  [["ST_tW_top_Q2Down_AnalysisNtuple.root",
+                               "ST_tW_antitop_Q2Down_AnalysisNtuple.root",
+                                ],
+                                618,
+                                "ST tW",
+                                isMC
+                                ],
+           
            "ST_tW_MuScaleUp" :  [["ST_tW_top_muscale_up_AnalysisNtuple.root",
                                   "ST_tW_antitop_muscale_up_AnalysisNtuple.root",
                                   ],

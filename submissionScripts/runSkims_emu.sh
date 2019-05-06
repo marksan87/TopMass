@@ -155,6 +155,14 @@ inputfiles=(
     $LPCtop"TT_TuneEE5C_13TeV-powheg-herwigpp/crab_TT_TuneEE5C_13TeV-powheg-herwigpp/181217_225145/0000" \
     $LPCtop"TT_TuneEE5C_13TeV-powheg-herwigpp/crab_TT_TuneEE5C_13TeV-powheg-herwigpp-ext2/181217_225217/0000" \
     $LPCtop"TT_TuneEE5C_13TeV-powheg-herwigpp/crab_TT_TuneEE5C_13TeV-powheg-herwigpp-ext3/181217_225248/0000" \
+    $LPCtop"ST_tW_top_5f_MEscaleup_NoFullyHadronicDecays_13TeV-powheg/crab_ST_tW_top_5f_MEscaleup_NoFullyHadronicDecays_13TeV-powheg/190502_160505/0000" \
+    $LPCtop"ST_tW_top_MEscaledown_5f_NoFullyHadronicDecays_13TeV-powheg/crab_ST_tW_top_MEscaledown_5f_NoFullyHadronicDecays_13TeV-powheg/190503_215515/0000" \
+    $LPCtop"ST_tW_top_5f_PSscaleup_NoFullyHadronicDecays_13TeV-powheg-pythia8/crab_ST_tW_top_5f_PSscaleup_NoFullyHadronicDecays_13TeV-powheg-pythia8/190502_160623/0000" \
+    $LPCtop"ST_tW_top_PSscaledown_5f_NoFullyHadronicDecays_13TeV-powheg-pythia8/crab_ST_tW_top_PSscaledown_5f_NoFullyHadronicDecays_13TeV-powheg-pythia8/190502_160544/0000" \
+    $LPCtop"ST_tW_antitop_5f_MEscaleup_NoFullyHadronicDecays_13TeV-powheg/crab_ST_tW_antitop_5f_MEscaleup_NoFullyHadronicDecays_13TeV-powheg/190502_160746/0000" \
+    $LPCtop"ST_tW_antitop_MEscaledown_5f_NoFullyHadronicDecays_13TeV-powheg/crab_ST_tW_antitop_MEscaledown_5f_NoFullyHadronicDecays_13TeV-powheg/190502_160705/0000" \
+    $LPCtop"ST_tW_antitop_5f_PSscaleup_NoFullyHadronicDecays_13TeV-powheg-pythia8/crab_ST_tW_antitop_5f_PSscaleup_NoFullyHadronicDecays_13TeV-powheg-pythia8/190502_160918/0000" \
+    $LPCtop"ST_tW_antitop_PSscaledown_5f_NoFullyHadronicDecays_13TeV-powheg-pythia8/crab_ST_tW_antitop_PSscaledown_5f_NoFullyHadronicDecays_13TeV-powheg-pythia8/190502_160831/0000" \
 )
 
 sampleType=(
@@ -237,6 +245,14 @@ sampleType=(
     "TTbar_herwigpp_1" \
     "TTbar_herwigpp_2" \
     "TTbar_herwigpp_3" \
+    "ST_tW_top_Q2Up" \
+    "ST_tW_top_Q2Down" \
+    "ST_tW_top_hdampUp" \
+    "ST_tW_top_hdampDown" \
+    "ST_tW_antitop_Q2Up" \
+    "ST_tW_antitop_Q2Down" \
+    "ST_tW_antitop_hdampUp" \
+    "ST_tW_antitop_hdampDown" \
     )
 
 

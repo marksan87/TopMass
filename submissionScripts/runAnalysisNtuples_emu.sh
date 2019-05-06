@@ -70,7 +70,7 @@ if [ "$jobType" == "Dilep" ] ;	then
 	tupleExtraName2="__Dilep"
 fi
 
-#outputdir="root://cmseos.fnal.gov//store/user/lpctop/TopMass/13TeV_"
+skimdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_skims"
 outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_"
 
 #variables for the directory names where the ttgamma analysis was storing ggNtuples
@@ -150,12 +150,20 @@ sampleType=("TTbarPowheg" \
             "ST_tW_antitop_fsrDown" \
             "ST_tW_top_DS" \
             "ST_tW_antitop_DS" \
+            "ST_tW_top_Q2Up" \
+            "ST_tW_top_Q2Down" \
+            "ST_tW_top_hdampUp" \
+            "ST_tW_top_hdampDown" \
+            "ST_tW_antitop_Q2Up" \
+            "ST_tW_antitop_Q2Down" \
+            "ST_tW_antitop_hdampUp" \
+            "ST_tW_antitop_hdampDown" \
             )
 
 
 #Copy skim ntuple from eos 
-echo "xrdcp -f ${outputdir}skims/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sampleType[job]}_skim.root"
-xrdcp -f ${outputdir}skims/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sampleType[job]}_skim.root 
+echo "xrdcp -f ${skimdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sampleType[job]}_skim.root"
+xrdcp -f ${skimdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sampleType[job]}_skim.root 
 
 #run makeAnalysisNtuple
 echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}${tupleExtraName2} . ${sampleType[job]}_skim.root"

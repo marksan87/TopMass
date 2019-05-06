@@ -13,7 +13,5 @@ Requirements          = (OpSys == "LINUX" && (Arch != "DUMMY"))
 
 # important, number of instances (jobs) of script
 Arguments = $(process)
-Queue 79 
-
-
+Queue 87
 

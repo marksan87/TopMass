@@ -14,6 +14,9 @@ import pdb
 
 obsTitle = {"ptll":"p_{T}(ll)", "ptpos":"p_{T}(l^{+})", "Epos":"E(l^{+})", "ptp_ptm":"p_{T}(l^{+}) + p_{T}(l^{-})", "Ep_Em":"E(l^{+}) + E(l^{-})", "Mll":"M(ll)"}
 
+# Scale these to nominal rate
+systematicsToScale = ["Q2","MEscale1","MEscale2","MEscale3","MEscale4","MEscale5","MEscale6"]
+
 # Available systematics
 tWSystematics = ["PU", "Lumi", "EleIDEff", "EleRecoEff","EleScale","EleSmear","MuIDEff","MuIsoEff","MuTrackEff","MuScale","TrigEff","JEC","JER","Q2","Pdf","isr","fsr", "DS"] 
 ttSystematics = ["PU", "Lumi", "isr", "fsr", "EleIDEff", "EleRecoEff", "EleScale", "EleSmear", "MuIDEff", "MuIsoEff", "MuTrackEff", "MuScale", "TrigEff", "JEC", "JER", "Q2", "Pdf", "toppt", "hdamp", "UE", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp" ]
@@ -94,6 +97,7 @@ parser.add_argument("--allPlots","--allPlots",dest="makeAllPlots",action="store_
                      help="Make plots of all distributions" )
 parser.add_argument("--file",dest="inputFile",default=None,
           help="Specify specific input file")
+parser.add_argument("--scaleToNominal", action="store_true", default=False, help="scale certain systematics to the nominal rate")
 parser.add_argument("--reverse", action="store_true", default=False, help="reverse stack ordering")
 parser.add_argument("--reorderTop", dest="newStackListTop",action="append",
           help="New order for stack list (which plots will be put on top of the stack)" )
@@ -103,6 +107,7 @@ parser.add_argument("--theoryTTxs", action="store_true", default=False, help="Us
 parser.add_argument("--norm", action="store_true", default=False, help="normalize plots")
 parser.add_argument("-o", "--outDir", default="plots", help="output plot directory")
 parser.add_argument("--hideUnc", action="store_true", default=False, help="hide uncertainty bands")
+parser.add_argument("--systError", action="store_true", default=False, help="draw syst error band as well as stat")
 parser.add_argument("--systPlots", action="store_true", default=False, help="make systematic variation plots")
 args = parser.parse_args()
 
@@ -123,7 +128,10 @@ makeAllPlots = args.makeAllPlots
 scaleTTbarXS = args.theoryTTxs     # Scale to theory xsec of 831.76pb instead of 803 pb (value from TOP-17-001)
 
 showUnc = not args.hideUnc    # If true, include data/mc uncertainty in plot
+#showSystUnc = args.systError
+showSystUnc = True 
 
+scaleToNominal = args.scaleToNominal
 
 _fileDir = "histograms/hists"
 plotDirectory = args.outDir
@@ -289,25 +297,26 @@ R = 0.1*W
 
 errorbandFillStyle = 3245
 
-legendHeightPer = 0.0295
+#legendHeightPer = 0.0295
+legendHeightPer = 0.015
 #legendHeightPer = 0.04
 legList = stackList[:]
 legList.reverse()
 
 #legendStart = 0.69
-legendStart = 0.73
+legendStart = 0.69
 legendEnd = 0.97-(R/W)
 
 #legend = TLegend(2*legendStart - legendEnd, 1-T/H-0.01 - legendHeightPer*(len(legList)+1), legendEnd, 0.99-(T/H)-0.01)
 legend = TLegend(2*legendStart - legendEnd , 0.99 - (T/H)/(1.-padRatio+padOverlap) - legendHeightPer/(1.-padRatio+padOverlap)*round((len(legList)+1)/2.), legendEnd, 0.99-(T/H)/(1.-padRatio+padOverlap))
-legend.SetNColumns(3)
+legend.SetNColumns(5)
 
 #legendR = TLegend(0.71, 0.99 - (T/H)/(1.-padRatio+padOverlap) - legendHeightPer/(1.-padRatio+padOverlap)*(len(legList)+1), 0.99-(R/W), 0.99-(T/H)/(1.-padRatio+padOverlap))
 
 
 legendR = TLegend(2*legendStart - legendEnd , 0.99 - (T/H)/(1.-padRatio+padOverlap) - legendHeightPer/(1.-padRatio+padOverlap)*round((len(legList)+1)/2.)-0.1, legendEnd, 0.99-(T/H)/(1.-padRatio+padOverlap))
 
-legendR.SetNColumns(3)
+legendR.SetNColumns(5)
 
 legendR.SetBorderSize(0)
 legendR.SetFillColor(0)
@@ -424,17 +433,18 @@ errorband.SetMarkerSize(0)
 systErrorband = errorband.Clone("_systerrband")
 systErrorband.SetFillColor(kRed)
 if showUnc:
-    legend.AddEntry(errorband,"Stat Uncertainty","f")
-    legend.AddEntry(systErrorband,"Stat+Syst Uncertainty","f")
-    legendR.AddEntry(errorband,"Stat Uncertainty","f")
-    legendR.AddEntry(systErrorband,"Stat+Syst Uncertainty","f")
+    legend.AddEntry(errorband,"Stat Unc","f")
+    legendR.AddEntry(errorband,"Stat Unc","f")
+    if showSystUnc: 
+        legend.AddEntry(systErrorband,"Stat+Syst Unc","f")
+        legendR.AddEntry(systErrorband,"Stat+Syst Unc","f")
 
 TGaxis.SetMaxDigits(3)
 
 
 
 
-def drawHist(histName,plotInfo, plotDirectory, _file):
+def drawHist(histName,plotInfo, plotDirectory, _file, scaleToNominal):
     #print "start drawing"
     useLogY = plotInfo[5]
 #    if useLogY and histName[:4] == "Log_":
@@ -505,6 +515,8 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     canvas.ResetDrawn()
     stack = THStack(histName,histName)
     SetOwnership(stack,True)
+    
+    nominalRates = {}
     for sample in stackList:
         #print sample, histName, _file[sample], "%s_%s"%(histName,sample)
         hist = _file[sample].Get("%s_%s"%(trueHistName,sample))
@@ -516,6 +528,8 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
             # Scale to xsec measured in TOP-17-001
             hist.Scale(831.76/803.)
 
+        nominalRates[sample] = hist.Integral()
+        
         if type(plotInfo[2]) is type(list()):
             hist = hist.Rebin(len(plotInfo[2])-1,"",array('d',plotInfo[2]))
             if "MassEGamma" not in histName:
@@ -533,7 +547,6 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
             hist.SetBinContent(lastBin,lastBinContent + overFlowContent)
             hist.SetBinError(lastBin, (lastBinError**2 + overFlowError**2)**0.5 )
 
-    
     #print sample, histName, hist.Integral(-1,-1)
     #if type(plotInfo[2]) is type(list()):
     #   hist.Scale(1.,"width")
@@ -641,9 +654,19 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
             #if sys=="toppt":
             if syst in oneSidedSysts:
                 h1_up[sample][syst]=_filesys_up[sample][syst].Get("%s_%s"%(trueHistName,sample)).Clone("%s_%s_up"%(syst,sample))
+                systRate = h1_up[sample][syst].Integral()
+                if scaleToNominal and syst in systematicsToScale and systRate > 0: 
+                    h1_up[sample][syst].Scale(nominalRates[sample] / systRate)
             else:
                 h1_up[sample][syst]=_filesys_up[sample][syst].Get("%s_%s"%(trueHistName,sample)).Clone("%s_%s_up"%(syst,sample))
+                systRate = h1_up[sample][syst].Integral()
+                if scaleToNominal and syst in systematicsToScale and systRate > 0: 
+                    h1_up[sample][syst].Scale(nominalRates[sample] / systRate)
+                
                 h1_do[sample][syst]=_filesys_down[sample][syst].Get("%s_%s"%(trueHistName,sample)).Clone("%s_%s_do"%(syst,sample))
+                systRate = h1_do[sample][syst].Integral()
+                if scaleToNominal and syst in systematicsToScale and systRate > 0: 
+                    h1_do[sample][syst].Scale(nominalRates[sample] / systRate)
 
             if type(plotInfo[2]) is type(list()):
                 h1_up[sample][syst] = h1_up[sample][syst].Rebin(len(plotInfo[2])-1,"",array('d',plotInfo[2]))
@@ -721,7 +744,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
     #canvas.Print("%s/%s_residue.pdf"%(plotDirectory,histName))
     #canvas.Clear()
     if showUnc: 
-        systErrorband.DrawCopy('e2 same')
+        if showSystUnc: systErrorband.DrawCopy('e2 same')
         errorband.DrawCopy('e2,same')
     legend.Draw("same")
 
@@ -785,7 +808,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         #print "dataHist.GetXaxis().GetTitle() =", dataHist.GetXaxis().GetTitle() 
 #       legendR.AddEntry(errorband,"Uncertainty","f")
         if showUnc: 
-            systErrorband.DrawCopy('e2 same')
+            if showSystUnc: systErrorband.DrawCopy('e2 same')
             errorband.DrawCopy('e2,same')
         
         legendR.Draw()
@@ -848,11 +871,13 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
         ratio.SetLineColor(dataHist.GetLineColor())
         ratio.SetLineWidth(dataHist.GetLineWidth())
         ratio.Draw('e,x0')
-        errorband.Divide(temp)
-        systErrorband.Divide(temp)
+        errorbandRatio = errorband.Clone("error_ratio")
+        systErrorbandRatio = systErrorband.Clone("systError_ratio")
+        errorbandRatio.Divide(temp)
+        systErrorbandRatio.Divide(temp)
         if showUnc: 
-            systErrorband.DrawCopy('e2 same')
-            errorband.DrawCopy('e2,same')
+            if showSystUnc: systErrorbandRatio.DrawCopy('e2 same')
+            errorbandRatio.DrawCopy('e2,same')
         oneLine.Draw("same")
         
         #    pad2.Update()
@@ -968,6 +993,9 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 #print "dataHist.GetXaxis().GetTitle() =", dataHist.GetXaxis().GetTitle() 
 #       legendR.AddEntry(errorband,"Uncertainty","f")
                 legendR.Draw("same")
+                if showUnc: 
+                    if showSystUnc: systErrorband.DrawCopy('e2 same')
+                    errorband.DrawCopy('e2,same')
 
                 _text = TPaveText(0.42,.75,0.5,0.85,"NDC")
                 _text.AddText(plotInfo[6])
@@ -1029,8 +1057,8 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
                 ratio.Draw('e,x0')
                 #errorband.Divide(temp)
                 if showUnc: 
-                    systErrorband.DrawCopy('e2 same')
-                    errorband.DrawCopy('e2,same')
+                    if showSystUnc: systErrorbandRatio.DrawCopy('e2 same')
+                    errorbandRatio.DrawCopy('e2,same')
                 oneLine.Draw("same")
 
                 #    pad2.Update()
@@ -1317,7 +1345,7 @@ def drawHist(histName,plotInfo, plotDirectory, _file):
 
 
 for histName in plotList:
-    drawHist(histName,histograms[histName],plotDirectory,_file)
+    drawHist(histName,histograms[histName],plotDirectory,_file, scaleToNominal)
 
 # for histName in phoselhistograms:
 #         drawHist("phosel_%s"%histName,phoselhistograms[histName],plotDirectory,_file)

@@ -105,15 +105,22 @@ extraCuts = ""
 btagWeightCategory = ["1","(1-btagWeight[0])","(btagWeight[2])","(btagWeight[1])"]
 
 # Systematics with separate analysis ntuples
-separateSystSamples = ["hdamp", "UE", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "DS", "isr", "fsr", "EleScale", "EleSmear", "MuScale", "JEC", "JER"]
+separateSystSamples = {
+    "TTbar":["hdamp", "UE", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "isr", "fsr"],
+    "ST_tW":["hdamp", "DS", "isr", "fsr", "Q2"]
+}
 oneSidedSysts = ["toppt", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "DS"]
 #atleast 0, atleast 1, atleast 2, exactly 1, btagWeight[0] = exactly 0
 
 sampleListName = sample
 
+if sample.find("_mt") >= 0:
+    sampleType = sample[:sample.find("_mt")]
+else:
+    sampleType = sample
 
 #if (sample=="TTbar" or sample=="ST_tW") and syst in separateSystSamples: 
-if ("TTbar" in sample or "ST_tW" in sample) and syst in separateSystSamples: 
+if ("TTbar" in sample or "ST_tW" in sample) and syst in separateSystSamples[sampleType]: 
 #    if (syst=="isr" or syst=="fsr"):
 #        sampleListName+="_%s" % syst
 #    elif syst=="EleScale": 
@@ -162,13 +169,20 @@ if runsystematic:
 
         outputhistName += "%sLumi_%s"%(outputFileName,level)
 
-    elif 'Q2' in syst:
+    elif 'Q2' in syst and sample == "TTbar":
         if level=="up":
-            Q2="q2weight_Up"
+            #Q2="q2weight_Up"
+            Q2="genScaleSystWeights[6]"
         else:
-            Q2="q2weight_Do"
+            #Q2="q2weight_Do"
+            Q2="genScaleSystWeights[4]"
        
         outputhistName += "%sQ2_%s"%(outputFileName,level)
+
+    elif 'MEscale' in syst:
+        # Q2 variations
+        Q2 = "genScaleSystWeights[%s]" % syst[-1]
+        outputhistName += "%s%s" % (outputFileName,syst)
 
     elif 'Pdf' in syst:
         if syst=="Pdf":
