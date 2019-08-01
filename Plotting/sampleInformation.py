@@ -475,6 +475,27 @@ samples = {"TTbar"        : [["TTbarPowheg_AnalysisNtuple.root",
                       "Data",
                       isData
                       ],
+           
+           "DataBCDEF" : [["Data_MuEG2016B_AnalysisNtuple.root",
+                            "Data_MuEG2016C_AnalysisNtuple.root",
+                            "Data_MuEG2016D_AnalysisNtuple.root",
+                            "Data_MuEG2016E_AnalysisNtuple.root",
+                            "Data_MuEG2016F_1_AnalysisNtuple.root",
+                            "Data_MuEG2016F_2_AnalysisNtuple.root",
+                      ],
+                      kBlack,
+                      "Data",
+                      isData
+                      ],
+           
+           "DataGH" : [["Data_MuEG2016G_AnalysisNtuple.root",
+                        "Data_MuEG2016H_1_AnalysisNtuple.root",
+                        "Data_MuEG2016H_2_AnalysisNtuple.root",
+                      ],
+                      kBlack,
+                      "Data",
+                      isData
+                      ],
            }
 
 _signals = ["TTbar", "ST_tW"]

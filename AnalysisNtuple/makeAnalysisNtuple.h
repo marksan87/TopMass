@@ -57,11 +57,11 @@ public :
     double eleEffSF(double elePt, double eleSCEta, int sysLvl);
     double eleIDEffSF(double elePt, double eleSCEta, int sysLvl);
     double eleRecoEffSF(double elePt, double eleSCEta, int sysLvl);
-    double muEffSF(double muPt, double muEta, int sysLvl);
-    double muIDEffSF(double muPt, double muEta, int sysLvl);
-    double muIsoEffSF(double muPt, double muEta, int sysLvl);
+    double muEffSF(double muPt, double muEta, int sysLvl, bool BF = true, bool GH = true);
+    double muIDEffSF(double muPt, double muEta, int sysLvl, bool BF = true, bool GH = true);
+    double muIsoEffSF(double muPt, double muEta, int sysLvl, bool BF = true, bool GH = true);
     double muTrackEffSF(double muEta, int sysLvl);
-    double trigEffSF(double elePt, double muPt, int sysLvl);
+    double trigEffSF(double elePt, double muPt, int sysLvl, bool BF = true, bool GH = true);
 
 
 private :
@@ -330,6 +330,13 @@ private :
 
 	double               _M3;
 	double               _HT;
+	
+    double               _gen_pt_ll;
+	double               _gen_m_ll;
+    double               _gen_pt_pos;
+    double               _gen_E_pos;
+    double               _gen_Ep_Em;
+    double               _gen_ptp_ptm;
 
 	double               _pt_ll;
 	double               _m_ll;
@@ -359,6 +366,8 @@ private :
     TLorentzVector lpVector;
     TLorentzVector lmVector;
 
+    TLorentzVector genLpVector;
+    TLorentzVector genLmVector;
 
 
     std::vector<TLorentzVector> ljetVectors;
@@ -660,6 +669,12 @@ void makeAnalysisNtuple::InitBranches(){
 		outputTree->Branch("E_pos"                        , &_E_pos                       ); 
 		outputTree->Branch("Ep_Em"                        , &_Ep_Em                       ); 
 		outputTree->Branch("ptp_ptm"                        , &_ptp_ptm                   ); 
+		outputTree->Branch("gen_pt_ll"                       , &_gen_pt_ll                         ); 
+		outputTree->Branch("gen_m_ll"                        , &_gen_m_ll                         ); 
+		outputTree->Branch("gen_pt_pos"                        , &_gen_pt_pos                       ); 
+		outputTree->Branch("gen_E_pos"                        , &_gen_E_pos                       ); 
+		outputTree->Branch("gen_Ep_Em"                        , &_gen_Ep_Em                       ); 
+		outputTree->Branch("gen_ptp_ptm"                        , &_gen_ptp_ptm                   ); 
 		outputTree->Branch("passPresel_EMu"              , &_passPresel_EMu             ); 
 	}
 
@@ -696,7 +711,14 @@ void makeAnalysisNtuple::InitVariables()
     _ptp_ptm         = -9999;
     _Ep_Em           = -9999;
 
-	_HT		 = -9999;
+    _gen_pt_ll           = -9999;
+    _gen_m_ll            = -9999;
+    _gen_pt_pos          = -9999;
+    _gen_E_pos           = -9999;
+    _gen_ptp_ptm         = -9999;
+    _gen_Ep_Em           = -9999;
+	
+    _HT		 = -9999;
 	_DilepMass	 = -9999;
 	_DilepDelR	 = -9999;
 	_DiphoMass       = -9999;

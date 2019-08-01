@@ -33,6 +33,8 @@ int elescale012_g = 1; // 0:down, 1:norm, 2:up
 
 #include "BTagCalibrationStandalone.h"
 
+int era = 3;    // 1: BCDEF,  2: GH,  3: all
+
 // No stochastic scaling or smearing for leptons/jets
 bool noScaleSmear = false;
 
@@ -105,6 +107,12 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
         f->Close();
     }
 
+    if (era == 1)
+        cout<<"This is 2016 eras BCDEF"<<endl;
+    else if (era == 2)
+        cout<<"This is 2016 eras GH"<<endl;
+    else
+        cout<<"This is the full 2016 run"<<endl;
 
 	size_t pos = sampleType.find("__");
 	if (pos != std::string::npos){
@@ -222,7 +230,7 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 		
 	if( systematicType=="JER_up")       {jervar012_g = 2; selector->JERsystLevel=2; isSystematicRun = true;}
 	if( systematicType=="JER_down")     {jervar012_g = 0; selector->JERsystLevel=0; isSystematicRun = true;}
-	if(systematicType=="elesmear_down") {elesmear012_g=0;selector->elesmearLevel=0; isSystematicRun = true;}
+    if(systematicType=="elesmear_down") {elesmear012_g=0;selector->elesmearLevel=0; isSystematicRun = true;}
 	if(systematicType=="elesmear_up") {elesmear012_g=2;selector->elesmearLevel=2; isSystematicRun = true;}
 	if(systematicType=="elescale_down") {elescale012_g=0;selector->elescaleLevel=0; isSystematicRun = true;}
 	if(systematicType=="elescale_up") {elescale012_g=2;  selector->elescaleLevel=2; isSystematicRun = true;}
@@ -271,9 +279,27 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 		jecvar = new JECvariation("./jecFiles/Summer16_23Sep2016V4", isMC, JECsystLevel);//SubTotalAbsolute");
 	}
 
+    
+    // Era flags
+    bool BF, GH;
+    BF = GH = true;
 
     _lumiWeight = getEvtWeight(sampleType);
-	
+    if (era < 3)
+    {
+        if (era == 1)
+        {
+            _lumiWeight *= lumiBF / (lumiBF + lumiGH);
+            GH = false;
+        }
+        else if (era == 2)
+        {
+            _lumiWeight *= lumiGH / (lumiBF + lumiGH);
+            BF = false;
+        }
+    }
+
+
 	_PUweight       = 1.;
 	_muEffWeight    = 1.;
 	_muEffWeight_Do = 1.;
@@ -381,17 +407,17 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
                 if (mtAnalysis) 
                 {
                     int muInd_ = selector->Muons.at(0);
-                    _muEffWeight    = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
-                    _muEffWeight_Do = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
-                    _muEffWeight_Up = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
+                    _muEffWeight    = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1, BF, GH);
+                    _muEffWeight_Do = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0, BF, GH);
+                    _muEffWeight_Up = muEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2, BF, GH);
                     
-                    _muIDEffWeight    = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
-                    _muIDEffWeight_Do = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
-                    _muIDEffWeight_Up = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
+                    _muIDEffWeight    = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1, BF, GH);
+                    _muIDEffWeight_Do = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0, BF, GH);
+                    _muIDEffWeight_Up = muIDEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2, BF, GH);
                     
-                    _muIsoEffWeight    = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1);
-                    _muIsoEffWeight_Do = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0);
-                    _muIsoEffWeight_Up = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2);
+                    _muIsoEffWeight    = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),1, BF, GH);
+                    _muIsoEffWeight_Do = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),0, BF, GH);
+                    _muIsoEffWeight_Up = muIsoEffSF(tree->muPt_->at(muInd_),tree->muEta_->at(muInd_),2, BF, GH);
                     
                     _muTrackEffWeight    = muTrackEffSF(tree->muEta_->at(muInd_),1);
                     _muTrackEffWeight_Do = muTrackEffSF(tree->muEta_->at(muInd_),0);
@@ -410,9 +436,9 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
                     _eleRecoEffWeight_Do = eleRecoEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),0);
                     _eleRecoEffWeight_Up = eleRecoEffSF(tree->elePt_->at(eleInd_),tree->eleSCEta_->at(eleInd_),2);
 
-                    _trigEffWeight    = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),1);
-                    _trigEffWeight_Do = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),0);
-                    _trigEffWeight_Up = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),2);
+                    _trigEffWeight    = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),1, BF, GH);
+                    _trigEffWeight_Do = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),0, BF, GH);
+                    _trigEffWeight_Up = trigEffSF(tree->elePt_->at(eleInd_), tree->muPt_->at(muInd_),2, BF, GH);
                 }
 			}
 
@@ -608,7 +634,122 @@ void makeAnalysisNtuple::FillEvent()
     _ptp_ptm = lpVector.Pt() + lmVector.Pt();
     _Ep_Em = lpVector.E() + lmVector.E();
 
-    if (!tree->isData_) { _topptWeight = topPtWeight(); }
+    if (!tree->isData_) 
+    {
+        _topptWeight = topPtWeight(); 
+        
+        double minEleDR = 9999;
+        double eleDR = 0;
+        double minMuDR = 9999;
+        double muDR = 0;
+
+        vector<int> genEleIndices;   // Indices of gen electrons 
+        vector<int> genMuIndices;   // Indices of gen muons
+
+        // Gen-level observables
+        // Find all gen electrons 
+        for (int mc = 0; mc < tree->nMC_; mc++)
+        {
+            if ( (tree->mcPID->at(mc) == (-11*tree->eleCharge_->at(eleInd)) ) && (tree->mcStatus->at(mc) == 1) ){ genEleIndices.push_back(mc); }
+        }
+        
+        // Find all gen muons
+        for (int mc = 0; mc < tree->nMC_; mc++)
+        {
+            if ( (tree->mcPID->at(mc) == (-13*tree->muCharge_->at(muInd)) ) && (tree->mcStatus->at(mc) == 1) ){ genMuIndices.push_back(mc); }
+        }
+        
+        // Match rec ele index to gen index
+        int eleGenIndex = -1;
+        
+        double eleRecPt = tree->elePt_->at(eleInd);
+        double eleRecEta = tree->eleEta_->at(eleInd);
+        double eleRecPhi = tree->elePhi_->at(eleInd);
+
+        for (auto mc : genEleIndices)
+        {
+            eleDR = dR(tree->mcEta->at(mc), tree->mcPhi->at(mc), eleRecEta, eleRecPhi);
+            if (eleDR < minEleDR && (abs(eleRecPt - tree->mcPt->at(mc)) / tree->mcPt->at(mc) < 0.2 ))
+            {
+                // Found a better match
+                minEleDR = eleDR;
+                eleGenIndex = mc;
+            }
+        }
+
+        if (eleGenIndex > -1)
+        {
+            // Found a match
+            if (tree->mcPID->at(eleGenIndex) > 0)
+            {
+                // e-
+                genLmVector.SetPtEtaPhiM(tree->mcPt->at(eleGenIndex),
+                                         tree->mcEta->at(eleGenIndex),
+                                         tree->mcPhi->at(eleGenIndex),
+                                         tree->mcMass->at(eleGenIndex));
+            }
+            else
+            {
+                // e+
+                genLpVector.SetPtEtaPhiM(tree->mcPt->at(eleGenIndex),
+                                         tree->mcEta->at(eleGenIndex),
+                                         tree->mcPhi->at(eleGenIndex),
+                                         tree->mcMass->at(eleGenIndex));
+
+            }
+        }
+        
+        // Match rec muon index to gen index
+        int muGenIndex = -1;
+        
+        double muRecPt = tree->muPt_->at(muInd);
+        double muRecEta = tree->muEta_->at(muInd);
+        double muRecPhi = tree->muPhi_->at(muInd);
+
+        for (auto mc : genMuIndices)
+        {
+            muDR = dR(tree->mcEta->at(mc), tree->mcPhi->at(mc), muRecEta, muRecPhi);
+            if (muDR < minMuDR && (abs(muRecPt - tree->mcPt->at(mc)) / tree->mcPt->at(mc) < 0.2 ))
+            {
+                // Found a better match
+                minMuDR = muDR;
+                muGenIndex = mc;
+            }
+        }
+
+        if (muGenIndex > -1)
+        {
+            // Found a match
+            if (tree->mcPID->at(muGenIndex) > 0)
+            {
+                // mu-
+                genLmVector.SetPtEtaPhiM(tree->mcPt->at(muGenIndex),
+                                         tree->mcEta->at(muGenIndex),
+                                         tree->mcPhi->at(muGenIndex),
+                                         tree->mcMass->at(muGenIndex));
+            }
+            else
+            {
+                // mu+
+                genLpVector.SetPtEtaPhiM(tree->mcPt->at(muGenIndex),
+                                         tree->mcEta->at(muGenIndex),
+                                         tree->mcPhi->at(muGenIndex),
+                                         tree->mcMass->at(muGenIndex));
+
+            }
+        }
+
+        if ( (eleGenIndex >= 0) && (muGenIndex >= 0) )
+        {
+            // Matched gen emu pair
+            _gen_pt_ll = (genLpVector + genLmVector).Pt();
+            _gen_m_ll = (genLpVector + genLmVector).M();
+            _gen_pt_pos = genLpVector.Pt();
+            _gen_E_pos = genLpVector.E();
+            _gen_ptp_ptm = genLpVector.Pt() + genLmVector.Pt();
+            _gen_Ep_Em = genLpVector.E() + genLmVector.E();
+        }
+    }
 
 
 
@@ -1073,77 +1214,97 @@ double makeAnalysisNtuple::eleRecoEffSF(double elePt, double eleSCEta, int sysLv
     return reco;
 }
 
-double makeAnalysisNtuple::muEffSF(double muPt, double muEta, int sysLvl)
+double makeAnalysisNtuple::muEffSF(double muPt, double muEta, int sysLvl, bool BF, bool GH)
 {
     double muAEta = abs(muEta);
 
-    // Muon ID scale factors
-    double ID_BF = muID_BF_SF->GetBinContent(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    if (sysLvl == 2)
-        ID_BF += muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    else if (sysLvl == 0)
-        ID_BF -= muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    // Muon BCDEF ID/Iso scale factors
+    double ID_BF = 0.0, Iso_BF = 0.0, ID_GH = 0.0, Iso_GH = 0.0;
+    if (BF)
+    {
+        ID_BF = muID_BF_SF->GetBinContent(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        if (sysLvl == 2)
+            ID_BF += muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        else if (sysLvl == 0)
+            ID_BF -= muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        
+        Iso_BF = muIso_BF_SF->GetBinContent(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        if (sysLvl == 2)
+            Iso_BF += muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        else if (sysLvl == 0)
+            Iso_BF -= muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    }
     
-    double ID_GH = muID_GH_SF->GetBinContent(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    if (sysLvl == 2)
-        ID_GH += muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    else if (sysLvl == 0)
-        ID_GH -= muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-
-    // Muon Isolation scale factors
-    double Iso_BF = muIso_BF_SF->GetBinContent(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    if (sysLvl == 2)
-        Iso_BF += muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    else if (sysLvl == 0)
-        Iso_BF -= muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (GH)
+    {
+        ID_GH = muID_GH_SF->GetBinContent(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        if (sysLvl == 2)
+            ID_GH += muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        else if (sysLvl == 0)
+            ID_GH -= muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
     
-    double Iso_GH = muIso_GH_SF->GetBinContent(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    if (sysLvl == 2)
-        Iso_GH += muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    else if (sysLvl == 0)
-        Iso_GH -= muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-
-    return (ID_BF * Iso_BF * lumiBF + ID_GH * Iso_GH * lumiGH) / luminosity;
+        Iso_GH = muIso_GH_SF->GetBinContent(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        if (sysLvl == 2)
+            Iso_GH += muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        else if (sysLvl == 0)
+            Iso_GH -= muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    }
+    return (ID_BF * Iso_BF * lumiBF + ID_GH * Iso_GH * lumiGH) / (int(BF) * lumiBF + int(GH) * lumiGH);
 }
 
-double makeAnalysisNtuple::muIDEffSF(double muPt, double muEta, int sysLvl)
+double makeAnalysisNtuple::muIDEffSF(double muPt, double muEta, int sysLvl, bool BF, bool GH)
 {
     double muAEta = abs(muEta);
-
-    // Muon ID scale factors
-    double ID_BF = muID_BF_SF->GetBinContent(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    if (sysLvl == 2)
-        ID_BF += muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    else if (sysLvl == 0)
-        ID_BF -= muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    double ID_BF = 0.0, ID_GH = 0.0;
     
-    double ID_GH = muID_GH_SF->GetBinContent(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    if (sysLvl == 2)
-        ID_GH += muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    else if (sysLvl == 0)
-        ID_GH -= muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (BF)
+    {
+        // Muon BCDEF ID scale factors
+        ID_BF = muID_BF_SF->GetBinContent(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        if (sysLvl == 2)
+            ID_BF += muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        else if (sysLvl == 0)
+            ID_BF -= muID_BF_SF->GetBinError(muID_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    }
 
-    return (ID_BF * lumiBF + ID_GH * lumiGH) / luminosity; 
+    if (GH)
+    {
+        // Muon GH ID scale factors
+        ID_GH = muID_GH_SF->GetBinContent(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        if (sysLvl == 2)
+            ID_GH += muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        else if (sysLvl == 0)
+            ID_GH -= muID_GH_SF->GetBinError(muID_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+
+    }
+    return (ID_BF * lumiBF + ID_GH * lumiGH) / (int(BF) * lumiBF + int(GH) * lumiGH);
 }
 
-double makeAnalysisNtuple::muIsoEffSF(double muPt, double muEta, int sysLvl)
+double makeAnalysisNtuple::muIsoEffSF(double muPt, double muEta, int sysLvl, bool BF, bool GH)
 {
     double muAEta = abs(muEta);
+    double Iso_BF = 0.0, Iso_GH = 0.0;
 
-    // Muon Isolation scale factors
-    double Iso_BF = muIso_BF_SF->GetBinContent(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    if (sysLvl == 2)
-        Iso_BF += muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    else if (sysLvl == 0)
-        Iso_BF -= muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    
-    double Iso_GH = muIso_GH_SF->GetBinContent(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    if (sysLvl == 2)
-        Iso_GH += muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
-    else if (sysLvl == 0)
-        Iso_GH -= muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    if (BF)
+    {
+        // Muon BCDEF Isolation scale factors
+        Iso_BF = muIso_BF_SF->GetBinContent(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        if (sysLvl == 2)
+            Iso_BF += muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        else if (sysLvl == 0)
+            Iso_BF -= muIso_BF_SF->GetBinError(muIso_BF_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    }
 
-    return (Iso_BF * lumiBF + Iso_GH * lumiGH) / luminosity;
+    if (GH)
+    {
+        Iso_GH = muIso_GH_SF->GetBinContent(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        if (sysLvl == 2)
+            Iso_GH += muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+        else if (sysLvl == 0)
+            Iso_GH -= muIso_GH_SF->GetBinError(muIso_GH_SF->FindBin(muAEta, max(25.0, min(119.9, muPt))));
+    }
+
+    return (Iso_BF * lumiBF + Iso_GH * lumiGH) / (int(BF) * lumiBF + int(GH) * lumiGH); 
 }
 
 double makeAnalysisNtuple::muTrackEffSF(double muEta, int sysLvl)
@@ -1187,8 +1348,9 @@ double makeAnalysisNtuple::muTrackEffSF(double muEta, int sysLvl)
     return track;
 }
 
-double makeAnalysisNtuple::trigEffSF(double elePt, double muPt, int sysLvl)
+double makeAnalysisNtuple::trigEffSF(double elePt, double muPt, int sysLvl, bool BF, bool GH)
 {
+    // TODO: Split by era?
     double sf = trigger_SF->GetBinContent(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));
     if (sysLvl == 2)
         sf += trigger_SF->GetBinError(trigger_SF->FindBin(min(99.9, max(elePt, muPt)), min(99.9, min(elePt, muPt))));

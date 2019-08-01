@@ -53,7 +53,7 @@ sampleTitle = {"TTbar":"\\ttbar",
 
 
 parser = ArgumentParser()
-parser.add_argument("-i", "--inDir", default="store/user/msaunder/old_13TeV_cutflows/emu/V08_00_26_07/", help="input eos analysis ntuple directory") 
+parser.add_argument("-i", "--inDir", default="store/user/msaunder/13TeV_cutflows/emu/V08_00_26_07/", help="input eos analysis ntuple directory") 
 #parser.add_argument("-i", "--inDir", default="store/user/msaunder/13TeV_cutflows/emu/V08_00_26_07/", help="input eos analysis ntuple directory") 
 parser.add_argument("-c", "--cuts", nargs="+", default=["lepton", "2jet", "1bjet"], choices=cutToBin.keys(), help="which cuts to include in table")
 #parser.add_argument("-o", "--outF", default="cutflow.tex", help="output tex file with cutflow table")
@@ -116,7 +116,7 @@ print ""
 print "-" * 90
 print "Data\t\t",
 for c in cuts:
-    print "%.0f +- %.0f%s" % (cutflowH["Data"].GetBinContent(cutToBin[c]), cutflowH["Data"].GetBinError(cutToBin[c]), "\t\t" if cutflowH["Data"].GetBinContent(cutToBin[c]) < 10000 else "\t\t"),
+    print "%.0f%s" % (cutflowH["Data"].GetBinContent(cutToBin[c]), "\t\t" if cutflowH["Data"].GetBinContent(cutToBin[c]) < 10000 else "\t\t"),
 print ""
 print "-" * 90
 
@@ -149,7 +149,7 @@ for c in cuts:
 f.write(""" \\\\\n\t\t\t\\hline\n""")
 f.write("\t\t\tData")
 for c in cuts:
-    f.write(" & %.0f & $\\pm$ & %.0f" % (cutflowH["Data"].GetBinContent(cutToBin[c]), cutflowH["Data"].GetBinError(cutToBin[c])) )
+    f.write(" & & %.0f &" % cutflowH["Data"].GetBinContent(cutToBin[c]) )
 f.write(""" \\\\\n\t\t\t\\hline\n""")
 f.write(
 """\t\t\\end{tabular}

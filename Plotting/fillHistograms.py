@@ -106,8 +106,8 @@ btagWeightCategory = ["1","(1-btagWeight[0])","(btagWeight[2])","(btagWeight[1])
 
 # Systematics with separate analysis ntuples
 separateSystSamples = {
-    "TTbar":["hdamp", "UE", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "isr", "fsr"],
-    "ST_tW":["hdamp", "DS", "isr", "fsr", "Q2"]
+    "TTbar":["hdamp", "EleScale", "EleSmear", "MuScale", "JEC", "JER", "UE", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "isr", "fsr"],
+    "ST_tW":["hdamp", "EleScale", "EleSmear", "MuScale", "JEC", "JER", "DS", "isr", "fsr", "Q2"]
 }
 oneSidedSysts = ["toppt", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "DS"]
 #atleast 0, atleast 1, atleast 2, exactly 1, btagWeight[0] = exactly 0
@@ -145,7 +145,7 @@ if ("TTbar" in sample or "ST_tW" in sample) and syst in separateSystSamples[samp
         else:
             sampleListName+="Down"
 
-
+print "sampleListName =", sampleListName
 #analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/"
 analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/%s/emu/V08_00_26_07/" % args.analysisNtupleDir
 outputhistName = "%s/%s" % (outputDirectory,outputFileName)
@@ -301,26 +301,11 @@ if runsystematic:
             btagWeightCategory = ["1","(1-btagWeight_Do[0])","(btagWeight_Do[2])","(btagWeight_Do[1])"]
 
         outputhistName += "%sBTagSF_%s"%(outputFileName,level)
-#elif syst=="isr" or syst=="fsr":
-#	if level=="up":
-#		analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/lpctop/TTGamma/13TeV_AnalysisNtuples/muons/V08_00_26_07/%s_up_"%(syst)
-         #               outputhistName = "histograms/mu/%s%s_up"%(outputFileName,syst)
-#	if level=="down":
-#		analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/lpctop/TTGamma/13TeV_AnalysisNtuples/muons/V08_00_26_07/%s_down_"%(syst)
-         #               outputhistName = "histograms/mu/%s%s_down"%(outputFileName,syst)
-
     else:
         if syst in oneSidedSysts:
             outputhistName += "%s%s"%(outputFileName,syst)
         else:
             outputhistName += "%s%s_%s"%(outputFileName,syst,level)
-#        if level=="up":
-#            #analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/lpctop/TTGamma/13TeV_AnalysisNtuples/systematics_muons/V08_00_26_07/%s_up_"%(syst)
-#            analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/%s_up_"%(syst)
-#            outputhistName = "histograms/%s%s_up"%(outputFileName,syst)
-#        if level=="down":
-#            analysisNtupleLocation = "root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples/emu/V08_00_26_07/%s_down_"%(syst)
-#            outputhistName = "histograms/%s%s_down"%(outputFileName,syst)
 
 btagWeight = btagWeightCategory[nBJets]
 
@@ -398,6 +383,9 @@ for fileName in fileList:
     tree.Add("%s%s"%(analysisNtupleLocation,fileName))
     print "%s%s"%(analysisNtupleLocation,fileName)
 
+if "Data" in sample and len(sample) > 4:
+    print "Data eras %s" % sample[4:]
+    sample = "Data"
 print "sample =",sample
 
 #print "Number of events:", tree.GetEntries()

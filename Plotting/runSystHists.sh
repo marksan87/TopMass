@@ -2,12 +2,10 @@
 
 eval `scramv1 runtime -sh`
 
-#declare -a signal=("TTbar" \
-#                   "ST_tW" \
-#                  )
-
-declare -a signal=("ST_tW" \
+declare -a signal=("TTbar" \
+                   "ST_tW" \
                   )
+
 
 declare -a background=("ST_bkgd" \
                        "DY" \
@@ -35,47 +33,46 @@ declare -a tWMass=("ST_tW_mt1695" \
                    "ST_tW_mt1755" \
                   )
 
-#declare -a systematics=(
-#             "EleScale" \
-#             "EleSmear" \
-#             "MuScale" \
-#             "JEC" \
-#             "JER" \
-#             "isr" \
-#             "fsr" \
-#             "hdamp" \
-#             "UE" \
-#             "EleIDEff"
-#             "EleRecoEff"
-#             "MuIDEff"
-#             "MuIsoEff"
-#             "MuTrackEff"
-#             "TrigEff"
-#             "BTagSF"
-#             "Lumi"
-#             "PU" \
-#             "Pdf" \
-#             "Q2" \
-#             "CRerdON" \
-#             "CRGluon" \
-#             "CRQCD" \
-#             "amcanlo" \
-#             "herwigpp" \
-#             "madgraph" \
-#             "DS" \
-#             "toppt" \
-#             "MEscale1" \
-#             "MEscale2" \
-#             "MEscale3" \
-#             "MEscale4" \
-#             "MEscale5" \
-#             "MEscale6" \
-#             )
-
 declare -a systematics=(
+             "EleScale" \
+             "EleSmear" \
+             "MuScale" \
+             "JEC" \
+             "JER" \
+             "isr" \
+             "fsr" \
              "hdamp" \
+             "UE" \
+             "EleIDEff" \
+             "EleRecoEff" \
+             "MuIDEff" \
+             "MuIsoEff" \
+             "MuTrackEff" \
+             "TrigEff" \
+             "BTagSF" \
+             "Lumi" \
+             "PU" \
+             "Pdf" \
+             "Q2" \
+             "CRerdON" \
+             "CRGluon" \
+             "CRQCD" \
+             "amcanlo" \
+             "herwigpp" \
+             "madgraph" \
+             "DS" \
+             "toppt" \
+             "MEscale1" \
+             "MEscale2" \
+             "MEscale3" \
+             "MEscale4" \
+             "MEscale5" \
+             "MEscale6" \
              )
 
+#declare -a systematics=(
+#             "PU" \
+#             )
 
 declare -a oneSidedSysts=(
         "toppt" \
@@ -116,6 +113,7 @@ declare -a separateSampleSysts=(
 declare -a ttOnlySysts=(
         "toppt" \
         "UE" \
+        "Pdf" \
         "CRerdON" \ 
         "CRGluon" \
         "CRQCD" \
@@ -137,7 +135,12 @@ declare -a tWOnlySysts=(
 
 declare -a variations=("up" \
             "down" \
-            )
+)
+
+#addPlots="--addPlots --plot nVtx --analysisNtupleDir 13TeV_AnalysisNtuples_BCDEF --outDir histograms_BCDEF"
+addPlots="--addPlots --plot nVtx --analysisNtupleDir 13TeV_AnalysisNtuples_GH --outDir histograms_GH"
+##addPlots="--addPlots --plot rec_ptll rec_Mll rec_ptpos rec_Epos rec_ptp_ptm rec_Ep_Em"
+#addPlots="--addPlots --plot rec_ptll_M0_E0 rec_ptll_M0_E1 rec_ptll_M0_E2 rec_ptll_M1_E0 rec_ptll_M1_E1 rec_ptll_M1_E2 rec_ptll_M2_E0 rec_ptll_M2_E1 rec_ptll_M2_E2 --varBins '[0,50,70,100,300]'"
 #addPlots="--addPlots --plot rec_leadJetPt rec_leadLepPt rec_Mll --analysisNtupleDir 1jet_13TeV_AnalysisNtuples --outDir 1jet_histograms"
 #addPlots="--addPlots --plot nBJet bjetPt bjetEta bjetPhi"
 #addPlots="--addPlots --plot rec_ptll --outDir secondtry_histograms"
@@ -147,7 +150,7 @@ declare -a variations=("up" \
 #addPlots="--addPlots --plot rec_ptll --binning 20 0 200 --outDir histograms_bin10"
 #addPlots='--addPlots --plot rec_ptll --varBins "range(0,210,10) + [220]" --outDir histograms_varbin_220'
 
-addPlots=""
+#addPlots=""
 #test="--testone"
 test=""
 signalLength=${#signal[@]}
@@ -265,8 +268,8 @@ elif [ "$option" == "tWmt" ] ; then
             if [[ "${ttOnlySysts[@]}" =~ "${systematics[$sys]}" ]] ; then
                 continue
             fi
-
-            if [[ "${separateSampleSysts[@]}" =~  "${systematics[$sys]}" ]] || ( ${systematics[$sys]} == "Q2") ; then
+            
+            if [[ "${separateSampleSysts[@]}" =~  "${systematics[$sys]}" ]] || [[ "Q2" =~ "${systematics[$sys]}" ]] ; then
                 # Separate sample syst not available at alternate mass points
                 continue
             elif [[ "${oneSidedSysts[@]}" =~  "${systematics[$sys]}" ]] ; then
@@ -299,8 +302,15 @@ elif [ "$option" == "bkg" ] ; then
 
 elif [ "${option,,}" == "data" ] ; then
     echo "./fillHistograms.py -s Data ${addPlots}"
-        eval ./fillHistograms.py -s Data ${addPlots}
+    eval ./fillHistograms.py -s Data ${addPlots}
+elif [ "${option,,}" == "databcdef" ] ; then
+    echo "./fillHistograms.py -s DataBCDEF ${addPlots}"
+    eval ./fillHistograms.py -s DataBCDEF ${addPlots}
+elif [ "${option,,}" == "datagh" ] ; then
+    echo "./fillHistograms.py -s DataGH ${addPlots}"
+    eval ./fillHistograms.py -s DataGH ${addPlots}
+
 else
     echo "Invalid option ${1}. Choose from:"
-    echo "sig, nosyst, ttmt, ttmt_1, ttmt_2, tWmt, bkg, data"
+    echo "sig, nosyst, ttmt, ttmt_1, ttmt_2, tWmt, bkg, data, databcdef, datagh"
 fi

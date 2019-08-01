@@ -115,7 +115,7 @@ void Selector::applyRoccor(int sysLvl)
         // Find all gen muons
         for (int mc = 0; mc < tree->nMC_; mc++)
         {
-            if (abs(tree->mcPID->at(mc)) == 13) { genMuIndices.push_back(mc); } 
+            if ( (abs(tree->mcPID->at(mc)) == 13) && (tree->mcStatus->at(mc) == 1) ) { genMuIndices.push_back(mc); } 
         }
 
         // Match rec muon index to gen index

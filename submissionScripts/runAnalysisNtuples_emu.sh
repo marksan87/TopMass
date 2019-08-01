@@ -71,7 +71,9 @@ if [ "$jobType" == "Dilep" ] ;	then
 fi
 
 skimdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_skims"
-outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_"
+outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples"
+#outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples_BCDEF"
+#outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples_GH"
 
 #variables for the directory names where the ttgamma analysis was storing ggNtuples
 DannyEOS="root://cmseos.fnal.gov//store/user/dnoonan/13TeV_ggNTuples/V08_00_26_07/"
@@ -169,8 +171,8 @@ xrdcp -f ${skimdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_skim.root ${sa
 echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}${tupleExtraName2} . ${sampleType[job]}_skim.root"
 AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}${tupleExtraName2} . ${sampleType[job]}_skim.root
 
-#Copy results over to eos (commented out for now)
-echo "xrdcp -f ${tupleExtraName1}${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${tupleExtraName1}${sampleType[job]}_AnalysisNtuple.root"
-xrdcp -f ${tupleExtraName1}${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${tupleExtraName1}${sampleType[job]}_AnalysisNtuple.root
-
-
+if [ ! -z ${_CONDOR_SCRATCH_DIR} ] ; then
+    #Copy results over to eos 
+    echo "xrdcp -f ${tupleExtraName1}${sampleType[job]}_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${tupleExtraName1}${sampleType[job]}_AnalysisNtuple.root"
+    xrdcp -f ${tupleExtraName1}${sampleType[job]}_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${tupleExtraName1}${sampleType[job]}_AnalysisNtuple.root
+fi
