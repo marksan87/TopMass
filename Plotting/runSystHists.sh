@@ -62,20 +62,18 @@ declare -a systematics=(
              "madgraph" \
              "DS" \
              "toppt" \
-             "MEscale1" \
-             "MEscale2" \
-             "MEscale3" \
-             "MEscale4" \
-             "MEscale5" \
-             "MEscale6" \
              )
 
 #declare -a systematics=(
-#             "PU" \
+#             "MEscale1" \
+#             "MEscale2" \
+#             "MEscale3" \
+#             "MEscale4" \
+#             "MEscale5" \
+#             "MEscale6" \
 #             )
 
 declare -a oneSidedSysts=(
-        "toppt" \
         "CRerdON" \
         "CRGluon" \
         "CRQCD" \
@@ -137,8 +135,8 @@ declare -a variations=("up" \
             "down" \
 )
 
-#addPlots="--addPlots --plot nVtx --analysisNtupleDir 13TeV_AnalysisNtuples_BCDEF --outDir histograms_BCDEF"
-addPlots="--addPlots --plot nVtx --analysisNtupleDir 13TeV_AnalysisNtuples_GH --outDir histograms_GH"
+#addPlots="--addPlots --analysisNtupleDir 13TeV_AnalysisNtuples_BCDEF --outDir histograms_BCDEF"
+#addPlots="--addPlots --analysisNtupleDir 13TeV_AnalysisNtuples_GH --outDir histograms_GH"
 ##addPlots="--addPlots --plot rec_ptll rec_Mll rec_ptpos rec_Epos rec_ptp_ptm rec_Ep_Em"
 #addPlots="--addPlots --plot rec_ptll_M0_E0 rec_ptll_M0_E1 rec_ptll_M0_E2 rec_ptll_M1_E0 rec_ptll_M1_E1 rec_ptll_M1_E2 rec_ptll_M2_E0 rec_ptll_M2_E1 rec_ptll_M2_E2 --varBins '[0,50,70,100,300]'"
 #addPlots="--addPlots --plot rec_leadJetPt rec_leadLepPt rec_Mll --analysisNtupleDir 1jet_13TeV_AnalysisNtuples --outDir 1jet_histograms"
@@ -149,8 +147,9 @@ addPlots="--addPlots --plot nVtx --analysisNtupleDir 13TeV_AnalysisNtuples_GH --
 #addPlots="--addPlots --plot rec_ptll --binning 300 20 320 --outDir histograms_cut320"
 #addPlots="--addPlots --plot rec_ptll --binning 20 0 200 --outDir histograms_bin10"
 #addPlots='--addPlots --plot rec_ptll --varBins "range(0,210,10) + [220]" --outDir histograms_varbin_220'
+#addPlots="--addPlots --plot rec_ptneg gen_ptneg rec_Eneg gen_Eneg --outDir histograms"
 
-#addPlots=""
+addPlots="--outDir histograms"
 #test="--testone"
 test=""
 signalLength=${#signal[@]}

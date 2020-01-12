@@ -20,6 +20,7 @@ using std::cout;
 using std::endl;
 using std::flush;
 
+TString topptCorrectionFile("correctionToppt.root");
 
 std::string mt_PUfilename = "mt_pileupNominal.root";
 std::string mt_PUfilename_up = "mt_pileupUp.root"; 
@@ -64,6 +65,7 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	isSystematicRun = false;
     isTTGamma = false;
     mtAnalysis = true;
+    isTTbar = false;
 
     if (mtAnalysis)
     {
@@ -121,6 +123,22 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 	}
 
     cout << sampleType << "  " << systematicType << endl;
+
+    if (sampleType.substr(0,5) == "TTbar")
+    {
+        isTTbar = true;
+        cout<<sampleType<<" is a TTbar sample!"<<endl;
+
+        // Load toppt reweighting systematics histogram
+        TFile* topptF = new TFile(topptCorrectionFile, "read");
+        topptUp = (TH1F*)topptF->Get("topptUp");
+        topptUp->SetDirectory(0);
+        topptDown = (TH1F*)topptF->Get("topptDown");
+        topptDown->SetDirectory(0);
+        topptF->Close();
+        delete topptF;
+    }
+
 
 	if (std::end(allowedSampleTypes) == std::find(std::begin(allowedSampleTypes), std::end(allowedSampleTypes), sampleType)){
 		cout << "This is not an allowed sample, please specify one from this list (or add to this list in the code):" << endl;
@@ -332,6 +350,9 @@ makeAnalysisNtuple::makeAnalysisNtuple(int ac, char** av)
 		nEntr = 1000;
 		saveAllEntries = true;
 	}
+    if (sampleType=="TTbarTest") {
+        nEntr = 10000;
+    }
 	//nEntr = 10000;
 
 	int dumpFreq = 1;
@@ -507,8 +528,8 @@ void makeAnalysisNtuple::FillEvent()
 	_pfMETPhi	     = tree->pfMETPhi_;
 
 	_nEle		     = selector->Electrons.size();
-	_nEleLoose           = selector->ElectronsLoose.size();
-	_nMuLoose            = selector->MuonsLoose.size();
+	_nEleLoose       = selector->ElectronsLoose.size();
+	_nMuLoose        = selector->MuonsLoose.size();
 	_nMu		     = selector->Muons.size();
 	_nJet            = selector->Jets.size();
 	_nBJet           = selector->bJets.size();
@@ -525,9 +546,12 @@ void makeAnalysisNtuple::FillEvent()
 
 	for (int i_ele = 0; i_ele <_nEle; i_ele++){
 		int eleInd = selector->Electrons.at(i_ele);
+		_eleEn.push_back(tree->eleEn_->at(eleInd));
 		_elePt.push_back(tree->elePt_->at(eleInd));
 		_elePhi.push_back(tree->elePhi_->at(eleInd));
+		_eleEta.push_back(tree->eleEta_->at(eleInd));
 		_eleSCEta.push_back(tree->eleSCEta_->at(eleInd));
+		_eleCharge.push_back(tree->eleCharge_->at(eleInd));
 
 		_elePFRelIso.push_back(selector->EleRelIso_corr.at(eleInd));
 		lepVector.SetPtEtaPhiE(tree->elePt_->at(eleInd),
@@ -540,9 +564,11 @@ void makeAnalysisNtuple::FillEvent()
 
 	for (int i_mu = 0; i_mu <_nMu; i_mu++){
 		int muInd = selector->Muons.at(i_mu);
+		_muEn.push_back(tree->muEn_->at(muInd));
 		_muPt.push_back(tree->muPt_->at(muInd));
 		_muPhi.push_back(tree->muPhi_->at(muInd));
 		_muEta.push_back(tree->muEta_->at(muInd));
+		_muCharge.push_back(tree->muCharge_->at(muInd));
 		_muPFRelIso.push_back(selector->MuRelIso_corr.at(muInd));
 		lepVector.SetPtEtaPhiE(tree->muPt_->at(muInd),
 							   tree->muEta_->at(muInd),
@@ -630,14 +656,19 @@ void makeAnalysisNtuple::FillEvent()
     _pt_ll = (lpVector + lmVector).Pt();
     _m_ll = (lpVector + lmVector).M();
     _pt_pos = lpVector.Pt();
+    _pt_neg = lmVector.Pt();
     _E_pos = lpVector.E();
+    _E_neg = lmVector.E();
     _ptp_ptm = lpVector.Pt() + lmVector.Pt();
     _Ep_Em = lpVector.E() + lmVector.E();
 
     if (!tree->isData_) 
     {
-        _topptWeight = topPtWeight(); 
-        
+        if (isTTbar){
+            _topptWeight    = topPtWeight(1); 
+            _topptWeight_Up = topPtWeight(2);
+            _topptWeight_Do = topPtWeight(0);
+        }
         double minEleDR = 9999;
         double eleDR = 0;
         double minMuDR = 9999;
@@ -647,17 +678,19 @@ void makeAnalysisNtuple::FillEvent()
         vector<int> genMuIndices;   // Indices of gen muons
 
         // Gen-level observables
-        // Find all gen electrons 
+        // Find all gen electrons and muons 
+        //
+        // mcStatus >> 1 & 1:   isPromptFinalState()
+        // e-  11
+        // e+ -11
         for (int mc = 0; mc < tree->nMC_; mc++)
         {
-            if ( (tree->mcPID->at(mc) == (-11*tree->eleCharge_->at(eleInd)) ) && (tree->mcStatus->at(mc) == 1) ){ genEleIndices.push_back(mc); }
+            if ( (abs(tree->mcPID->at(mc)) == 11) && (tree->mcStatusFlag->at(mc) >> 1 & 1) && (tree->mcPt->at(mc) > 15.0)) { genEleIndices.push_back(mc); }
+            else if ( (abs(tree->mcPID->at(mc)) == 13) && (tree->mcStatusFlag->at(mc) >> 1 & 1) && (tree->mcPt->at(mc) > 15.0)){ genMuIndices.push_back(mc); }
+//            if ( (abs(tree->mcPID->at(mc)) == 11) && (tree->mcStatus->at(mc) == 1) && (tree->mcPt->at(mc) > 15.0)) { genEleIndices.push_back(mc); }
+//            else if ( (abs(tree->mcPID->at(mc)) == 13) && (tree->mcStatus->at(mc) == 1) && (tree->mcPt->at(mc) > 15.0)){ genMuIndices.push_back(mc); }
         }
         
-        // Find all gen muons
-        for (int mc = 0; mc < tree->nMC_; mc++)
-        {
-            if ( (tree->mcPID->at(mc) == (-13*tree->muCharge_->at(muInd)) ) && (tree->mcStatus->at(mc) == 1) ){ genMuIndices.push_back(mc); }
-        }
         
         // Match rec ele index to gen index
         int eleGenIndex = -1;
@@ -668,8 +701,18 @@ void makeAnalysisNtuple::FillEvent()
 
         for (auto mc : genEleIndices)
         {
+//            _gen_elePt.push_back(tree->mcPt->at(mc));
+//            _gen_eleEta.push_back(tree->mcEta->at(mc));
+//            _gen_elePhi.push_back(tree->mcPhi->at(mc));
+//            _gen_eleParentage.push_back(tree->mcParentage->at(mc));
+//            _gen_eleCharge.push_back(tree->mcPID->at(mc) > 0 ? -1 : 1);
+//            _gen_eleMomPID.push_back(tree->mcMomPID->at(mc));
+//            _gen_eleGMomPID.push_back(tree->mcGMomPID->at(mc));
+
+            if ( (tree->mcPID->at(mc) * tree->eleCharge_->at(eleInd)) > 0) { continue; }
             eleDR = dR(tree->mcEta->at(mc), tree->mcPhi->at(mc), eleRecEta, eleRecPhi);
-            if (eleDR < minEleDR && (abs(eleRecPt - tree->mcPt->at(mc)) / tree->mcPt->at(mc) < 0.2 ))
+            //if (eleDR < minEleDR && (abs(eleRecPt - tree->mcPt->at(mc)) / tree->mcPt->at(mc) < 0.2 ))
+            if (eleDR < minEleDR)
             {
                 // Found a better match
                 minEleDR = eleDR;
@@ -677,9 +720,45 @@ void makeAnalysisNtuple::FillEvent()
             }
         }
 
+        _gen_nEle = genEleIndices.size();
+        // Push back matching lepton first (if exists)
         if (eleGenIndex > -1)
         {
-            // Found a match
+            _gen_eleMatched.push_back(1);
+            _gen_eleEn.push_back(pow( pow(tree->mcMass->at(eleGenIndex),2) + pow(tree->mcPt->at(eleGenIndex),2) * pow(cosh(tree->mcEta->at(eleGenIndex)),2), 0.5) );
+            _gen_elePt.push_back(tree->mcPt->at(eleGenIndex));
+            _gen_eleEta.push_back(tree->mcEta->at(eleGenIndex));
+            _gen_elePhi.push_back(tree->mcPhi->at(eleGenIndex));
+            _gen_eleParentage.push_back(tree->mcParentage->at(eleGenIndex));
+            _gen_eleStatusFlag.push_back(tree->mcStatusFlag->at(eleGenIndex));
+            _gen_eleCharge.push_back(tree->mcPID->at(eleGenIndex) > 0 ? -1 : 1);
+            _gen_eleMomPID.push_back(tree->mcMomPID->at(eleGenIndex));
+            _gen_eleGMomPID.push_back(tree->mcGMomPID->at(eleGenIndex));
+        }
+
+        // Push back other particles
+        for (auto mc : genEleIndices)
+        {
+            if (mc == eleGenIndex) continue;
+            _gen_eleMatched.push_back(0);
+            _gen_eleEn.push_back(pow( pow(tree->mcMass->at(mc),2) + pow(tree->mcPt->at(mc),2) * pow(cosh(tree->mcEta->at(mc)),2), 0.5) );
+            _gen_elePt.push_back(tree->mcPt->at(mc));
+            _gen_eleEta.push_back(tree->mcEta->at(mc));
+            _gen_elePhi.push_back(tree->mcPhi->at(mc));
+            _gen_eleParentage.push_back(tree->mcParentage->at(mc));
+            _gen_eleStatusFlag.push_back(tree->mcStatusFlag->at(mc));
+            _gen_eleCharge.push_back(tree->mcPID->at(mc) > 0 ? -1 : 1);
+            _gen_eleMomPID.push_back(tree->mcMomPID->at(mc));
+            _gen_eleGMomPID.push_back(tree->mcGMomPID->at(mc));
+
+        }
+//        for (auto mc : genEleIndices)
+//        {
+//            _gen_eleMatched.push_back( (mc == eleGenIndex) ? 1 : 0);
+//        }
+
+        if (eleGenIndex > -1)
+        {
             if (tree->mcPID->at(eleGenIndex) > 0)
             {
                 // e-
@@ -708,18 +787,51 @@ void makeAnalysisNtuple::FillEvent()
 
         for (auto mc : genMuIndices)
         {
+            
+            if ( (tree->mcPID->at(mc) * tree->muCharge_->at(muInd)) > 0) { continue; }
             muDR = dR(tree->mcEta->at(mc), tree->mcPhi->at(mc), muRecEta, muRecPhi);
-            if (muDR < minMuDR && (abs(muRecPt - tree->mcPt->at(mc)) / tree->mcPt->at(mc) < 0.2 ))
+            //if (muDR < minMuDR && (abs(muRecPt - tree->mcPt->at(mc)) / tree->mcPt->at(mc) < 0.2 ))
+            if (muDR < minMuDR)
             {
                 // Found a better match
                 minMuDR = muDR;
                 muGenIndex = mc;
             }
         }
+        
+        _gen_nMu = genMuIndices.size();
+        // Push back matching lepton first
+        if (muGenIndex > -1)
+        {
+            _gen_muMatched.push_back(1);
+            _gen_muEn.push_back(pow( pow(tree->mcMass->at(muGenIndex),2) + pow(tree->mcPt->at(muGenIndex),2) * pow(cosh(tree->mcEta->at(muGenIndex)),2), 0.5) );
+            _gen_muPt.push_back(tree->mcPt->at(muGenIndex));
+            _gen_muEta.push_back(tree->mcEta->at(muGenIndex));
+            _gen_muPhi.push_back(tree->mcPhi->at(muGenIndex));
+            _gen_muParentage.push_back(tree->mcParentage->at(muGenIndex));
+            _gen_muStatusFlag.push_back(tree->mcStatusFlag->at(muGenIndex));
+            _gen_muCharge.push_back(tree->mcPID->at(muGenIndex) > 0 ? -1 : 1);
+            _gen_muMomPID.push_back(tree->mcMomPID->at(muGenIndex));
+            _gen_muGMomPID.push_back(tree->mcGMomPID->at(muGenIndex));
+        }
+
+        for (auto mc : genMuIndices)
+        {
+            if (mc == muGenIndex) continue;
+            _gen_muMatched.push_back(0);
+            _gen_muEn.push_back(pow( pow(tree->mcMass->at(mc),2) + pow(tree->mcPt->at(mc),2) * pow(cosh(tree->mcEta->at(mc)),2), 0.5) );
+            _gen_muPt.push_back(tree->mcPt->at(mc));
+            _gen_muEta.push_back(tree->mcEta->at(mc));
+            _gen_muPhi.push_back(tree->mcPhi->at(mc));
+            _gen_muParentage.push_back(tree->mcParentage->at(mc));
+            _gen_muStatusFlag.push_back(tree->mcStatusFlag->at(mc));
+            _gen_muCharge.push_back(tree->mcPID->at(mc) > 0 ? -1 : 1);
+            _gen_muMomPID.push_back(tree->mcMomPID->at(mc));
+            _gen_muGMomPID.push_back(tree->mcGMomPID->at(mc));
+        }
 
         if (muGenIndex > -1)
         {
-            // Found a match
             if (tree->mcPID->at(muGenIndex) > 0)
             {
                 // mu-
@@ -739,13 +851,21 @@ void makeAnalysisNtuple::FillEvent()
             }
         }
 
+        // mcMatched flag
+        for (int mc = 0; mc < tree->nMC_; mc++)
+        {
+            _mcMatched.push_back( ((mc == eleGenIndex) || (mc == muGenIndex)) ? 1 : 0 );
+        }
+
         if ( (eleGenIndex >= 0) && (muGenIndex >= 0) )
         {
             // Matched gen emu pair
             _gen_pt_ll = (genLpVector + genLmVector).Pt();
             _gen_m_ll = (genLpVector + genLmVector).M();
             _gen_pt_pos = genLpVector.Pt();
+            _gen_pt_neg = genLmVector.Pt();
             _gen_E_pos = genLpVector.E();
+            _gen_E_neg = genLmVector.E();
             _gen_ptp_ptm = genLpVector.Pt() + genLmVector.Pt();
             _gen_Ep_Em = genLpVector.E() + genLmVector.E();
         }
@@ -810,17 +930,32 @@ void makeAnalysisNtuple::FillEvent()
 			_mcMomPID.push_back(tree->mcMomPID->at(i_mc));
 			_mcGMomPID.push_back(tree->mcGMomPID->at(i_mc));
 			_mcParentage.push_back(tree->mcParentage->at(i_mc));
+			_mcMomMass.push_back(tree->mcMomMass->at(i_mc));
+			_mcMomPt.push_back(tree->mcMomPt->at(i_mc));
+			_mcMomEta.push_back(tree->mcMomEta->at(i_mc));
+			_mcMomPhi.push_back(tree->mcMomPhi->at(i_mc));
 		}
 	}
 
 }
 
 // https://twiki.cern.ch/twiki/bin/viewauth/CMS/TopPtReweighting
-double makeAnalysisNtuple::SFtop(double pt){
-	return exp(0.0615 - 0.0005*pt); 
+double makeAnalysisNtuple::SFtop(double pt, int lvl){
+    // lvl      0:down, 1:nominal, 2:up
+    switch(lvl)
+    {
+        case 2: // Up
+            return topptUp->GetBinContent(topptUp->FindBin(pt));
+            //return exp(0.0908 - 0.0005*pt);
+        case 1: // Nominal
+            return exp(0.0615 - 0.0005*pt);
+        case 0: // Down
+            return topptDown->GetBinContent(topptDown->FindBin(pt));
+            //return exp(0.0356 - 0.0005*pt);
+    }
 }
 
-double makeAnalysisNtuple::topPtWeight(){
+double makeAnalysisNtuple::topPtWeight(int lvl){
 	double toppt=0.0;
 	double antitoppt=0.0;
 	double weight = 1.0;
@@ -829,7 +964,7 @@ double makeAnalysisNtuple::topPtWeight(){
 		if(tree->mcPID->at(mcInd)==-6) antitoppt = tree->mcPt->at(mcInd);
 	}
 	if(toppt > 0.001 && antitoppt > 0.001)
-		weight = sqrt( SFtop(toppt) * SFtop(antitoppt) );
+		weight = sqrt( SFtop(toppt,lvl) * SFtop(antitoppt,lvl) );
 
     return weight;
 

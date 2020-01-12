@@ -688,6 +688,11 @@ EventTree::EventTree(int nFiles, char** fileNames){
         chain->SetBranchStatus("genScaleSystWeights",1);
         chain->SetBranchAddress("genScaleSystWeights", &genScaleSystWeights_);
 
+    // TODO: Include mcE in next skim
+//    mcE = new vector<float>;
+//	chain->SetBranchStatus("mcE",1);
+//	chain->SetBranchAddress("mcE", &mcE);
+
 	mcEta = new vector<float>;
 	chain->SetBranchStatus("mcEta",1);
 	chain->SetBranchAddress("mcEta", &mcEta);

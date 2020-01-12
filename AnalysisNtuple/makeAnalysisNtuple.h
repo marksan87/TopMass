@@ -79,6 +79,7 @@ private :
 
 	bool isTTGamma;
 	bool isSystematicRun;
+    bool isTTbar;
 
     bool mtAnalysis;
     TH1F* eleID_SF;
@@ -89,6 +90,9 @@ private :
     TH1F* muIso_GH_SF;
     TGraphAsymmErrors* muTrack_SF;
     TH1F* trigger_SF;
+
+    TH1F* topptUp;
+    TH1F* topptDown;
 
 	bool getGenScaleWeights;
 	bool applypdfweight;
@@ -117,6 +121,8 @@ private :
 	std::vector<float> _pdfSystWeight;
 
     Float_t            _topptWeight;
+    Float_t            _topptWeight_Up;
+    Float_t            _topptWeight_Do;
 
 	std::vector<float> _btagWeight;
 	std::vector<float> _btagWeight_Up;
@@ -284,18 +290,49 @@ private :
    
 	Int_t           _nEle;
 	Int_t           _nEleLoose;
-
+	std::vector<float>   _eleEn;
 	std::vector<float>   _elePt;
 	std::vector<float>   _elePhi;
+	std::vector<float>   _eleEta;
 	std::vector<float>   _eleSCEta;
+	std::vector<int>     _eleCharge;
 	std::vector<float>   _elePFRelIso;
-	Int_t           _nMu;
-	Int_t           _nMuLoose;
+
+    Int_t                _gen_nEle;
+    std::vector<float>   _gen_eleEn;
+    std::vector<float>   _gen_elePt;
+    std::vector<float>   _gen_elePhi;
+    std::vector<float>   _gen_eleEta;
+	std::vector<int>     _gen_eleCharge;
+	std::vector<int>     _gen_eleParentage;
+	std::vector<int>     _gen_eleStatusFlag; // mcStatusFlag
+    std::vector<int>     _gen_eleMatched;    // Gen lepton matched to reco lepton
+    std::vector<int>     _gen_eleMomPID;     // Mother particle
+    std::vector<int>     _gen_eleGMomPID;    // Grandmother (mother of mother)
+    
+
+	Int_t                _nMu;
+	Int_t                _nMuLoose;
+	std::vector<float>   _muEn;
 	std::vector<float>   _muPt;
 	std::vector<float>   _muEta;
 	std::vector<float>   _muPhi;
+	std::vector<int>     _muCharge;
 	std::vector<float>   _muPFRelIso;
-	
+
+    Int_t                _gen_nMu;
+	std::vector<float>   _gen_muEn;
+	std::vector<float>   _gen_muPt;
+	std::vector<float>   _gen_muEta;
+	std::vector<float>   _gen_muPhi;
+	std::vector<int>     _gen_muCharge;
+	std::vector<int>     _gen_muParentage;
+	std::vector<int>     _gen_muStatusFlag; // mcStatusFlag
+    std::vector<int>     _gen_muMatched;    // Gen lepton matched to reco lepton
+    std::vector<int>     _gen_muMomPID;     // Mother particle
+    std::vector<int>     _gen_muGMomPID;    // Grandmother (mother of mother)
+
+
 	Int_t                _nJet;
 	Int_t                _nBJet;
 	std::vector<float>   _jetPt;
@@ -327,6 +364,11 @@ private :
 	std::vector<int>     _mcMomPID;
 	std::vector<int>     _mcGMomPID;
 	std::vector<int>     _mcParentage;
+	std::vector<int>     _mcMatched;    // One of the matched leptons
+	std::vector<float>   _mcMomMass;
+	std::vector<float>   _mcMomPt;
+	std::vector<float>   _mcMomEta;
+	std::vector<float>   _mcMomPhi;
 
 	double               _M3;
 	double               _HT;
@@ -334,14 +376,18 @@ private :
     double               _gen_pt_ll;
 	double               _gen_m_ll;
     double               _gen_pt_pos;
+    double               _gen_pt_neg;
     double               _gen_E_pos;
+    double               _gen_E_neg;
     double               _gen_Ep_Em;
     double               _gen_ptp_ptm;
 
 	double               _pt_ll;
 	double               _m_ll;
     double               _pt_pos;
+    double               _pt_neg;
     double               _E_pos;
+    double               _E_neg;
     double               _Ep_Em;
     double               _ptp_ptm;
 
@@ -390,8 +436,8 @@ private :
 	void FillEvent();
 	void InitBranches();
 
-	double SFtop(double pt);
-	double topPtWeight();
+	double SFtop(double pt, int lvl=1);
+	double topPtWeight(int lvl=1);
 	vector<float> getBtagSF(string sysType, BTagCalibrationReader reader, vector<float> &btagSF);
 	double WjetsBRreweight();
 	/* double getMuSF(int muInd, int systLevel); */
@@ -495,9 +541,14 @@ void makeAnalysisNtuple::InitBranches(){
 		outputTree->Branch("pdfweight_Up"              , &_pdfweight_Up             );
 		outputTree->Branch("pdfweight_Do"              , &_pdfweight_Do             );
 		outputTree->Branch("pdfSystWeight"             , &_pdfSystWeight            );
-        outputTree->Branch("topptWeight"               , &_topptWeight              );
 	}
-	outputTree->Branch("evtWeight"                  , &_evtWeight                   );      
+	if (isTTbar){
+        outputTree->Branch("topptWeight"               , &_topptWeight              );
+        outputTree->Branch("topptWeight_Up"            , &_topptWeight_Up           );
+        outputTree->Branch("topptWeight_Do"            , &_topptWeight_Do           );
+    }
+    
+    outputTree->Branch("evtWeight"                  , &_evtWeight                   );      
 	outputTree->Branch("nVtx"                       , &_nVtx                        ); 
 	outputTree->Branch("nGoodVtx"                   , &_nGoodVtx                    ); 
 	outputTree->Branch("isPVGood"                   , &_isPVGood                    ); 
@@ -589,17 +640,48 @@ void makeAnalysisNtuple::InitBranches(){
 	}
 	
 	outputTree->Branch("nEle"                        , &_nEle                       ); 
+	outputTree->Branch("eleEn"                       , &_eleEn                      );
 	outputTree->Branch("elePt"                       , &_elePt                      );
 	outputTree->Branch("elePhi"                      , &_elePhi                     ); 
+	outputTree->Branch("eleEta"                      , &_eleEta                     ); 
 	outputTree->Branch("eleSCEta"                    , &_eleSCEta                   ); 
+	outputTree->Branch("eleCharge"                   , &_eleCharge                  ); 
 	outputTree->Branch("elePFRelIso"                 , &_elePFRelIso                ); 
-
+	
 	outputTree->Branch("nMu"                         , &_nMu                        ); 
+	outputTree->Branch("muEn"                        , &_muEn                       ); 
 	outputTree->Branch("muPt"                        , &_muPt                       ); 
 	outputTree->Branch("muEta"                       , &_muEta                      );
 	outputTree->Branch("muPhi"                       , &_muPhi                      );
+	outputTree->Branch("muCharge"                    , &_muCharge                   );
 	outputTree->Branch("muPFRelIso"                  , &_muPFRelIso                 );
-    
+
+    if (!tree->isData_) {
+        outputTree->Branch("gen_nEle"                        , &_gen_nEle                       ); 
+        outputTree->Branch("gen_eleEn"                       , &_gen_eleEn                      );
+        outputTree->Branch("gen_elePt"                       , &_gen_elePt                      );
+        outputTree->Branch("gen_elePhi"                      , &_gen_elePhi                     ); 
+        outputTree->Branch("gen_eleEta"                      , &_gen_eleEta                     ); 
+        outputTree->Branch("gen_eleCharge"                   , &_gen_eleCharge                  ); 
+        outputTree->Branch("gen_eleParentage"                , &_gen_eleParentage               ); 
+        outputTree->Branch("gen_eleStatusFlag"               , &_gen_eleStatusFlag               ); 
+        outputTree->Branch("gen_eleMatched"                  , &_gen_eleMatched                 ); 
+        outputTree->Branch("gen_eleMomPID"                   , &_gen_eleMomPID                  ); 
+        outputTree->Branch("gen_eleGMomPID"                  , &_gen_eleGMomPID                 ); 
+
+        outputTree->Branch("gen_nMu"                         , &_gen_nMu                        ); 
+        outputTree->Branch("gen_muEn"                        , &_gen_muEn                       ); 
+        outputTree->Branch("gen_muPt"                        , &_gen_muPt                       ); 
+        outputTree->Branch("gen_muEta"                       , &_gen_muEta                      );
+        outputTree->Branch("gen_muPhi"                       , &_gen_muPhi                      );
+        outputTree->Branch("gen_muCharge"                    , &_gen_muCharge                   );
+        outputTree->Branch("gen_muParentage"                 , &_gen_muParentage                ); 
+        outputTree->Branch("gen_muStatusFlag"                , &_gen_muStatusFlag               ); 
+        outputTree->Branch("gen_muMatched"                   , &_gen_muMatched                  ); 
+        outputTree->Branch("gen_muMomPID"                    , &_gen_muMomPID                   ); 
+        outputTree->Branch("gen_muGMomPID"                   , &_gen_muGMomPID                  ); 
+    }
+
 	outputTree->Branch("nJet"                        , &_nJet                       ); 
 	outputTree->Branch("nBJet"                       , &_nBJet                      ); 
 	outputTree->Branch("jetPt"                       , &_jetPt                      );
@@ -641,7 +723,12 @@ void makeAnalysisNtuple::InitBranches(){
 		outputTree->Branch("mcMomPID"                    , &_mcMomPID                   );
 		outputTree->Branch("mcGMomPID"                   , &_mcGMomPID                  );
 		outputTree->Branch("mcParentage"                 , &_mcParentage                );
-		outputTree->Branch("genScaleSystWeights"        , &_genScaleSystWeights         );
+		outputTree->Branch("mcMatched"                   , &_mcMatched                  );
+		outputTree->Branch("mcMomMass"                   , &_mcMomMass                  );
+		outputTree->Branch("mcMomPt"                     , &_mcMomPt                    );
+		outputTree->Branch("mcMomEta"                    , &_mcMomEta                   );
+		outputTree->Branch("mcMomPhi"                    , &_mcMomPhi                   );
+		outputTree->Branch("genScaleSystWeights"         , &_genScaleSystWeights        );
 	}
 
 	if (isTTGamma) {
@@ -666,13 +753,17 @@ void makeAnalysisNtuple::InitBranches(){
 		outputTree->Branch("pt_ll"                       , &_pt_ll                         ); 
 		outputTree->Branch("m_ll"                        , &_m_ll                         ); 
 		outputTree->Branch("pt_pos"                        , &_pt_pos                       ); 
+		outputTree->Branch("pt_neg"                        , &_pt_neg                       ); 
 		outputTree->Branch("E_pos"                        , &_E_pos                       ); 
+		outputTree->Branch("E_neg"                        , &_E_neg                       ); 
 		outputTree->Branch("Ep_Em"                        , &_Ep_Em                       ); 
 		outputTree->Branch("ptp_ptm"                        , &_ptp_ptm                   ); 
 		outputTree->Branch("gen_pt_ll"                       , &_gen_pt_ll                         ); 
 		outputTree->Branch("gen_m_ll"                        , &_gen_m_ll                         ); 
 		outputTree->Branch("gen_pt_pos"                        , &_gen_pt_pos                       ); 
+		outputTree->Branch("gen_pt_neg"                        , &_gen_pt_neg                       ); 
 		outputTree->Branch("gen_E_pos"                        , &_gen_E_pos                       ); 
+		outputTree->Branch("gen_E_neg"                        , &_gen_E_neg                       ); 
 		outputTree->Branch("gen_Ep_Em"                        , &_gen_Ep_Em                       ); 
 		outputTree->Branch("gen_ptp_ptm"                        , &_gen_ptp_ptm                   ); 
 		outputTree->Branch("passPresel_EMu"              , &_passPresel_EMu             ); 
@@ -707,14 +798,18 @@ void makeAnalysisNtuple::InitVariables()
     _pt_ll           = -9999;
     _m_ll            = -9999;
     _pt_pos          = -9999;
+    _pt_neg          = -9999;
     _E_pos           = -9999;
+    _E_neg           = -9999;
     _ptp_ptm         = -9999;
     _Ep_Em           = -9999;
 
     _gen_pt_ll           = -9999;
     _gen_m_ll            = -9999;
     _gen_pt_pos          = -9999;
+    _gen_pt_neg          = -9999;
     _gen_E_pos           = -9999;
+    _gen_E_neg           = -9999;
     _gen_ptp_ptm         = -9999;
     _gen_Ep_Em           = -9999;
 	
@@ -730,17 +825,22 @@ void makeAnalysisNtuple::InitVariables()
 	_nJet            = -9999;    
 	_nBJet           = -9999;    
 
+    _gen_nEle        = -9999;
+    _gen_nMu         = -9999;
+
 	_passPresel_Ele  = false;
 	_passPresel_Mu   = false;
 	_passAll_Ele     = false;
 	_passAll_Mu      = false;
 
 
-    _topptWeight  = 1.;
-	_pdfWeight    = 1.;
-	_pdfweight_Up = 1.;
-	_pdfweight_Do = 1.;
-	_pdfuncer = 0.;
+    _topptWeight     = 1.;
+    _topptWeight_Up  = 1.;
+    _topptWeight_Do  = 1.;
+	_pdfWeight     = 1.;
+	_pdfweight_Up  = 1.;
+	_pdfweight_Do  = 1.;
+	_pdfuncer      = 0.;
 
 	_q2weight_nominal = 1.;
 	_q2weight_Up = 1.;
@@ -794,15 +894,42 @@ void makeAnalysisNtuple::InitVariables()
 	_btagSF_Up.clear();
 	_btagSF_Do.clear();
 
+	_eleEn.clear();
 	_elePt.clear();
 	_elePhi.clear();
+	_eleEta.clear();
 	_eleSCEta.clear();
+	_eleCharge.clear();
 	_elePFRelIso.clear();
 
+	_muEn.clear();
 	_muPt.clear();
 	_muEta.clear();
 	_muPhi.clear();
+	_muCharge.clear();
 	_muPFRelIso.clear();
+    
+    _gen_eleEn.clear();
+    _gen_elePt.clear();
+	_gen_elePhi.clear();
+	_gen_eleEta.clear();
+	_gen_eleCharge.clear();
+	_gen_eleParentage.clear();
+	_gen_eleStatusFlag.clear();
+    _gen_eleMatched.clear();
+    _gen_eleMomPID.clear();
+    _gen_eleGMomPID.clear();
+	
+    _gen_muEn.clear();
+    _gen_muPt.clear();
+	_gen_muEta.clear();
+	_gen_muPhi.clear();
+	_gen_muCharge.clear();
+	_gen_muParentage.clear();
+	_gen_muStatusFlag.clear();
+    _gen_muMatched.clear();
+    _gen_muMomPID.clear();
+    _gen_muGMomPID.clear();
 
 	_phoEt.clear();
 	_phoEta.clear();
@@ -912,6 +1039,11 @@ void makeAnalysisNtuple::InitVariables()
 	_mcMomPID.clear();
 	_mcGMomPID.clear();
 	_mcParentage.clear();
+	_mcMatched.clear();
+	_mcMomMass.clear();
+	_mcMomPt.clear();
+	_mcMomEta.clear();
+	_mcMomPhi.clear();
 
 
 }

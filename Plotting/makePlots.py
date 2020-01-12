@@ -23,10 +23,12 @@ ttSystematics = ["PU", "Lumi", "isr", "fsr", "EleIDEff", "EleRecoEff", "EleScale
 backgroundSystematics = ["PU"]  # Systematics to load for background processes
 experimentalSysts = ["PU", "Lumi", "EleIDEff", "EleRecoEff", "EleScale", "EleSmear", "MuIDEff", "MuIsoEff", "MuTrackEff", "MuScale", "TrigEff", "JEC", "JER" ]
 theorySysts = ["toppt", "Q2", "isr", "fsr", "Pdf", "hdamp", "UE", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "DS" ]
-oneSidedSysts = ["toppt", "CRerdON", "CRGluon", "CRQCD", "DS", "amcanlo", "madgraph", "herwigpp" ]
+oneSidedSysts = ["CRerdON", "CRGluon", "CRQCD", "DS", "amcanlo", "madgraph", "herwigpp" ]
 systematics = experimentalSysts + theorySysts
 systColors = { 
     "toppt":kRed,
+    "topptUp":kRed,
+    "topptDown":kBlue,
     "LumiUp":kRed-1,
     "LumiDown":kRed-2,
     "PUUp":kBlue, 
@@ -95,6 +97,8 @@ parser.add_argument("--morePlots","--MorePlots",dest="makeMorePlots",action="sto
                      help="Make larger list of kinematic distributions" )
 parser.add_argument("--allPlots","--allPlots",dest="makeAllPlots",action="store_false",default=True,
                      help="Make plots of all distributions" )
+parser.add_argument("-i", "--inDir", default="histograms", help="top level histogram directory")
+parser.add_argument("--oldtoppt", action="store_true", default=False, help="use old top pt reweighting (only use it for a systematic)")
 parser.add_argument("--file",dest="inputFile",default=None,
           help="Specify specific input file")
 parser.add_argument("--scaleToNominal", action="store_true", default=False, help="scale certain systematics to the nominal rate")
@@ -111,8 +115,14 @@ parser.add_argument("--systError", action="store_true", default=False, help="dra
 parser.add_argument("--systPlots", action="store_true", default=False, help="make systematic variation plots")
 args = parser.parse_args()
 
+oldtoppt = args.oldtoppt
+if oldtoppt and "toppt" not in oneSidedSysts:
+    oneSidedSysts.append("toppt")
+
 makeSystPlots = args.systPlots
 
+inDir = args.inDir
+if inDir[-1] == "/": inDir = inDir[:-1]
 if args.outDir[-1] == "/": args.outDir = args.outDir[:-1]
 plotList = args.plotList
 
@@ -133,7 +143,7 @@ showSystUnc = True
 
 scaleToNominal = args.scaleToNominal
 
-_fileDir = "histograms/hists"
+_fileDir = "%s/hists" % inDir
 plotDirectory = args.outDir
 regionText = ""
 channel = 'emu'
@@ -143,7 +153,7 @@ CMS_lumi.extraText = "Work in Progress"
 
 #print channel
 if not inputFile is None:
-    _fileDir = "histograms/%s"%inputFile
+    _fileDir = "%s"%inputFile
     if not _file.IsOpen():
         print "Unable to open file"
         sys.exit()
@@ -191,6 +201,18 @@ histograms = {  \
           "bjetPt"          : ["BJet p_{T} [GeV]", "Events", 5, [-1,-1], regionText, NoLog, " "],
           "bjetEta"         : ["BJet #eta", "Events", 1, [-1,-1], regionText, NoLog, " "],
           "bjetPhi"         : ["BJet #phi", "Events", 1, [-1,-1], regionText, NoLog, " "],
+          "gen_ptll"        : ["Gen p_{T}(ll) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "gen_Mll"         : ["Gen M(ll) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "gen_ptpos"       : ["Gen p_{T}(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "gen_Epos"        : ["Gen E(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "gen_ptp_ptm"     : ["Gen p_{T}(l^{+}) + p_{T}(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "gen_Ep_Em"       : ["Gen E(l^{+}) + E(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
+          "Log_gen_ptll"        : ["Gen p_{T}(ll) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_gen_Mll"         : ["Gen M(ll) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_gen_ptpos"       : ["Gen p_{T}(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_gen_Epos"        : ["Gen E(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_gen_ptp_ptm"     : ["Gen p_{T}(l^{+}) + p_{T}(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
+          "Log_gen_Ep_Em"       : ["Gen E(l^{+}) + E(l^{-}) [GeV]", "Events", 10, [-1,-1], regionText, YesLog, " "],
           "rec_ptll"        : ["Reco p_{T}(ll) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
           "rec_Mll"         : ["Reco M(ll) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
           "rec_ptpos"       : ["Reco p_{T}(l^{+}) [GeV]", "Events", 10, [-1,-1], regionText, NoLog, " "],
@@ -366,10 +388,10 @@ for sample in stackList:
         if sample == "ST_tW" and syst not in tWSystematics: continue
         
         if syst not in oneSidedSysts:
-            _filesys_up[sample][syst]=TFile.Open("histograms/hists%s_up/%s.root"%(syst,sample),"read")
-            _filesys_down[sample][syst]=TFile.Open("histograms/hists%s_down/%s.root"%(syst,sample),"read")
+            _filesys_up[sample][syst]=TFile.Open("%s/hists%s_up/%s.root"%(inDir,syst,sample),"read")
+            _filesys_down[sample][syst]=TFile.Open("%s/hists%s_down/%s.root"%(inDir,syst,sample),"read")
         else:
-            _filesys_up[sample][syst]=TFile.Open("histograms/hists%s/%s.root"%(syst,sample),"read")
+            _filesys_up[sample][syst]=TFile.Open("%s/hists%s/%s.root"%(inDir,syst,sample),"read")
             
 
 

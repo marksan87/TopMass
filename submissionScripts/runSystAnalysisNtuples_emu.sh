@@ -120,7 +120,9 @@ fi
 
 
 skimdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_skims"
-outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_"
+outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples"
+#outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples_BCDEF"
+#outputdir="root://cmseos.fnal.gov//store/user/msaunder/13TeV_AnalysisNtuples_GH"
 
 #variables for the directory names where the ttgamma analysis was storing ggNtuples
 DannyEOS="root://cmseos.fnal.gov//store/user/dnoonan/13TeV_ggNTuples/V08_00_26_07/"
@@ -257,21 +259,21 @@ if [ "$systematic" = true ] ; then
         echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]} . ${inputdir}${sampleType[job]}_skim.root"
         AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]} . ${inputdir}${sampleType[job]}_skim.root
         
-        echo "xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
-        xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
+        echo "xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
+        xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
     elif [ "$jobType" == "CRerdON" ] || [ "$jobType" == "CRGluon" ] || [ "$jobType" == "CRQCD" ] || [ "$jobType" == "amcanlo" ] || [ "$jobType" == "madgraph" ] || [ "$jobType" == "herwigpp" ] ; then
         echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]} . ${inputdir}${sampleType[job]}_skim.root"
         AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]} . ${inputdir}${sampleType[job]}_skim.root
         
-        echo "xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
-        xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
+        echo "xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
+        xrdcp -f ${sampleType[job]}_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
 
     elif [ "$jobType" == "isr" ] || [ "$jobType" == "fsr" ] || [ "$jobType" == "hdamp" ] || [ "$jobType" == "UE" ] ; then
         echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_${var} . ${inputdir}${sampleType[job]}_skim.root"
         AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_${var} . ${inputdir}${sampleType[job]}_skim.root
 
-        echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_${var}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
-        xrdcp -f ${sampleType[job]}__${tupleExtraName1}_${var}_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
+        echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_${var}_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root"
+        xrdcp -f ${sampleType[job]}__${tupleExtraName1}_${var}_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_AnalysisNtuple.root
 
 
     elif [ "$JEC" = false ] ; then
@@ -279,15 +281,15 @@ if [ "$systematic" = true ] ; then
         echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_up . ${inputdir}${sampleType[job]}_skim.root"
         AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_up . ${inputdir}${sampleType[job]}_skim.root
 
-        echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_up_AnalysisNtuple.root"
-        xrdcp -f ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_up_AnalysisNtuple.root
+        echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_up_AnalysisNtuple.root"
+        xrdcp -f ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_up_AnalysisNtuple.root
 
         # Down variation
         echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_down . ${inputdir}${sampleType[job]}_skim.root"
         AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_down . ${inputdir}${sampleType[job]}_skim.root
 
-        echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_down_AnalysisNtuple.root"
-        xrdcp -f ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_down_AnalysisNtuple.root
+        echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_down_AnalysisNtuple.root"
+        xrdcp -f ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_down_AnalysisNtuple.root
 
     else
         if [ "$jobType" == "JEC1" ] ;   then
@@ -338,16 +340,16 @@ if [ "$systematic" = true ] ; then
             echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_up . ${inputdir}${sampleType[job]}_skim.root"
             AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_up . ${inputdir}${sampleType[job]}_skim.root
 
-            echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_up_AnalysisNtuple.root"
-            xrdcp -f ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_up_AnalysisNtuple.root
+            echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_up_AnalysisNtuple.root"
+            xrdcp -f ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_up_AnalysisNtuple.root
             rm ${sampleType[job]}__${tupleExtraName1}_up_AnalysisNtuple.root
 
             # Down variation
             echo "AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_down . ${inputdir}${sampleType[job]}_skim.root"
             AnalysisNtuple/makeAnalysisNtuple ${sampleType[job]}__${tupleExtraName1}_down . ${inputdir}${sampleType[job]}_skim.root
 
-            echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_down_AnalysisNtuple.root"
-            xrdcp -f ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root ${outputdir}AnalysisNtuples/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_down_AnalysisNtuple.root
+            echo "xrdcp -f ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_down_AnalysisNtuple.root"
+            xrdcp -f ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root ${outputdir}/${channelDir}/V08_00_26_07/${sampleType[job]}_${tupleExtraName1}_down_AnalysisNtuple.root
             rm ${sampleType[job]}__${tupleExtraName1}_down_AnalysisNtuple.root
         done
     fi

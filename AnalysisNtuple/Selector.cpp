@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <utility>
 #include <map>
 #include <vector>
@@ -8,6 +9,20 @@ using std::map;
 using std::pair;
 
 const string rocFile = "AnalysisNtuple/RocMuonCorrections/rcdata.2016.v3";
+
+
+struct LeptonPt
+{
+    int index;
+    double pt;
+    LeptonPt() : index(-1), pt(-999.9) {};
+    LeptonPt(int i, float p) : index(i), pt(p) {};
+};
+
+bool sortDescending(LeptonPt l1, LeptonPt l2)
+{
+    return (l1.pt > l2.pt);
+}
 
 double dR(double eta1, double phi1, double eta2, double phi2){
 	double dphi = phi2 - phi1;
@@ -392,6 +407,9 @@ void Selector::filter_photons_jetsDR(){
 
 
 void Selector::filter_electrons(){
+    // Store index and pt of passing leptons to be sorted by pt
+    vector<LeptonPt> sortedEle;
+
 	for(int eleInd = 0; eleInd < tree->nEle_; ++eleInd){
 		double eta = tree->eleEta_->at(eleInd);
 		double absEta = TMath::Abs(eta);
@@ -489,12 +507,19 @@ void Selector::filter_electrons(){
 
 
 		if( eleSel ){
-			Electrons.push_back(eleInd);
+			//Electrons.push_back(eleInd);
+            sortedEle.push_back(LeptonPt(eleInd, pt));
 		}
 		else if( looseSel ){ 
 			ElectronsLoose.push_back(eleInd);
 		}
 	}
+
+    // Sort based on pt
+    sort(sortedEle.begin(), sortedEle.end(), sortDescending);
+
+    for (auto& ele : sortedEle)
+        Electrons.push_back(ele.index);
 }
 
 
@@ -503,6 +528,8 @@ void Selector::filter_electrons(){
 void Selector::filter_muons(){
     if (useRoccor) { applyRoccor(muscaleLevel); }   // Rochester muon corrections	
     
+    // Store index and pt of passing leptons to be sorted by pt
+    vector<LeptonPt> sortedMu;
     
     for(int muInd = 0; muInd < tree->nMu_; ++muInd){
 
@@ -543,12 +570,19 @@ void Selector::filter_muons(){
 						  );
 		
 		if(passTight){
-		 	Muons.push_back(muInd);
+		 	//Muons.push_back(muInd);
+            sortedMu.push_back(LeptonPt(muInd, pt));
 		}
 		else if (passLoose){
 		 	MuonsLoose.push_back(muInd);
 		}
 	}
+    
+    // Sort based on pt
+    sort(sortedMu.begin(), sortedMu.end(), sortDescending);
+
+    for (auto& mu : sortedMu)
+        Muons.push_back(mu.index);
 }
 
 

@@ -26,7 +26,7 @@ else
     echo "scramv1 project CMSSW CMSSW_8_0_26_patch1"
     scramv1 project CMSSW CMSSW_8_0_26_patch1
 
-	echo "tar -xvf CMSSW_8_0_26_patch1.tgz"
+	echo "tar -xzf CMSSW_8_0_26_patch1.tgz"
 	tar -xzf CMSSW_8_0_26_patch1.tgz
 
     rm CMSSW_8_0_26_patch1.tgz
@@ -39,14 +39,14 @@ else
 	echo "xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/lepSF.tgz lepSF.tgz"
 	xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/lepSF.tgz lepSF.tgz
     
-    echo "tar xzvf lepSF.tgz"
-	tar xzvf lepSF.tgz
+    echo "tar xzf lepSF.tgz"
+	tar xzf lepSF.tgz
 
 	echo "xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz Data_Pileup.tgz"
 	xrdcp -f root://cmseos.fnal.gov//store/user/msaunder/condorFiles/Data_Pileup.tgz Data_Pileup.tgz
 	
-    echo "tar xzvf Data_Pileup.tgz"
-    tar xzvf Data_Pileup.tgz
+    echo "tar xzf Data_Pileup.tgz"
+    tar xzf Data_Pileup.tgz
 	sleep 5
 fi
 

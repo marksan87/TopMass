@@ -14,6 +14,7 @@ parser = ArgumentParser()
 parser.add_argument("--analysisNtupleDir", default="13TeV_AnalysisNtuples", help="eos directory name for analysis ntuples")
 parser.add_argument("-s", "--sample", dest="sample", default="", help="Specify which sample to run on" )
 parser.add_argument("-l", "--level", dest="level", default="", help="Specify up/down of systematic")
+parser.add_argument("--oldtoppt", action="store_true", default=False, help="use old method of toppt (for one-sided systematic)") 
 parser.add_argument("--syst", "--systematic", dest="systematic", default="", help="Specify which systematic to run on")
 parser.add_argument("--addPlots","--addOnly", dest="onlyAddPlots", default=False,action="store_true",
                      help="Use only if you want to add a couple of plots to the file, does not remove other plots" )
@@ -37,7 +38,6 @@ parser.add_argument("--genPlots","--genPlots", dest="makegenPlots",action="store
 parser.add_argument("--quiet", "-q", dest="quiet",default=False,action="store_true",
                      help="Quiet outputs" )
 
-
 args = parser.parse_args()
 if args.varBins != "":
     print "Using variable binning"
@@ -59,7 +59,6 @@ else:
 	runsystematic = True
 
 
-
 gROOT.SetBatch(True)
 
 
@@ -73,6 +72,12 @@ makeAllPlots = args.makeAllPlots
 makeMorePlots = args.makeMorePlots
 makegenPlots=args.makegenPlots
 runQuiet = args.quiet
+
+# True if top pT reweighting is applied to all ttbar samples
+# False if a one-sided top pT reweighting systematic is used
+alltoppt = not args.oldtoppt
+if alltoppt and "TTbar" in sample:
+    print "Top pT reweighting will be applied to this sample!"
 
 
 if outputDirectory[-1] == "/": outputDirectory = outputDirectory[:-1]
@@ -90,7 +95,7 @@ dir_=""
 Lumi = 1.
 Q2 = 1.
 Pdf = 1.
-topptWeight = 1.
+topptWeight = "topptWeight" if "TTbar" in sample else "1" 
 Pileup ="PUweight"
 #EleEff= "eleEffWeight"
 #MuEff = "muEffWeight"
@@ -109,7 +114,7 @@ separateSystSamples = {
     "TTbar":["hdamp", "EleScale", "EleSmear", "MuScale", "JEC", "JER", "UE", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "isr", "fsr"],
     "ST_tW":["hdamp", "EleScale", "EleSmear", "MuScale", "JEC", "JER", "DS", "isr", "fsr", "Q2"]
 }
-oneSidedSysts = ["toppt", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp", "DS"]
+oneSidedSysts = ["DS", "CRerdON", "CRGluon", "CRQCD", "amcanlo", "madgraph", "herwigpp"]
 #atleast 0, atleast 1, atleast 2, exactly 1, btagWeight[0] = exactly 0
 
 sampleListName = sample
@@ -198,9 +203,12 @@ if runsystematic:
                 Pdf="pdfSystWeight[%i]/pdfWeight"%(pdfNumber-1)
                 outputhistName += "%sPdf/Pdf%i"%(outputFileName,pdfNumber)				
 
-    elif 'toppt' in syst:
-        topptWeight = "topptWeight"
-        outputhistName += "%stoppt" % outputFileName
+    elif 'toppt' in syst and alltoppt:
+        if level=="up":
+            topptWeight = "topptWeight_Up"
+        else:
+            topptWeight = "topptWeight_Do"
+        outputhistName += "%stoppt_%s" % (outputFileName,level)
     
 #    elif 'JEC' in syst:
 #        outputhistName = "histograms/%sJEC_%s"%(outputFileName,level)

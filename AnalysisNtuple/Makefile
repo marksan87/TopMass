@@ -21,7 +21,7 @@ BTagCalibrationStandalone.o: BTagCalibrationStandalone.cpp BTagCalibrationStanda
 	g++ -c -I`root-config --incdir` -std=c++11 BTagCalibrationStandalone.cpp
 
 JEC: JEC/FactorizedJetCorrector.cpp JEC/JetCorrectorParameters.cpp JEC/SimpleJetCorrector.cpp JEC/JetCorrectionUncertainty.cpp JEC/SimpleJetCorrectionUncertainty.cpp
-	$(MAKE) -C JEC -I`root-config --incdir`
+	$(MAKE) -C JEC all 
 
 makeAnalysisNtuple: Selector.o EventPick.o EventTree.o ScaleFactors.h makeAnalysisNtuple.C makeAnalysisNtuple.h OverlapRemove.cpp JetResolutions.h PUReweight.cpp PUReweight.h BTagCalibrationStandalone.o ScaleFactors.h JEC/JECvariation.o TopEventCombinatorics.cpp RocMuonCorrections/RoccoR.o
 	g++ -o makeAnalysisNtuple `root-config --libs` -I`root-config --incdir` -std=c++11 makeAnalysisNtuple.C EventTree.o EventPick.o Selector.o  OverlapRemove.cpp  PUReweight.cpp BTagCalibrationStandalone.o JEC/FactorizedJetCorrector.o JEC/JetCorrectorParameters.o JEC/SimpleJetCorrector.o JEC/JetCorrectionUncertainty.o JEC/SimpleJetCorrectionUncertainty.o JEC/JECvariation.o METzCalculator.cpp TopEventCombinatorics.cpp RocMuonCorrections/RoccoR.o

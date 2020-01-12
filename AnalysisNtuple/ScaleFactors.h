@@ -814,6 +814,7 @@ const std::string allowedSampleTypes[199] = {"Data",
 											"TTGamma_Dilepton_fsrDown",
 											"TestAll",
 											"Test",
+                                            "TTbarTest"
                                                                                         };
 
 #endif
