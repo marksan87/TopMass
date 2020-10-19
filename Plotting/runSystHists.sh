@@ -74,6 +74,7 @@ declare -a systematics=(
 #             )
 
 declare -a oneSidedSysts=(
+        "toppt" \
         "CRerdON" \
         "CRGluon" \
         "CRQCD" \

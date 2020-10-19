@@ -98,10 +98,11 @@ parser.add_argument("--morePlots","--MorePlots",dest="makeMorePlots",action="sto
 parser.add_argument("--allPlots","--allPlots",dest="makeAllPlots",action="store_false",default=True,
                      help="Make plots of all distributions" )
 parser.add_argument("-i", "--inDir", default="histograms", help="top level histogram directory")
-parser.add_argument("--oldtoppt", action="store_true", default=False, help="use old top pt reweighting (only use it for a systematic)")
+#parser.add_argument("--oldtoppt", action="store_true", default=False, help="use old top pt reweighting (only use it for a systematic)")
 parser.add_argument("--file",dest="inputFile",default=None,
           help="Specify specific input file")
 parser.add_argument("--scaleToNominal", action="store_true", default=False, help="scale certain systematics to the nominal rate")
+parser.add_argument("--nodata", action="store_true", default=False, help="don't plot data")
 parser.add_argument("--reverse", action="store_true", default=False, help="reverse stack ordering")
 parser.add_argument("--reorderTop", dest="newStackListTop",action="append",
           help="New order for stack list (which plots will be put on top of the stack)" )
@@ -115,7 +116,7 @@ parser.add_argument("--systError", action="store_true", default=False, help="dra
 parser.add_argument("--systPlots", action="store_true", default=False, help="make systematic variation plots")
 args = parser.parse_args()
 
-oldtoppt = args.oldtoppt
+oldtoppt = True # args.oldtoppt
 if oldtoppt and "toppt" not in oneSidedSysts:
     oneSidedSysts.append("toppt")
 
@@ -408,8 +409,9 @@ print "\n"
 print histName
 dataHist = _file["Data"].Get("%s_Data" % (histName if histName[:4] != "Log_" else histName[4:]))
 
-legend.AddEntry(dataHist, "Data", 'pe')
-legendR.AddEntry(dataHist, "Data", 'pe')
+if not args.nodata:
+    legend.AddEntry(dataHist, "Data", 'pe')
+    legendR.AddEntry(dataHist, "Data", 'pe')
 #legList.remove("QCD_DD")
 
 
@@ -575,10 +577,13 @@ def drawHist(histName,plotInfo, plotDirectory, _file, scaleToNominal):
         stack.Add(hist)
 
 
-    dataHist = _file["Data"].Get("%s_Data" % trueHistName).Clone(histName)
-    noData = False
-    #print dataHist
-    if type(dataHist)==type(TObject()): noData = True
+    if args.nodata:
+        noData = True
+    else:
+        dataHist = _file["Data"].Get("%s_Data" % trueHistName).Clone(histName)
+        noData = False
+        #print dataHist
+        if type(dataHist)==type(TObject()): noData = True
     
     if not noData:
         dataHist.Sumw2()

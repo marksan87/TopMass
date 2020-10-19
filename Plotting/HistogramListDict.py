@@ -1,5 +1,6 @@
 btagWeightCategory = ["1","(1-btagWeight[0])","(btagWeight[2])","(btagWeight[1])"]
 
+genMatched = "gen_eleMatched * (gen_eleParentage == 10) * gen_muMatched * (gen_muParentage == 10) * ( ((gen_eleEta - eleEta[0])**2 + (gen_elePhi - elePhi[0])**2)**0.5 < 0.2 ) * ( ((gen_muEta - muEta[0])**2 + (gen_muPhi - muPhi[0])**2)**0.5 < 0.2 ) * "
 
 def GetHistogramInfo_2Dplot(extraCuts="(passPresel_Mu && nJet>=3 && nBJet>=1)*", extraPhotonCuts="(passPresel_Mu && nJet>=3 && nBJet>=1 && %s)*", nBJets=1):
     histogramInfo = {#"2D_PhotonEt" :["phoEt[0]", "mcPt", "2D_PhotonEt", [300,0,300], [300,0,300],"
@@ -48,14 +49,17 @@ def GetHistogramInfo(extraCuts="", nBJets=1):
                       "bjetPt"           : ["jetPt"     , "bjetPt"           ,     [100,20,200], extraCuts+btagCut, ""],
                       "bjetEta"          : ["jetEta"    , "bjetEta"          ,    [50,-2.4,2.4], extraCuts+btagCut, ""],
                       "bjetPhi"          : ["jetPhi"    , "bjetPhi"          ,    [50,-3.2,3.2], extraCuts+btagCut, ""],
-                      "gen_ptll"         : ["gen_pt_ll"     , "gen_ptll"         ,     [300, 0,300], extraCuts, ""],
-                      "gen_Mll"          : ["gen_m_ll"      , "gen_Mll"          ,     [600,20,620], extraCuts, ""],
-                      "gen_ptpos"        : ["gen_pt_pos"    , "gen_ptpos"        ,     [300,20,320], extraCuts, ""],
-                      "gen_ptneg"        : ["gen_pt_neg"    , "gen_ptneg"        ,     [300,20,320], extraCuts, ""],
-                      "gen_Epos"         : ["gen_E_pos"     , "gen_Epos"         ,     [600,20,620], extraCuts, ""],
-                      "gen_Eneg"         : ["gen_E_neg"     , "gen_Eneg"         ,     [600,20,620], extraCuts, ""],
-                      "gen_ptp_ptm"      : ["gen_ptp_ptm"   , "gen_ptp_ptm"      ,     [400,45,445], extraCuts, ""],
-                      "gen_Ep_Em"        : ["gen_Ep_Em"     , "gen_Ep_Em"        ,     [800,50,850], extraCuts, ""],
+                      "gen_topPt"        : ["gen_topPt"     , "gen_topPt"        ,     [600, 0,600], extraCuts+genMatched, ""],
+                      "gen_antitopPt"    : ["gen_antitopPt" , "gen_antitopPt"    ,     [600, 0,600], extraCuts+genMatched, ""],
+                      "gen_ttbarPt"      : ["gen_ttbarPt"   , "gen_ttbarPt"      ,     [600, 0,600], extraCuts+genMatched, ""],
+                      "gen_ptll"         : ["gen_pt_ll"     , "gen_ptll"         ,     [300, 0,300], extraCuts+genMatched, ""],
+                      "gen_Mll"          : ["gen_m_ll"      , "gen_Mll"          ,     [600,20,620], extraCuts+genMatched, ""],
+                      "gen_ptpos"        : ["gen_pt_pos"    , "gen_ptpos"        ,     [300,20,320], extraCuts+genMatched, ""],
+                      "gen_ptneg"        : ["gen_pt_neg"    , "gen_ptneg"        ,     [300,20,320], extraCuts+genMatched, ""],
+                      "gen_Epos"         : ["gen_E_pos"     , "gen_Epos"         ,     [600,20,620], extraCuts+genMatched, ""],
+                      "gen_Eneg"         : ["gen_E_neg"     , "gen_Eneg"         ,     [600,20,620], extraCuts+genMatched, ""],
+                      "gen_ptp_ptm"      : ["gen_ptp_ptm"   , "gen_ptp_ptm"      ,     [400,45,445], extraCuts+genMatched, ""],
+                      "gen_Ep_Em"        : ["gen_Ep_Em"     , "gen_Ep_Em"        ,     [800,50,850], extraCuts+genMatched, ""],
                       "rec_ptll"         : ["pt_ll"     , "rec_ptll"         ,     [300, 0,300], extraCuts, ""],
                       "rec_Mll"          : ["m_ll"      , "rec_Mll"          ,     [600,20,620], extraCuts, ""],
                       "rec_ptpos"        : ["pt_pos"    , "rec_ptpos"        ,     [300,20,320], extraCuts, ""],
@@ -64,6 +68,14 @@ def GetHistogramInfo(extraCuts="", nBJets=1):
                       "rec_Eneg"         : ["E_neg"     , "rec_Eneg"         ,     [600,20,620], extraCuts, ""],
                       "rec_ptp_ptm"      : ["ptp_ptm"   , "rec_ptp_ptm"      ,     [400,45,445], extraCuts, ""],
                       "rec_Ep_Em"        : ["Ep_Em"     , "rec_Ep_Em"        ,     [800,50,850], extraCuts, ""],
+                      "rec_ptll_genMatched"         : ["pt_ll"     , "rec_ptll_genMatched"         ,     [300, 0,300], extraCuts+genMatched, ""],
+                      "rec_Mll_genMatched"          : ["m_ll"      , "rec_Mll_genMatched"          ,     [600,20,620], extraCuts+genMatched, ""],
+                      "rec_ptpos_genMatched"        : ["pt_pos"    , "rec_ptpos_genMatched"        ,     [300,20,320], extraCuts+genMatched, ""],
+                      "rec_ptneg_genMatched"        : ["pt_neg"    , "rec_ptneg_genMatched"        ,     [300,20,320], extraCuts+genMatched, ""],
+                      "rec_Epos_genMatched"         : ["E_pos"     , "rec_Epos_genMatched"         ,     [600,20,620], extraCuts+genMatched, ""],
+                      "rec_Eneg_genMatched"         : ["E_neg"     , "rec_Eneg_genMatched"         ,     [600,20,620], extraCuts+genMatched, ""],
+                      "rec_ptp_ptm_genMatched"      : ["ptp_ptm"   , "rec_ptp_ptm_genMatched"      ,     [400,45,445], extraCuts+genMatched, ""],
+                      "rec_Ep_Em_genMatched"        : ["Ep_Em"     , "rec_Ep_Em_genMatched"        ,     [800,50,850], extraCuts+genMatched, ""],
 #                      "rec_leadLepPt"    : ["elePt[0] >= muPt[0] ? elePt[0] : muPt[0]", "rec_leadLepPt", [200, 25, 225], extraCuts, ""],
 #                      "rec_leadJetPt"    : ["jetPt[0]", "rec_leadJetPt", [200, 30, 230], extraCuts, ""],
                       

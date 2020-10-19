@@ -662,12 +662,43 @@ void makeAnalysisNtuple::FillEvent()
     _ptp_ptm = lpVector.Pt() + lmVector.Pt();
     _Ep_Em = lpVector.E() + lmVector.E();
 
+    int topIndex = -1;
+    int antitopIndex = -1;
+    double topPt = 0.0;
+    double antitopPt = 0.0;
+
     if (!tree->isData_) 
     {
         if (isTTbar){
-            _topptWeight    = topPtWeight(1); 
-            _topptWeight_Up = topPtWeight(2);
-            _topptWeight_Do = topPtWeight(0);
+            // Truth top pt distributons
+            truthTopVector.Clear();
+            truthAntitopVector.Clear();
+            for(int mcInd=0; mcInd<tree->nMC_; ++mcInd){
+                if(tree->mcPID->at(mcInd)==6) topIndex = mcInd;//toppt = tree->mcPt->at(mcInd);
+                if(tree->mcPID->at(mcInd)==-6) antitopIndex = mcInd;//antitoppt = tree->mcPt->at(mcInd);
+            }
+            if (topIndex > -1)
+                truthTopVector.SetPtEtaPhiM(tree->mcPt->at(topIndex), tree->mcEta->at(topIndex), tree->mcPhi->at(topIndex), tree->mcMass->at(topIndex));
+            if (antitopIndex > -1)
+                truthAntitopVector.SetPtEtaPhiM(tree->mcPt->at(antitopIndex), tree->mcEta->at(antitopIndex), tree->mcPhi->at(antitopIndex), tree->mcMass->at(antitopIndex));
+            
+            topPt = truthTopVector.Pt();
+            antitopPt = truthAntitopVector.Pt();
+
+            _gen_topPt.push_back(topPt);
+            _gen_antitopPt.push_back(antitopPt);
+            _gen_ttbarPt.push_back( (truthTopVector + truthAntitopVector).Pt() );
+
+            _topptWeight    = topPtWeight(1, topPt, antitopPt); 
+            _topptWeight_Up = topPtWeight(2, topPt, antitopPt);
+            _topptWeight_Do = topPtWeight(0, topPt, antitopPt);
+        
+
+            for (int mc = 0; mc < tree->nMC_; mc++)
+            {
+                
+
+            }
         }
         double minEleDR = 9999;
         double eleDR = 0;
@@ -965,6 +996,15 @@ double makeAnalysisNtuple::topPtWeight(int lvl){
 	}
 	if(toppt > 0.001 && antitoppt > 0.001)
 		weight = sqrt( SFtop(toppt,lvl) * SFtop(antitoppt,lvl) );
+
+    return weight;
+
+}
+
+double makeAnalysisNtuple::topPtWeight(int lvl, double topPt, double antitopPt){
+	double weight = 1.0;
+	if(topPt > 0.001 && antitopPt > 0.001)
+		weight = sqrt( SFtop(topPt,lvl) * SFtop(antitopPt,lvl) );
 
     return weight;
 

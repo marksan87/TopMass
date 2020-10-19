@@ -6,6 +6,8 @@ import sys
 from argparse import ArgumentParser
 from pprint import pprint
 
+print "*** Warning! This cutflow output tex file is not currently used in the Analysis Note!! ***"
+
 sampleList = ["TTbar",
               "ST_tW",
               "DY",

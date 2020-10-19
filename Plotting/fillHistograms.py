@@ -14,7 +14,7 @@ parser = ArgumentParser()
 parser.add_argument("--analysisNtupleDir", default="13TeV_AnalysisNtuples", help="eos directory name for analysis ntuples")
 parser.add_argument("-s", "--sample", dest="sample", default="", help="Specify which sample to run on" )
 parser.add_argument("-l", "--level", dest="level", default="", help="Specify up/down of systematic")
-parser.add_argument("--oldtoppt", action="store_true", default=False, help="use old method of toppt (for one-sided systematic)") 
+parser.add_argument("--twosidedtoppt", action="store_true", default=False, help="use two-sided toppt systematic") 
 parser.add_argument("--syst", "--systematic", dest="systematic", default="", help="Specify which systematic to run on")
 parser.add_argument("--addPlots","--addOnly", dest="onlyAddPlots", default=False,action="store_true",
                      help="Use only if you want to add a couple of plots to the file, does not remove other plots" )
@@ -75,8 +75,8 @@ runQuiet = args.quiet
 
 # True if top pT reweighting is applied to all ttbar samples
 # False if a one-sided top pT reweighting systematic is used
-alltoppt = not args.oldtoppt
-if alltoppt and "TTbar" in sample:
+twosidedtoppt = args.twosidedtoppt
+if twosidedtoppt and "TTbar" in sample:
     print "Top pT reweighting will be applied to this sample!"
 
 
@@ -95,7 +95,8 @@ dir_=""
 Lumi = 1.
 Q2 = 1.
 Pdf = 1.
-topptWeight = "topptWeight" if "TTbar" in sample else "1" 
+#topptWeight = "topptWeight" if "TTbar" in sample else "1" 
+topptWeight = "1" 
 Pileup ="PUweight"
 #EleEff= "eleEffWeight"
 #MuEff = "muEffWeight"
@@ -203,12 +204,16 @@ if runsystematic:
                 Pdf="pdfSystWeight[%i]/pdfWeight"%(pdfNumber-1)
                 outputhistName += "%sPdf/Pdf%i"%(outputFileName,pdfNumber)				
 
-    elif 'toppt' in syst and alltoppt:
+    elif 'toppt' in syst and twosidedtoppt:
         if level=="up":
             topptWeight = "topptWeight_Up"
         else:
             topptWeight = "topptWeight_Do"
         outputhistName += "%stoppt_%s" % (outputFileName,level)
+    
+    elif 'toppt' in syst:
+        topptWeight = "topptWeight"
+        outputhistName += "%stoppt" % outputFileName
     
 #    elif 'JEC' in syst:
 #        outputhistName = "histograms/%sJEC_%s"%(outputFileName,level)
@@ -356,6 +361,16 @@ if plotList is None:
 	    pass
 
 plotList.sort()
+if "Data" in sample:
+    # Remove gen plots 
+    plotsToRemove = []
+    for plt in plotList:
+        if plt[:4] == "gen_" or "genMatched" in plt:
+            plotsToRemove.append(plt)
+
+    for plt in plotsToRemove:
+        plotList.remove(plt)
+
 if not runQuiet: print '-----'
 if not runQuiet: print "Making the following plots:"
 if not runQuiet: 

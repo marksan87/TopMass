@@ -332,6 +332,9 @@ private :
     std::vector<int>     _gen_muMomPID;     // Mother particle
     std::vector<int>     _gen_muGMomPID;    // Grandmother (mother of mother)
 
+	std::vector<float>   _gen_topPt;
+	std::vector<float>   _gen_antitopPt;
+	std::vector<float>   _gen_ttbarPt;
 
 	Int_t                _nJet;
 	Int_t                _nBJet;
@@ -415,6 +418,8 @@ private :
     TLorentzVector genLpVector;
     TLorentzVector genLmVector;
 
+    TLorentzVector truthTopVector;
+    TLorentzVector truthAntitopVector;
 
     std::vector<TLorentzVector> ljetVectors;
 	std::vector<TLorentzVector> bjetVectors;
@@ -438,6 +443,7 @@ private :
 
 	double SFtop(double pt, int lvl=1);
 	double topPtWeight(int lvl=1);
+	double topPtWeight(int lvl=1, double topPt=0.0, double antitopPt=0.0);
 	vector<float> getBtagSF(string sysType, BTagCalibrationReader reader, vector<float> &btagSF);
 	double WjetsBRreweight();
 	/* double getMuSF(int muInd, int systLevel); */
@@ -664,7 +670,7 @@ void makeAnalysisNtuple::InitBranches(){
         outputTree->Branch("gen_eleEta"                      , &_gen_eleEta                     ); 
         outputTree->Branch("gen_eleCharge"                   , &_gen_eleCharge                  ); 
         outputTree->Branch("gen_eleParentage"                , &_gen_eleParentage               ); 
-        outputTree->Branch("gen_eleStatusFlag"               , &_gen_eleStatusFlag               ); 
+        outputTree->Branch("gen_eleStatusFlag"               , &_gen_eleStatusFlag              ); 
         outputTree->Branch("gen_eleMatched"                  , &_gen_eleMatched                 ); 
         outputTree->Branch("gen_eleMomPID"                   , &_gen_eleMomPID                  ); 
         outputTree->Branch("gen_eleGMomPID"                  , &_gen_eleGMomPID                 ); 
@@ -680,6 +686,10 @@ void makeAnalysisNtuple::InitBranches(){
         outputTree->Branch("gen_muMatched"                   , &_gen_muMatched                  ); 
         outputTree->Branch("gen_muMomPID"                    , &_gen_muMomPID                   ); 
         outputTree->Branch("gen_muGMomPID"                   , &_gen_muGMomPID                  ); 
+	
+        outputTree->Branch("gen_topPt"                       , &_gen_topPt                      ); 
+        outputTree->Branch("gen_antitopPt"                   , &_gen_antitopPt                  ); 
+        outputTree->Branch("gen_ttbarPt"                     , &_gen_ttbarPt                    ); 
     }
 
 	outputTree->Branch("nJet"                        , &_nJet                       ); 
@@ -931,7 +941,11 @@ void makeAnalysisNtuple::InitVariables()
     _gen_muMomPID.clear();
     _gen_muGMomPID.clear();
 
-	_phoEt.clear();
+    _gen_topPt.clear();
+    _gen_antitopPt.clear();
+    _gen_ttbarPt.clear();
+    
+    _phoEt.clear();
 	_phoEta.clear();
 	_phoSCEta.clear();
 	_phoPhi.clear();
